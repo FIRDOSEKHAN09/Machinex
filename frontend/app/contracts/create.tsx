@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { contractAPI } from '../../src/services/api';
+import { contractAPI } from '@/src/services/api';
 
 export default function CreateContractScreen() {
   const router = useRouter();

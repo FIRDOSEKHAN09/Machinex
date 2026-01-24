@@ -13,8 +13,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { authAPI } from '../../src/services/api';
-import { useAuth } from '../../src/context/AuthContext';
+import { authAPI } from '@/src/services/api';
+import { useAuth } from '@/src/context/AuthContext';
 
 export default function LoginScreen() {
   const router = useRouter();

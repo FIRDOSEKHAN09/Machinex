@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { notificationAPI } from '../src/services/api';
+import { notificationAPI } from '@/src/services/api';
 
 export default function NotificationsScreen() {
   const router = useRouter();

@@ -11,8 +11,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '../../src/context/AuthContext';
-import { machineAPI } from '../../src/services/api';
+import { useAuth } from '@/src/context/AuthContext';
+import { machineAPI } from '@/src/services/api';
 
 export default function MachinesScreen() {
   const router = useRouter();

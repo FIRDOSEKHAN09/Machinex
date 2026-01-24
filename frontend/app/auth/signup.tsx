@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { authAPI } from '../../src/services/api';
+import { authAPI } from '@/src/services/api';
 
 const ROLES = [
   { id: 'owner', label: 'Machine Owner', icon: 'business', description: 'I own machines and rent them out' },

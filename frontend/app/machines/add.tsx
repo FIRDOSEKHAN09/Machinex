@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { machineAPI } from '../../src/services/api';
+import { machineAPI } from '@/src/services/api';
 
 const MACHINE_TYPES = [
   'Excavator',

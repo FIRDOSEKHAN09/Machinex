@@ -12,8 +12,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '../../src/context/AuthContext';
-import { contractAPI, dailyLogAPI } from '../../src/services/api';
+import { useAuth } from '@/src/context/AuthContext';
+import { contractAPI, dailyLogAPI } from '@/src/services/api';
 
 export default function ContractDetailScreen() {
   const router = useRouter();
