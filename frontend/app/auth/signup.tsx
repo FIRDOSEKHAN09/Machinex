@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { authAPI } from '@/src/services/api';
 
 const ROLES = [
+  { id: 'admin', label: 'App Owner (Admin)', icon: 'shield-checkmark', description: 'I am the app owner - view all data' },
   { id: 'owner', label: 'Machine Owner', icon: 'business', description: 'I own machines and rent them out' },
   { id: 'user', label: 'User/Farmer', icon: 'person', description: 'I want to rent machines' },
   { id: 'manager', label: 'Manager/Operator', icon: 'settings', description: 'I operate machines' },
