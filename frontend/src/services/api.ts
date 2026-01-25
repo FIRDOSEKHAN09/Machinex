@@ -64,3 +64,14 @@ export const notificationAPI = {
 export const dashboardAPI = {
   getStats: () => api.get('/dashboard/stats'),
 };
+
+// Admin API (App Owner Only)
+export const adminAPI = {
+  getOverview: () => api.get('/admin/overview'),
+  getAllUsers: () => api.get('/admin/users'),
+  getAllContracts: () => api.get('/admin/all-contracts'),
+  getAllMachines: () => api.get('/admin/all-machines'),
+  getRunningMachines: () => api.get('/admin/running-machines'),
+  getRecentActivity: () => api.get('/admin/recent-activity'),
+  getAllDailyLogs: () => api.get('/admin/daily-logs-all'),
+};
