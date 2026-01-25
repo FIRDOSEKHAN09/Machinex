@@ -38,6 +38,7 @@ logger = logging.getLogger(__name__)
 # ==================== MODELS ====================
 
 class UserRole:
+    ADMIN = "admin"  # App owner - can see everything
     OWNER = "owner"
     USER = "user"
     MANAGER = "manager"
