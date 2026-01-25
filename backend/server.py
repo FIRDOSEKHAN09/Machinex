@@ -785,6 +785,345 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
 async def root():
     return {"message": "Machine Rental API", "version": "1.0.0"}
 
+# ==================== ADMIN ENDPOINTS (App Owner Only) ====================
+
+async def check_admin(current_user: dict):
+    """Check if user is admin"""
+    if current_user["role"] != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+@api_router.get("/admin/overview")
+async def admin_overview(current_user: dict = Depends(get_current_user)):
+    """Get complete overview for admin dashboard"""
+    await check_admin(current_user)
+    
+    # Get counts
+    total_users = await db.users.count_documents({})
+    total_owners = await db.users.count_documents({"role": "owner"})
+    total_renters = await db.users.count_documents({"role": "user"})
+    total_managers = await db.users.count_documents({"role": "manager"})
+    total_machines = await db.machines.count_documents({})
+    available_machines = await db.machines.count_documents({"status": "available"})
+    rented_machines = await db.machines.count_documents({"status": "rented"})
+    total_contracts = await db.contracts.count_documents({})
+    active_contracts = await db.contracts.count_documents({"status": "active"})
+    completed_contracts = await db.contracts.count_documents({"status": "completed"})
+    
+    # Calculate total revenue
+    all_contracts = await db.contracts.find({"status": "completed"}).to_list(10000)
+    total_revenue = sum(c.get("total_amount", 0) for c in all_contracts)
+    
+    # Get machines currently running (engine is ON)
+    running_logs = await db.daily_logs.find({
+        "start_time": {"$ne": None},
+        "end_time": None
+    }).to_list(1000)
+    
+    running_machines_count = len(running_logs)
+    
+    return {
+        "users": {
+            "total": total_users,
+            "owners": total_owners,
+            "renters": total_renters,
+            "managers": total_managers
+        },
+        "machines": {
+            "total": total_machines,
+            "available": available_machines,
+            "rented": rented_machines,
+            "running": running_machines_count
+        },
+        "contracts": {
+            "total": total_contracts,
+            "active": active_contracts,
+            "completed": completed_contracts
+        },
+        "revenue": {
+            "total": total_revenue
+        }
+    }
+
+@api_router.get("/admin/users")
+async def admin_get_all_users(current_user: dict = Depends(get_current_user)):
+    """Get all users with their activity"""
+    await check_admin(current_user)
+    
+    users = await db.users.find().sort("created_at", -1).to_list(10000)
+    
+    result = []
+    for user in users:
+        # Get user's contracts
+        if user["role"] == "owner":
+            contracts = await db.contracts.count_documents({"owner_id": user["id"]})
+            machines = await db.machines.count_documents({"owner_id": user["id"]})
+        else:
+            contracts = await db.contracts.count_documents({"renter_id": user["id"]})
+            machines = 0
+        
+        result.append({
+            "id": user["id"],
+            "name": user["name"],
+            "phone_or_email": user["phone_or_email"],
+            "role": user["role"],
+            "created_at": user["created_at"],
+            "total_contracts": contracts,
+            "total_machines": machines
+        })
+    
+    return result
+
+@api_router.get("/admin/all-contracts")
+async def admin_get_all_contracts(current_user: dict = Depends(get_current_user)):
+    """Get all contracts across the platform"""
+    await check_admin(current_user)
+    
+    contracts = await db.contracts.find().sort("created_at", -1).to_list(10000)
+    
+    result = []
+    for c in contracts:
+        machine = await db.machines.find_one({"id": c["machine_id"]})
+        owner = await db.users.find_one({"id": c["owner_id"]})
+        
+        # Check if machine is running
+        running_log = await db.daily_logs.find_one({
+            "contract_id": c["id"],
+            "start_time": {"$ne": None},
+            "end_time": None
+        })
+        
+        result.append({
+            "id": c["id"],
+            "machine_name": machine["model_name"] if machine else "Unknown",
+            "machine_type": machine["machine_type"] if machine else "Unknown",
+            "owner_name": owner["name"] if owner else "Unknown",
+            "owner_contact": owner["phone_or_email"] if owner else "",
+            "renter_name": c["renter_name"],
+            "renter_contact": c["renter_contact"],
+            "total_days": c["total_days"],
+            "total_amount": c["total_amount"],
+            "advance_amount": c["advance_amount"],
+            "remaining_amount": c["remaining_amount"],
+            "deductions": c["deductions"],
+            "status": c["status"],
+            "is_machine_running": running_log is not None,
+            "start_date": c["start_date"],
+            "created_at": c["created_at"]
+        })
+    
+    return result
+
+@api_router.get("/admin/all-machines")
+async def admin_get_all_machines(current_user: dict = Depends(get_current_user)):
+    """Get all machines with their current status"""
+    await check_admin(current_user)
+    
+    machines = await db.machines.find().sort("created_at", -1).to_list(10000)
+    
+    result = []
+    for m in machines:
+        owner = await db.users.find_one({"id": m["owner_id"]})
+        
+        # Check if machine is currently running
+        active_contract = await db.contracts.find_one({
+            "machine_id": m["id"],
+            "status": "active"
+        })
+        
+        is_running = False
+        current_renter = None
+        running_hours_today = 0
+        
+        if active_contract:
+            current_renter = active_contract["renter_name"]
+            # Check if engine is running
+            running_log = await db.daily_logs.find_one({
+                "contract_id": active_contract["id"],
+                "start_time": {"$ne": None},
+                "end_time": None
+            })
+            is_running = running_log is not None
+            
+            # Get today's working hours
+            today_logs = await db.daily_logs.find({
+                "contract_id": active_contract["id"]
+            }).to_list(100)
+            running_hours_today = sum(log.get("working_hours", 0) for log in today_logs)
+        
+        result.append({
+            "id": m["id"],
+            "model_name": m["model_name"],
+            "machine_type": m["machine_type"],
+            "engine_capacity": m["engine_capacity"],
+            "fuel_type": m["fuel_type"],
+            "hourly_rate": m["hourly_rate"],
+            "daily_rate": m["daily_rate"],
+            "status": m["status"],
+            "owner_name": owner["name"] if owner else "Unknown",
+            "owner_contact": owner["phone_or_email"] if owner else "",
+            "is_running": is_running,
+            "current_renter": current_renter,
+            "total_working_hours": running_hours_today,
+            "created_at": m["created_at"]
+        })
+    
+    return result
+
+@api_router.get("/admin/running-machines")
+async def admin_get_running_machines(current_user: dict = Depends(get_current_user)):
+    """Get all machines that are currently running (engine ON)"""
+    await check_admin(current_user)
+    
+    # Find all logs where engine is running (start_time set but no end_time)
+    running_logs = await db.daily_logs.find({
+        "start_time": {"$ne": None},
+        "end_time": None
+    }).to_list(1000)
+    
+    result = []
+    for log in running_logs:
+        contract = await db.contracts.find_one({"id": log["contract_id"]})
+        if not contract:
+            continue
+            
+        machine = await db.machines.find_one({"id": contract["machine_id"]})
+        owner = await db.users.find_one({"id": contract["owner_id"]})
+        
+        # Calculate running time
+        start_time = datetime.fromisoformat(log["start_time"])
+        running_seconds = (datetime.utcnow() - start_time).total_seconds()
+        running_hours = running_seconds / 3600
+        
+        result.append({
+            "log_id": log["id"],
+            "contract_id": contract["id"],
+            "machine_id": machine["id"] if machine else None,
+            "machine_name": machine["model_name"] if machine else "Unknown",
+            "machine_type": machine["machine_type"] if machine else "Unknown",
+            "owner_name": owner["name"] if owner else "Unknown",
+            "renter_name": contract["renter_name"],
+            "day_number": log["day_number"],
+            "started_at": log["start_time"],
+            "running_hours": round(running_hours, 2),
+            "total_hours_today": log["working_hours"] + running_hours
+        })
+    
+    return result
+
+@api_router.get("/admin/recent-activity")
+async def admin_get_recent_activity(current_user: dict = Depends(get_current_user)):
+    """Get recent activity log"""
+    await check_admin(current_user)
+    
+    activities = []
+    
+    # Recent user registrations
+    recent_users = await db.users.find().sort("created_at", -1).limit(10).to_list(10)
+    for user in recent_users:
+        activities.append({
+            "type": "user_registered",
+            "message": f"New {user['role']} registered: {user['name']}",
+            "details": {
+                "user_id": user["id"],
+                "name": user["name"],
+                "role": user["role"],
+                "contact": user["phone_or_email"]
+            },
+            "timestamp": user["created_at"]
+        })
+    
+    # Recent contracts
+    recent_contracts = await db.contracts.find().sort("created_at", -1).limit(10).to_list(10)
+    for contract in recent_contracts:
+        machine = await db.machines.find_one({"id": contract["machine_id"]})
+        activities.append({
+            "type": "contract_created",
+            "message": f"New contract: {machine['model_name'] if machine else 'Unknown'} rented to {contract['renter_name']}",
+            "details": {
+                "contract_id": contract["id"],
+                "machine_name": machine["model_name"] if machine else "Unknown",
+                "renter_name": contract["renter_name"],
+                "total_amount": contract["total_amount"],
+                "status": contract["status"]
+            },
+            "timestamp": contract["created_at"]
+        })
+    
+    # Recent daily logs (engine starts/stops)
+    recent_logs = await db.daily_logs.find().sort("created_at", -1).limit(20).to_list(20)
+    for log in recent_logs:
+        contract = await db.contracts.find_one({"id": log["contract_id"]})
+        if contract:
+            machine = await db.machines.find_one({"id": contract["machine_id"]})
+            if log["start_time"] and not log["end_time"]:
+                activities.append({
+                    "type": "engine_started",
+                    "message": f"Engine started: {machine['model_name'] if machine else 'Unknown'} (Day {log['day_number']})",
+                    "details": {
+                        "machine_name": machine["model_name"] if machine else "Unknown",
+                        "renter_name": contract["renter_name"],
+                        "day_number": log["day_number"]
+                    },
+                    "timestamp": datetime.fromisoformat(log["start_time"]) if log["start_time"] else log["created_at"]
+                })
+            elif log["end_time"]:
+                activities.append({
+                    "type": "engine_stopped",
+                    "message": f"Engine stopped: {machine['model_name'] if machine else 'Unknown'} ({log['working_hours']:.1f}h)",
+                    "details": {
+                        "machine_name": machine["model_name"] if machine else "Unknown",
+                        "working_hours": log["working_hours"],
+                        "day_number": log["day_number"]
+                    },
+                    "timestamp": datetime.fromisoformat(log["end_time"]) if log["end_time"] else log["created_at"]
+                })
+    
+    # Sort by timestamp
+    activities.sort(key=lambda x: x["timestamp"], reverse=True)
+    
+    return activities[:50]
+
+@api_router.get("/admin/daily-logs-all")
+async def admin_get_all_daily_logs(current_user: dict = Depends(get_current_user)):
+    """Get all daily logs with full details"""
+    await check_admin(current_user)
+    
+    logs = await db.daily_logs.find().sort("created_at", -1).to_list(10000)
+    
+    result = []
+    for log in logs:
+        contract = await db.contracts.find_one({"id": log["contract_id"]})
+        machine = None
+        owner_name = "Unknown"
+        
+        if contract:
+            machine = await db.machines.find_one({"id": contract["machine_id"]})
+            owner = await db.users.find_one({"id": contract["owner_id"]})
+            owner_name = owner["name"] if owner else "Unknown"
+        
+        result.append({
+            "id": log["id"],
+            "contract_id": log["contract_id"],
+            "machine_name": machine["model_name"] if machine else "Unknown",
+            "owner_name": owner_name,
+            "renter_name": contract["renter_name"] if contract else "Unknown",
+            "day_number": log["day_number"],
+            "start_time": log["start_time"],
+            "end_time": log["end_time"],
+            "working_hours": log["working_hours"],
+            "petrol_filled": log["petrol_filled"],
+            "petrol_used": log["petrol_used"],
+            "engine_oil": log["engine_oil"],
+            "grease_oil": log["grease_oil"],
+            "hydraulic_oil": log["hydraulic_oil"],
+            "filled_by": log["filled_by"],
+            "expenses": log["expenses"],
+            "is_running": log["start_time"] is not None and log["end_time"] is None,
+            "created_at": log["created_at"]
+        })
+    
+    return result
+
 # Include router
 app.include_router(api_router)
 
