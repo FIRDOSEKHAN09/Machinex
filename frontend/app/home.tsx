@@ -148,6 +148,17 @@ export default function HomeScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Quick Actions</Text>
           <View style={styles.actionsGrid}>
+            {user?.role === 'admin' && (
+              <TouchableOpacity
+                style={styles.actionCard}
+                onPress={() => router.push('/admin')}
+              >
+                <View style={[styles.actionIcon, { backgroundColor: 'rgba(168, 85, 247, 0.1)' }]}>
+                  <Ionicons name="settings" size={28} color="#a855f7" />
+                </View>
+                <Text style={styles.actionText}>Admin Dashboard</Text>
+              </TouchableOpacity>
+            )}
             {user?.role === 'owner' && (
               <TouchableOpacity
                 style={styles.actionCard}
