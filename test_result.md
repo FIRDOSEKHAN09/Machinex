@@ -202,7 +202,29 @@ backend:
           comment: "JWT token authentication working correctly. Role-based access control implemented properly. Owner-only endpoints protected. Bearer token validation working."
 
 frontend:
-  # Frontend testing not performed as per instructions
+  - task: "Data Persistence Bug Fix"
+    implemented: true
+    working: "needs_testing"
+    file: "/app/frontend/app/home.tsx, /app/frontend/app/machines/index.tsx, /app/frontend/app/contracts/index.tsx, /app/frontend/app/admin/index.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "needs_testing"
+          agent: "main"
+          comment: "Fixed critical bug where data was lost on re-login. Root cause: useFocusEffect hooks were missing user dependencies. Updated all screens to include user?.id and user?.role in dependency arrays so data refetches when user changes. This ensures that when a user logs out and logs back in, all screens properly reload their data. MongoDB persistence verified - database has 6 users, 2 machines, 3 contracts."
+
+  - task: "Admin Dashboard Data Display"
+    implemented: true
+    working: "needs_testing"
+    file: "/app/frontend/app/admin/index.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "needs_testing"
+          agent: "main"
+          comment: "Applied same fix to admin dashboard - added user?.id to useFocusEffect dependencies. Backend endpoints already exist and working. Admin screen should now properly fetch and display data when logged in as admin user."
 
 metadata:
   created_by: "testing_agent"
