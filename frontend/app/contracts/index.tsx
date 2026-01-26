@@ -36,8 +36,10 @@ export default function ContractsScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      fetchContracts();
-    }, [])
+      if (user) {
+        fetchContracts();
+      }
+    }, [user?.id])
   );
 
   const onRefresh = () => {
