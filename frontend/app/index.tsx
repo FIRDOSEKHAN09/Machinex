@@ -10,12 +10,17 @@ export default function Index() {
   useEffect(() => {
     if (!isLoading) {
       if (isAuthenticated) {
-        router.replace('/home');
+        // Redirect admin users to admin dashboard
+        if (user?.role === 'admin') {
+          router.replace('/admin');
+        } else {
+          router.replace('/home');
+        }
       } else {
         router.replace('/auth/login');
       }
     }
-  }, [isLoading, isAuthenticated]);
+  }, [isLoading, isAuthenticated, user]);
 
   return (
     <View style={styles.container}>
