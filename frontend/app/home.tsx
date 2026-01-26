@@ -7,12 +7,37 @@ import {
   StyleSheet,
   RefreshControl,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/src/context/AuthContext';
 import { machineAPI, contractAPI, dashboardAPI, notificationAPI } from '@/src/services/api';
+
+const FEATURED_MACHINES = [
+  {
+    id: '1',
+    name: 'JCB 3DX Super',
+    type: 'Backhoe Loader',
+    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300',
+    power: '92 HP',
+  },
+  {
+    id: '2',
+    name: 'CAT 320D',
+    type: 'Excavator',
+    image: 'https://images.unsplash.com/photo-1621922688758-e2e8b902c8ec?w=300',
+    power: '148 HP',
+  },
+  {
+    id: '3',
+    name: 'Komatsu PC200',
+    type: 'Excavator',
+    image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=300',
+    power: '155 HP',
+  },
+];
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -61,6 +86,16 @@ export default function HomeScreen() {
     router.replace('/auth/login');
   };
 
+  const getRoleLabel = (role: string) => {
+    switch (role) {
+      case 'admin': return 'App Admin';
+      case 'owner': return 'Machine Owner';
+      case 'user': return 'User';
+      case 'manager': return 'Manager';
+      default: return role;
+    }
+  };
+
   if (isLoading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -84,9 +119,9 @@ export default function HomeScreen() {
           <View>
             <Text style={styles.greeting}>Hello,</Text>
             <Text style={styles.userName}>{user?.name}</Text>
-            <View style={styles.roleBadge}>
-              <Text style={styles.roleText}>
-                {user?.role === 'owner' ? 'Machine Owner' : user?.role === 'user' ? 'User' : user?.role === 'admin' ? 'Admin' : 'Manager'}
+            <View style={[styles.roleBadge, user?.role === 'admin' && styles.adminBadge]}>
+              <Text style={[styles.roleText, user?.role === 'admin' && styles.adminText]}>
+                {getRoleLabel(user?.role || '')}
               </Text>
             </View>
           </View>
@@ -108,9 +143,26 @@ export default function HomeScreen() {
           </View>
         </View>
 
+        {/* Admin Dashboard Button */}
+        {user?.role === 'admin' && (
+          <TouchableOpacity
+            style={styles.adminBanner}
+            onPress={() => router.push('/admin')}
+          >
+            <View style={styles.adminBannerIcon}>
+              <Ionicons name="shield-checkmark" size={28} color="#ef4444" />
+            </View>
+            <View style={styles.adminBannerContent}>
+              <Text style={styles.adminBannerTitle}>Admin Dashboard</Text>
+              <Text style={styles.adminBannerSubtitle}>View all users, contracts & running machines</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={24} color="#ef4444" />
+          </TouchableOpacity>
+        )}
+
         {/* Stats Cards */}
         <View style={styles.statsContainer}>
-          {user?.role === 'owner' ? (
+          {user?.role === 'owner' || user?.role === 'admin' ? (
             <>
               <View style={styles.statCard}>
                 <Ionicons name="construct" size={24} color="#f97316" />
@@ -144,22 +196,46 @@ export default function HomeScreen() {
           )}
         </View>
 
+        {/* Featured Machines Catalog */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Featured Machines</Text>
+            <TouchableOpacity onPress={() => router.push('/catalog')}>
+              <Text style={styles.seeAll}>View Catalog</Text>
+            </TouchableOpacity>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <View style={styles.featuredRow}>
+              {FEATURED_MACHINES.map((machine) => (
+                <TouchableOpacity
+                  key={machine.id}
+                  style={styles.featuredCard}
+                  onPress={() => router.push('/catalog')}
+                >
+                  <Image
+                    source={{ uri: machine.image }}
+                    style={styles.featuredImage}
+                    resizeMode="cover"
+                  />
+                  <View style={styles.featuredOverlay}>
+                    <Text style={styles.featuredName}>{machine.name}</Text>
+                    <Text style={styles.featuredType}>{machine.type}</Text>
+                    <View style={styles.featuredSpec}>
+                      <Ionicons name="speedometer" size={12} color="#f97316" />
+                      <Text style={styles.featuredSpecText}>{machine.power}</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </ScrollView>
+        </View>
+
         {/* Quick Actions */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Quick Actions</Text>
           <View style={styles.actionsGrid}>
-            {user?.role === 'admin' && (
-              <TouchableOpacity
-                style={styles.actionCard}
-                onPress={() => router.push('/admin')}
-              >
-                <View style={[styles.actionIcon, { backgroundColor: 'rgba(168, 85, 247, 0.1)' }]}>
-                  <Ionicons name="settings" size={28} color="#a855f7" />
-                </View>
-                <Text style={styles.actionText}>Admin Dashboard</Text>
-              </TouchableOpacity>
-            )}
-            {user?.role === 'owner' && (
+            {(user?.role === 'owner' || user?.role === 'admin') && (
               <TouchableOpacity
                 style={styles.actionCard}
                 onPress={() => router.push('/machines/add')}
@@ -188,17 +264,15 @@ export default function HomeScreen() {
               </View>
               <Text style={styles.actionText}>Contracts</Text>
             </TouchableOpacity>
-            {user?.role === 'owner' && (
-              <TouchableOpacity
-                style={styles.actionCard}
-                onPress={() => router.push('/settings/fuel-prices')}
-              >
-                <View style={[styles.actionIcon, { backgroundColor: 'rgba(168, 85, 247, 0.1)' }]}>
-                  <Ionicons name="pricetag" size={28} color="#a855f7" />
-                </View>
-                <Text style={styles.actionText}>Fuel Prices</Text>
-              </TouchableOpacity>
-            )}
+            <TouchableOpacity
+              style={styles.actionCard}
+              onPress={() => router.push('/catalog')}
+            >
+              <View style={[styles.actionIcon, { backgroundColor: 'rgba(168, 85, 247, 0.1)' }]}>
+                <Ionicons name="images" size={28} color="#a855f7" />
+              </View>
+              <Text style={styles.actionText}>Catalog</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -257,7 +331,7 @@ export default function HomeScreen() {
         </View>
 
         {/* My Machines (Owner only) */}
-        {user?.role === 'owner' && machines.length > 0 && (
+        {(user?.role === 'owner' || user?.role === 'admin') && machines.length > 0 && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>My Machines</Text>
@@ -341,10 +415,16 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignSelf: 'flex-start',
   },
+  adminBadge: {
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+  },
   roleText: {
     color: '#f97316',
     fontSize: 12,
     fontWeight: '600',
+  },
+  adminText: {
+    color: '#ef4444',
   },
   headerActions: {
     flexDirection: 'row',
@@ -381,6 +461,39 @@ const styles = StyleSheet.create({
     backgroundColor: '#1e293b',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  adminBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    marginHorizontal: 20,
+    marginBottom: 20,
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.3)',
+  },
+  adminBannerIcon: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: 'rgba(239, 68, 68, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  adminBannerContent: {
+    flex: 1,
+    marginLeft: 14,
+  },
+  adminBannerTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#ef4444',
+  },
+  adminBannerSubtitle: {
+    fontSize: 12,
+    color: '#94a3b8',
+    marginTop: 2,
   },
   statsContainer: {
     flexDirection: 'row',
@@ -430,6 +543,47 @@ const styles = StyleSheet.create({
     color: '#f97316',
     fontSize: 14,
     fontWeight: '500',
+  },
+  featuredRow: {
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    gap: 14,
+  },
+  featuredCard: {
+    width: 200,
+    height: 160,
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: '#1e293b',
+  },
+  featuredImage: {
+    width: '100%',
+    height: '100%',
+  },
+  featuredOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+    padding: 12,
+  },
+  featuredName: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  featuredType: {
+    fontSize: 12,
+    color: '#94a3b8',
+  },
+  featuredSpec: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 6,
+  },
+  featuredSpecText: {
+    fontSize: 11,
+    color: '#f97316',
   },
   actionsGrid: {
     flexDirection: 'row',
