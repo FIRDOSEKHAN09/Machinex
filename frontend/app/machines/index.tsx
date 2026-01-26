@@ -37,8 +37,10 @@ export default function MachinesScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      fetchMachines();
-    }, [])
+      if (user) {
+        fetchMachines();
+      }
+    }, [user?.id, user?.role])
   );
 
   const onRefresh = () => {
