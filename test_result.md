@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Machine Rental Management API backend testing - comprehensive testing of all API endpoints including auth flow, machine management, contracts, daily logs, engine timer, fuel prices, dashboard and notifications"
+user_problem_statement: "Machine Rental Management Mobile App - Fix critical bugs: data deletion on re-login and admin dashboard not showing data. Add new features: animated splash screen and machine catalog redesign."
 
 backend:
   - task: "Authentication Flow"
