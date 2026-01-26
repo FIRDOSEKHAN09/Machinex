@@ -86,7 +86,7 @@ export default function HomeScreen() {
             <Text style={styles.userName}>{user?.name}</Text>
             <View style={styles.roleBadge}>
               <Text style={styles.roleText}>
-                {user?.role === 'owner' ? 'Machine Owner' : user?.role === 'user' ? 'User' : 'Manager'}
+                {user?.role === 'owner' ? 'Machine Owner' : user?.role === 'user' ? 'User' : user?.role === 'admin' ? 'Admin' : 'Manager'}
               </Text>
             </View>
           </View>
