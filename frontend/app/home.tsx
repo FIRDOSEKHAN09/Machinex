@@ -72,8 +72,10 @@ export default function HomeScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      fetchData();
-    }, [])
+      if (user) {
+        fetchData();
+      }
+    }, [user?.id, user?.role])
   );
 
   const onRefresh = () => {
