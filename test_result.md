@@ -241,3 +241,5 @@ test_plan:
 agent_communication:
     - agent: "testing"
       message: "Comprehensive backend API testing completed successfully. All 24 test cases passed (100% success rate). Complete workflow tested: owner registration → login → machine creation → contract creation → daily logs → engine timer → fuel price management → dashboard stats → contract completion → machine deletion. All endpoints working correctly with proper authentication, authorization, and data validation. Backend is production-ready."
+    - agent: "main"
+      message: "Fixed critical data deletion bug. Root cause was missing user dependencies in useFocusEffect hooks. Updated home.tsx, machines/index.tsx, contracts/index.tsx, and admin/index.tsx to properly refetch data when user changes (login/logout). MongoDB persistence verified working - no data loss on server side. Ready for frontend testing to verify the fix works correctly."
