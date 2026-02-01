@@ -83,7 +83,6 @@ class MachineUpdate(BaseModel):
     engine_capacity: Optional[str] = None
     fuel_type: Optional[str] = None
     hourly_rate: Optional[float] = None
-    daily_rate: Optional[float] = None
     description: Optional[str] = None
     status: Optional[str] = None
 
