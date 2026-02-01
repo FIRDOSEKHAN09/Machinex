@@ -953,7 +953,6 @@ async def admin_get_all_machines(current_user: dict = Depends(get_current_user))
             "engine_capacity": m["engine_capacity"],
             "fuel_type": m["fuel_type"],
             "hourly_rate": m["hourly_rate"],
-            "daily_rate": m["daily_rate"],
             "status": m["status"],
             "owner_name": owner["name"] if owner else "Unknown",
             "owner_contact": owner["phone_or_email"] if owner else "",
