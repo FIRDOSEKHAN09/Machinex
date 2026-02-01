@@ -94,7 +94,6 @@ class MachineResponse(BaseModel):
     engine_capacity: str
     fuel_type: str
     hourly_rate: float
-    daily_rate: float
     description: str
     status: str
     created_at: datetime
