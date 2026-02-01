@@ -354,7 +354,6 @@ async def create_machine(machine: MachineCreate, current_user: dict = Depends(ge
         "engine_capacity": machine.engine_capacity,
         "fuel_type": machine.fuel_type,
         "hourly_rate": machine.hourly_rate,
-        "daily_rate": machine.daily_rate,
         "description": machine.description or "",
         "status": "available",
         "created_at": datetime.utcnow()
