@@ -75,7 +75,6 @@ class MachineCreate(BaseModel):
     engine_capacity: str
     fuel_type: str
     hourly_rate: float
-    daily_rate: float
     description: Optional[str] = ""
 
 class MachineUpdate(BaseModel):
