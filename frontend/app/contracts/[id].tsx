@@ -89,6 +89,38 @@ export default function ContractDetailScreen() {
     );
   };
 
+  const handleEngineToggle = async () => {
+    const action = engineRunning ? 'stop' : 'start';
+    const actionText = engineRunning ? 'Stop' : 'Start';
+    
+    Alert.alert(
+      `${actionText} Engine`,
+      `Are you sure you want to ${action} the engine?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: actionText,
+          onPress: async () => {
+            try {
+              await dailyLogAPI.engineTimer({
+                contract_id: id,
+                day_number: currentDayNumber,
+                action: action,
+              });
+              
+              setEngineRunning(!engineRunning);
+              Alert.alert('Success', `Engine ${action}ed successfully`);
+              fetchData(); // Refresh data
+            } catch (error: any) {
+              console.error('Engine toggle error:', error);
+              Alert.alert('Error', error.response?.data?.detail || `Failed to ${action} engine`);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const getDayStatus = (dayNumber: number) => {
     return dailyLogs.find(log => log.day_number === dayNumber);
   };
