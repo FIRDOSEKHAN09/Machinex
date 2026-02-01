@@ -378,12 +378,16 @@ export default function ContractDetailScreen() {
         <View style={styles.bottomSpacer} />
       </ScrollView>
 
-      {/* Action Button */}
+      {/* Action Buttons */}
       {contract.status === 'active' && isOwner && (
         <View style={styles.footer}>
+          <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteContract}>
+            <Ionicons name="trash" size={20} color="#fff" />
+            <Text style={styles.deleteButtonText}>Delete</Text>
+          </TouchableOpacity>
           <TouchableOpacity style={styles.completeButton} onPress={handleCompleteContract}>
             <Ionicons name="checkmark-done" size={20} color="#fff" />
-            <Text style={styles.completeButtonText}>Complete Contract</Text>
+            <Text style={styles.completeButtonText}>Complete</Text>
           </TouchableOpacity>
         </View>
       )}
