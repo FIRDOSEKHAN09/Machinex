@@ -208,20 +208,6 @@ export default function AddMachineScreen() {
                   />
                 </View>
               </View>
-              <View style={[styles.inputGroup, styles.rateInput]}>
-                <Text style={styles.label}>Daily Rate (₹) *</Text>
-                <View style={styles.inputContainer}>
-                  <Ionicons name="calendar-outline" size={20} color="#94a3b8" style={styles.inputIcon} />
-                  <TextInput
-                    style={styles.input}
-                    placeholder="5000"
-                    placeholderTextColor="#64748b"
-                    value={dailyRate}
-                    onChangeText={setDailyRate}
-                    keyboardType="numeric"
-                  />
-                </View>
-              </View>
             </View>
 
             {/* Description */}
