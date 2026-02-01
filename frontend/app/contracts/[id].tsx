@@ -213,6 +213,40 @@ export default function ContractDetailScreen() {
           </View>
         </View>
 
+        {/* Engine Control - Only for active contracts */}
+        {contract.status === 'active' && (
+          <TouchableOpacity
+            style={[
+              styles.engineButton,
+              engineRunning ? styles.engineButtonStop : styles.engineButtonStart,
+            ]}
+            onPress={handleEngineToggle}
+          >
+            <View style={styles.engineButtonContent}>
+              <Ionicons
+                name={engineRunning ? 'stop-circle' : 'play-circle'}
+                size={32}
+                color="#fff"
+              />
+              <View style={styles.engineButtonText}>
+                <Text style={styles.engineButtonTitle}>
+                  {engineRunning ? 'STOP ENGINE' : 'START ENGINE'}
+                </Text>
+                <Text style={styles.engineButtonSubtitle}>
+                  {engineRunning
+                    ? 'Engine is currently running'
+                    : `Day ${currentDayNumber} • Tap to start`}
+                </Text>
+              </View>
+              {engineRunning && (
+                <View style={styles.pulsingDot}>
+                  <View style={styles.pulsingDotInner} />
+                </View>
+              )}
+            </View>
+          </TouchableOpacity>
+        )}
+
         {/* Days Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Daily Logs ({contract.total_days} Days)</Text>
