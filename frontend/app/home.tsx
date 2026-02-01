@@ -139,8 +139,8 @@ export default function HomeScreen() {
                 </View>
               )}
             </TouchableOpacity>
-            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-              <Ionicons name="log-out-outline" size={24} color="#f8fafc" />
+            <TouchableOpacity style={styles.logoutButton} onPress={() => router.push('/profile')}>
+              <Ionicons name="person-outline" size={24} color="#f8fafc" />
             </TouchableOpacity>
           </View>
         </View>
