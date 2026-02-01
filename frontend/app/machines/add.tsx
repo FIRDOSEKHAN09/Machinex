@@ -34,14 +34,13 @@ export default function AddMachineScreen() {
   const [engineCapacity, setEngineCapacity] = useState('');
   const [fuelType, setFuelType] = useState('');
   const [hourlyRate, setHourlyRate] = useState('');
-  const [dailyRate, setDailyRate] = useState('');
   const [description, setDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showTypeDropdown, setShowTypeDropdown] = useState(false);
   const [showFuelDropdown, setShowFuelDropdown] = useState(false);
 
   const handleSubmit = async () => {
-    if (!modelName.trim() || !machineType || !engineCapacity.trim() || !fuelType || !hourlyRate || !dailyRate) {
+    if (!modelName.trim() || !machineType || !engineCapacity.trim() || !fuelType || !hourlyRate) {
       Alert.alert('Error', 'Please fill in all required fields');
       return;
     }
@@ -54,7 +53,6 @@ export default function AddMachineScreen() {
         engine_capacity: engineCapacity.trim(),
         fuel_type: fuelType,
         hourly_rate: parseFloat(hourlyRate),
-        daily_rate: parseFloat(dailyRate),
         description: description.trim(),
       });
       
