@@ -101,7 +101,7 @@ export default function ContractDetailScreen() {
         {
           text: actionText,
           onPress: async () => {
-            try:
+            try {
               await dailyLogAPI.engineTimer({
                 contract_id: id,
                 day_number: currentDayNumber,
