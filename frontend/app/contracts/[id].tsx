@@ -101,7 +101,7 @@ export default function ContractDetailScreen() {
         {
           text: actionText,
           onPress: async () => {
-            try {
+            try:
               await dailyLogAPI.engineTimer({
                 contract_id: id,
                 day_number: currentDayNumber,
@@ -115,6 +115,48 @@ export default function ContractDetailScreen() {
               console.error('Engine toggle error:', error);
               Alert.alert('Error', error.response?.data?.detail || `Failed to ${action} engine`);
             }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleDeleteContract = () => {
+    Alert.alert(
+      '⚠️ Delete Contract',
+      'Are you absolutely sure you want to delete this contract? This action cannot be undone and will delete all associated daily logs.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'I Understand',
+          style: 'destructive',
+          onPress: () => {
+            // Second confirmation
+            Alert.alert(
+              '🗑️ Final Confirmation',
+              'This is your final warning. Delete this contract permanently?',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Delete Permanently',
+                  style: 'destructive',
+                  onPress: async () => {
+                    try {
+                      await contractAPI.delete(id);
+                      Alert.alert('Success', 'Contract deleted successfully', [
+                        {
+                          text: 'OK',
+                          onPress: () => router.back(),
+                        },
+                      ]);
+                    } catch (error: any) {
+                      console.error('Delete error:', error);
+                      Alert.alert('Error', error.response?.data?.detail || 'Failed to delete contract');
+                    }
+                  },
+                },
+              ]
+            );
           },
         },
       ]
