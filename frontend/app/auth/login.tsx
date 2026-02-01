@@ -198,6 +198,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  forgotPassword: {
+    alignItems: 'center',
+    marginTop: 16,
+    paddingVertical: 8,
+  },
+  forgotPasswordText: {
+    color: '#f97316',
+    fontSize: 14,
+    fontWeight: '500',
+  },
   signupContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
