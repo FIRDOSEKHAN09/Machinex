@@ -339,7 +339,7 @@ async def get_me(current_user: dict = Depends(get_current_user)):
     )
 
 @api_router.post("/auth/forgot-password")
-async def forgot_password(data: SendOTPRequest):
+async def forgot_password(data: UserLogin):
     """Request OTP for password reset"""
     user = await db.users.find_one({"phone_or_email": data.phone_or_email})
     if not user:
