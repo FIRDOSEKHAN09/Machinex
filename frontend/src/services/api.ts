@@ -36,6 +36,7 @@ export const contractAPI = {
   getAll: () => api.get('/contracts'),
   getOne: (id: string) => api.get(`/contracts/${id}`),
   complete: (id: string) => api.put(`/contracts/${id}/complete`),
+  delete: (id: string) => api.delete(`/contracts/${id}`),
 };
 
 // Daily Log API
