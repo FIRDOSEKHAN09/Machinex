@@ -131,8 +131,6 @@ export default function MachinesScreen() {
                   </View>
                   <View style={styles.machineRates}>
                     <Text style={styles.rateText}>₹{machine.hourly_rate}/hr</Text>
-                    <Text style={styles.rateSeparator}>•</Text>
-                    <Text style={styles.rateText}>₹{machine.daily_rate}/day</Text>
                   </View>
                 </View>
                 <View style={styles.machineStatusContainer}>
