@@ -558,6 +558,33 @@ async def complete_contract(contract_id: str, current_user: dict = Depends(get_c
     
     return {"message": "Contract completed"}
 
+@api_router.delete("/contracts/{contract_id}")
+async def delete_contract(contract_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a contract - only owner or admin can delete"""
+    contract = await db.contracts.find_one({"id": contract_id})
+    if not contract:
+        raise HTTPException(status_code=404, detail="Contract not found")
+    
+    # Only owner of the machine or admin can delete
+    if contract["owner_id"] != current_user["id"] and current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Not authorized to delete this contract")
+    
+    # Delete associated daily logs
+    await db.daily_logs.delete_many({"contract_id": contract_id})
+    
+    # Update machine status to available if contract was active
+    if contract.get("status") == "active":
+        await db.machines.update_one(
+            {"id": contract["machine_id"]}, 
+            {"$set": {"status": "available"}}
+        )
+    
+    # Delete the contract
+    await db.contracts.delete_one({"id": contract_id})
+    
+    return {"message": "Contract deleted successfully"}
+
+
 # ==================== DAILY LOG ENDPOINTS ====================
 
 @api_router.post("/daily-logs", response_model=DailyLogResponse)
