@@ -488,6 +488,56 @@ const styles = StyleSheet.create({
   orangeText: {
     color: '#f97316',
   },
+  engineButton: {
+    marginHorizontal: 16,
+    marginBottom: 16,
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  engineButtonStart: {
+    backgroundColor: '#22c55e',
+  },
+  engineButtonStop: {
+    backgroundColor: '#ef4444',
+  },
+  engineButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  engineButtonText: {
+    flex: 1,
+  },
+  engineButtonTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fff',
+    letterSpacing: 0.5,
+  },
+  engineButtonSubtitle: {
+    fontSize: 13,
+    color: 'rgba(255, 255, 255, 0.8)',
+    marginTop: 4,
+  },
+  pulsingDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pulsingDotInner: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#fff',
+  },
   section: {
     padding: 16,
   },
