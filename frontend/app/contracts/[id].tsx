@@ -23,6 +23,8 @@ export default function ContractDetailScreen() {
   const [dailyLogs, setDailyLogs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [engineRunning, setEngineRunning] = useState(false);
+  const [currentDayNumber, setCurrentDayNumber] = useState(1);
 
   const fetchData = async () => {
     try {
@@ -32,6 +34,17 @@ export default function ContractDetailScreen() {
       ]);
       setContract(contractRes.data);
       setDailyLogs(logsRes.data || []);
+      
+      // Calculate current day number
+      const startDate = new Date(contractRes.data.start_date);
+      const today = new Date();
+      const diffTime = Math.abs(today.getTime() - startDate.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      setCurrentDayNumber(diffDays);
+      
+      // Check if engine is currently running
+      const todayLog = logsRes.data?.find((log: any) => log.day_number === diffDays);
+      setEngineRunning(todayLog?.start_time && !todayLog?.end_time);
     } catch (error) {
       console.error('Error fetching contract:', error);
       Alert.alert('Error', 'Failed to load contract details');
@@ -43,7 +56,9 @@ export default function ContractDetailScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      fetchData();
+      if (id) {
+        fetchData();
+      }
     }, [id])
   );
 
