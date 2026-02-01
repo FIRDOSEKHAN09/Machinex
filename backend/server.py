@@ -338,6 +338,57 @@ async def get_me(current_user: dict = Depends(get_current_user)):
         created_at=current_user["created_at"]
     )
 
+@api_router.post("/auth/forgot-password")
+async def forgot_password(data: SendOTPRequest):
+    """Request OTP for password reset"""
+    user = await db.users.find_one({"phone_or_email": data.phone_or_email})
+    if not user:
+        # For security, don't reveal if the email/phone exists
+        return {"message": "If this account exists, an OTP has been sent"}
+    
+    otp = generate_otp()
+    expires_at = datetime.utcnow() + timedelta(minutes=5)
+    
+    # Store OTP in pending_registrations collection for reset
+    await db.pending_registrations.update_one(
+        {"phone_or_email": data.phone_or_email},
+        {"$set": {"otp": otp, "expires_at": expires_at, "purpose": "password_reset"}},
+        upsert=True
+    )
+    
+    print(f"🔑 Password Reset OTP for {data.phone_or_email}: {otp}")
+    return {"message": "OTP sent successfully"}
+
+@api_router.post("/auth/reset-password")
+async def reset_password(phone_or_email: str, otp: str, new_password: str):
+    """Reset password with OTP verification"""
+    pending = await db.pending_registrations.find_one({
+        "phone_or_email": phone_or_email,
+        "purpose": "password_reset"
+    })
+    
+    if not pending:
+        raise HTTPException(status_code=400, detail="No password reset request found")
+    
+    if pending["otp"] != otp:
+        raise HTTPException(status_code=400, detail="Invalid OTP")
+    
+    if datetime.utcnow() > pending["expires_at"]:
+        raise HTTPException(status_code=400, detail="OTP has expired")
+    
+    # Update user's password
+    password_hash = hash_password(new_password)
+    await db.users.update_one(
+        {"phone_or_email": phone_or_email},
+        {"$set": {"password_hash": password_hash}}
+    )
+    
+    # Delete the pending reset request
+    await db.pending_registrations.delete_one({"phone_or_email": phone_or_email, "purpose": "password_reset"})
+    
+    return {"message": "Password reset successfully"}
+
+
 # ==================== MACHINE ENDPOINTS ====================
 
 @api_router.post("/machines", response_model=MachineResponse)
