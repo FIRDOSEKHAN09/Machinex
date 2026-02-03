@@ -3,11 +3,14 @@ import { View, ActivityIndicator, StyleSheet, Animated, Text, Easing } from 'rea
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/src/context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
+import AdminPasswordModal from '@/src/components/AdminPasswordModal';
 
 export default function Index() {
-  const { isAuthenticated, isLoading, user } = useAuth();
+  const { isAuthenticated, isLoading, user, isAdmin } = useAuth();
   const router = useRouter();
   const [showSplash, setShowSplash] = useState(true);
+  const [showAdminModal, setShowAdminModal] = useState(false);
+  const [hasCheckedAdmin, setHasCheckedAdmin] = useState(false);
   
   // Animation values
   const excavatorPosition = new Animated.Value(-100);
