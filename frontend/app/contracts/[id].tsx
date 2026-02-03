@@ -303,10 +303,10 @@ export default function ContractDetailScreen() {
             <Ionicons name="information-circle" size={24} color="#3b82f6" />
             <View style={styles.statusInfoText}>
               <Text style={styles.statusInfoTitle}>
-                {user?.role === 'owner' ? 'Monitoring Mode' : 'View Only Mode'}
+                {isOwner ? 'Monitoring Mode' : 'View Only Mode'}
               </Text>
               <Text style={styles.statusInfoSubtitle}>
-                {user?.role === 'owner' 
+                {isOwner 
                   ? 'Supervisor manages engine controls'
                   : 'Contact supervisor for daily operations'}
               </Text>
