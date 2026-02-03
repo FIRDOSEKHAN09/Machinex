@@ -489,6 +489,177 @@ async def reset_password(phone_or_email: str, otp: str, new_password: str):
     return {"message": "Password reset successfully"}
 
 
+
+# ==================== ADMIN SECURITY ENDPOINTS (HIDDEN) ====================
+
+async def log_security_alert(alert_type: str, phone_number: str, device_info: str = None, ip_address: str = None):
+    """Log security alert and notify all admins"""
+    # Log the alert
+    alert_id = str(uuid.uuid4())
+    alert_doc = {
+        "id": alert_id,
+        "alert_type": alert_type,
+        "phone_number": phone_number,
+        "device_info": device_info,
+        "ip_address": ip_address,
+        "timestamp": datetime.utcnow(),
+        "created_at": datetime.utcnow()
+    }
+    await db.security_alerts.insert_one(alert_doc)
+    
+    # Get all admins
+    admins = await db.users.find({"role": "admin"}).to_list(100)
+    
+    # Send notification to all admins
+    for admin in admins:
+        notification = {
+            "id": str(uuid.uuid4()),
+            "user_id": admin["id"],
+            "message": f"⚠️ SECURITY ALERT: Someone attempted to access Admin Panel\nPhone: {phone_number}\nType: {alert_type}\nTime: {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')}",
+            "notification_type": "security_alert",
+            "read": False,
+            "created_at": datetime.utcnow()
+        }
+        await db.notifications.insert_one(notification)
+    
+    print(f"🚨 SECURITY ALERT: {alert_type} attempt from {phone_number}")
+
+@api_router.post("/auth/verify-admin-access")
+async def verify_admin_access(
+    data: AdminPasswordVerify,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Verify admin password - CRITICAL SECURITY ENDPOINT
+    This endpoint is called AFTER phone + OTP login
+    Returns true only if password matches exactly
+    """
+    # Check if password matches
+    if data.admin_password == ADMIN_SECRET_PASSWORD:
+        # Update user role to admin if password is correct
+        await db.users.update_one(
+            {"id": current_user["id"]},
+            {"$set": {"role": "admin", "is_primary_admin": current_user.get("is_primary_admin", False)}}
+        )
+        
+        print(f"✅ Admin access granted to {current_user['phone_or_email']}")
+        
+        # Return new token with admin role
+        new_token = create_access_token(current_user["id"], "admin")
+        return {
+            "success": True,
+            "is_admin": True,
+            "is_primary_admin": current_user.get("is_primary_admin", False),
+            "token": new_token
+        }
+    else:
+        # Wrong password - log security alert
+        await log_security_alert(
+            "wrong_password",
+            current_user.get("phone_or_email", "unknown"),
+            device_info=None
+        )
+        
+        print(f"🚨 Wrong admin password attempt: {current_user['phone_or_email']}")
+        
+        # Return false without any hints
+        return {
+            "success": False,
+            "is_admin": False,
+            "message": "Access denied"
+        }
+
+@api_router.post("/admin/create-invite")
+async def create_admin_invite(
+    invite: AdminInviteCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Primary admin creates invite for Admin 2"""
+    # Only primary admin can create invites
+    if not current_user.get("is_primary_admin"):
+        await log_security_alert("unauthorized_access", current_user.get("phone_or_email", "unknown"))
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    # Generate unique invite code
+    invite_code = str(uuid.uuid4())[:8].upper()
+    
+    invite_doc = {
+        "id": str(uuid.uuid4()),
+        "invite_code": invite_code,
+        "invited_phone": invite.invited_phone,
+        "invited_name": invite.invited_name,
+        "created_by": current_user["id"],
+        "status": "pending",  # pending, accepted, expired
+        "created_at": datetime.utcnow(),
+        "expires_at": datetime.utcnow() + timedelta(days=7)
+    }
+    
+    await db.admin_invites.insert_one(invite_doc)
+    
+    return {
+        "invite_code": invite_code,
+        "message": "Admin invite created successfully",
+        "expires_in_days": 7
+    }
+
+@api_router.post("/admin/accept-invite")
+async def accept_admin_invite(data: AdminInviteAccept):
+    """Admin 2 accepts invite with name and phone verification"""
+    # Find invite
+    invite = await db.admin_invites.find_one({
+        "invite_code": data.invite_code,
+        "status": "pending"
+    })
+    
+    if not invite:
+        await log_security_alert("impersonation", data.phone_number, device_info="Invalid invite code")
+        raise HTTPException(status_code=404, detail="Invalid or expired invite code")
+    
+    # Check if expired
+    if datetime.utcnow() > invite["expires_at"]:
+        await log_security_alert("impersonation", data.phone_number, device_info="Expired invite")
+        raise HTTPException(status_code=400, detail="Invite has expired")
+    
+    # Verify name and phone match
+    if (data.phone_number.strip() != invite["invited_phone"].strip() or
+        data.full_name.strip().lower() != invite["invited_name"].strip().lower()):
+        # Mismatch - security alert!
+        await log_security_alert("impersonation", data.phone_number, device_info="Name/phone mismatch")
+        raise HTTPException(status_code=403, detail="Verification failed")
+    
+    # Find user by phone
+    user = await db.users.find_one({"phone_or_email": data.phone_number})
+    if not user:
+        await log_security_alert("impersonation", data.phone_number, device_info="User not found")
+        raise HTTPException(status_code=404, detail="User not found. Please register first.")
+    
+    # Grant admin access
+    await db.users.update_one(
+        {"id": user["id"]},
+        {"$set": {"role": "admin", "is_primary_admin": False}}
+    )
+    
+    # Mark invite as accepted
+    await db.admin_invites.update_one(
+        {"id": invite["id"]},
+        {"$set": {"status": "accepted", "accepted_at": datetime.utcnow()}}
+    )
+    
+    print(f"✅ Admin 2 access granted to {data.phone_number}")
+    
+    return {"message": "Admin access granted successfully"}
+
+@api_router.get("/admin/security-alerts")
+async def get_security_alerts(current_user: dict = Depends(get_current_user)):
+    """Get all security alerts - Primary admin only"""
+    if not current_user.get("is_primary_admin"):
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    alerts = await db.security_alerts.find().sort("created_at", -1).limit(100).to_list(100)
+    return alerts
+
+
+
 # ==================== MACHINE ENDPOINTS ====================
 
 @api_router.post("/machines", response_model=MachineResponse)
