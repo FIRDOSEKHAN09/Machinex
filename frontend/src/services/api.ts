@@ -39,6 +39,10 @@ export const contractAPI = {
   getOne: (id: string) => api.get(`/contracts/${id}`),
   complete: (id: string) => api.put(`/contracts/${id}/complete`),
   delete: (id: string) => api.delete(`/contracts/${id}`),
+  approve: (id: string) => api.post(`/contracts/${id}/approve`),
+  reject: (id: string, reason?: string) => api.post(`/contracts/${id}/reject`, { reason }),
+  assignSupervisor: (contractId: string, supervisorId: string) =>
+    api.post(`/contracts/${contractId}/assign-supervisor`, { contract_id: contractId, supervisor_id: supervisorId }),
 };
 
 // Daily Log API
