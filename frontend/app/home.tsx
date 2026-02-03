@@ -193,7 +193,7 @@ export default function HomeScreen() {
         </View>
 
         <ScrollView style={styles.scrollView} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#f97316" />}>
-          <TouchableOpacity style={styles.discoveryCard} onPress={() => router.push('/machines')}>
+          <TouchableOpacity style={styles.discoveryCard} onPress={() => router.push('/machines/discover')}>
             <Ionicons name="search" size={48} color="#f97316" />
             <Text style={styles.discoveryTitle}>Discover Nearby Machines</Text>
             <Text style={styles.discoverySubtitle}>Find excavators and JCBs near you</Text>
