@@ -160,12 +160,13 @@ class ContractResponse(BaseModel):
 class DailyLogCreate(BaseModel):
     contract_id: str
     day_number: int
-    petrol_filled: float = 0
-    petrol_used: float = 0
+    diesel_filled: float = 0  # Changed from petrol to diesel (HSD)
+    diesel_used: float = 0
+    diesel_price_snapshot: float = 0  # Market price at time of entry
     engine_oil: float = 0
     grease_oil: float = 0
     hydraulic_oil: float = 0
-    filled_by: str  # "owner" or "user"
+    filled_by: str  # "owner" or "user"  
     notes: Optional[str] = ""
 
 class DailyLogUpdate(BaseModel):
