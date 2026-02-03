@@ -1241,6 +1241,112 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
 async def root():
     return {"message": "Machine Rental API", "version": "1.0.0"}
 
+
+
+@api_router.get("/reports/monthly/{machine_id}")
+async def get_monthly_report(
+    machine_id: str,
+    month: str,  # Format: "2025-01"
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Get monthly summary for a machine (Machine Owner only)
+    Aggregates: working hours, diesel consumed, oils used, earnings, costs
+    """
+    machine = await db.machines.find_one({"id": machine_id})
+    if not machine:
+        raise HTTPException(status_code=404, detail="Machine not found")
+    
+    # Only owner can view reports
+    if machine["owner_id"] != current_user["id"]:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    # Parse month
+    from datetime import datetime
+    try:
+        year, month_num = map(int, month.split("-"))
+        start_date = datetime(year, month_num, 1)
+        # Get first day of next month
+        if month_num == 12:
+            end_date = datetime(year + 1, 1, 1)
+        else:
+            end_date = datetime(year, month_num + 1, 1)
+    except:
+        raise HTTPException(status_code=400, detail="Invalid month format. Use YYYY-MM")
+    
+    # Get all contracts for this machine in the month
+    contracts = await db.contracts.find({
+        "machine_id": machine_id,
+        "start_date": {"$gte": start_date, "$lt": end_date}
+    }).to_list(1000)
+    
+    if not contracts:
+        return {
+            "month": month,
+            "machine_id": machine_id,
+            "machine_name": machine["model_name"],
+            "total_working_hours": 0,
+            "diesel_consumed": 0,
+            "grease_consumed": 0,
+            "engine_oil_used": 0,
+            "hydraulic_oil_used": 0,
+            "total_earnings": 0,
+            "diesel_cost": 0,
+            "consumables_cost": 0,
+            "net_earnings": 0
+        }
+    
+    # Aggregate data from contracts
+    total_working_hours = 0
+    diesel_consumed = 0
+    grease_consumed = 0
+    engine_oil_used = 0
+    hydraulic_oil_used = 0
+    total_earnings = 0
+    diesel_cost = 0
+    consumables_cost = 0
+    
+    for contract in contracts:
+        # Get daily logs for this contract
+        daily_logs = await db.daily_logs.find({"contract_id": contract["id"]}).to_list(1000)
+        
+        for log in daily_logs:
+            total_working_hours += log.get("working_hours", 0)
+            diesel_consumed += log.get("diesel_filled", 0)
+            grease_consumed += log.get("grease_oil", 0)
+            engine_oil_used += log.get("engine_oil", 0)
+            hydraulic_oil_used += log.get("hydraulic_oil", 0)
+            
+            # Calculate diesel cost
+            diesel_cost += log.get("diesel_filled", 0) * log.get("diesel_price_snapshot", 95)
+        
+        # Get consumables for this contract
+        consumables = await db.consumables.find({"contract_id": contract["id"]}).to_list(1000)
+        for cons in consumables:
+            consumables_cost += cons.get("total_cost", 0)
+        
+        # Total earnings from this contract
+        total_earnings += contract.get("total_amount", 0)
+    
+    # Calculate net earnings
+    net_earnings = total_earnings - diesel_cost - consumables_cost
+    
+    return {
+        "month": month,
+        "machine_id": machine_id,
+        "machine_name": machine["model_name"],
+        "total_working_hours": round(total_working_hours, 2),
+        "diesel_consumed": round(diesel_consumed, 2),
+        "grease_consumed": round(grease_consumed, 2),
+        "engine_oil_used": round(engine_oil_used, 2),
+        "hydraulic_oil_used": round(hydraulic_oil_used, 2),
+        "total_earnings": round(total_earnings, 2),
+        "diesel_cost": round(diesel_cost, 2),
+        "consumables_cost": round(consumables_cost, 2),
+        "net_earnings": round(net_earnings, 2)
+    }
+
+
 # ==================== ADMIN ENDPOINTS (App Owner Only) ====================
 
 async def check_admin(current_user: dict):
