@@ -75,6 +75,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const updateUser = async (newUser: User) => {
+    try {
+      await AsyncStorage.setItem('auth_user', JSON.stringify(newUser));
+      setUser(newUser);
+    } catch (error) {
+      console.error('Error updating user:', error);
+    }
+  };
+
+  const isAdmin = user?.role === 'admin';
+
   return (
     <AuthContext.Provider
       value={{
@@ -83,7 +94,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         login,
         logout,
+        updateUser,
         isAuthenticated: !!token && !!user,
+        isAdmin,
       }}
     >
       {children}
