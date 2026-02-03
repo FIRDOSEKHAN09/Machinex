@@ -803,4 +803,52 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  timeTrackingCard: {
+    backgroundColor: '#1e293b',
+    margin: 16,
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.3)',
+  },
+  timeTrackingHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    gap: 8,
+  },
+  timeTrackingTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#3b82f6',
+  },
+  timeTrackingContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  timeTrackingStat: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  timeTrackingValue: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#f8fafc',
+    marginBottom: 4,
+  },
+  timeTrackingLabel: {
+    fontSize: 12,
+    color: '#94a3b8',
+    textAlign: 'center',
+  },
+  timeTrackingDivider: {
+    width: 1,
+    height: 40,
+    backgroundColor: '#334155',
+    marginHorizontal: 12,
+  },
+  revenueColor: {
+    color: '#22c55e',
+  },
 });
