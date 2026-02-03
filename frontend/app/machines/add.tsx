@@ -444,6 +444,24 @@ const styles = StyleSheet.create({
   rateInput: {
     flex: 1,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 24,
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#f8fafc',
+  },
+  helperText: {
+    fontSize: 12,
+    color: '#64748b',
+    marginTop: 6,
+    fontStyle: 'italic',
+  },
   textAreaContainer: {
     alignItems: 'flex-start',
     paddingVertical: 12,
