@@ -643,55 +643,6 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: '#fff',
   },
-  timeTrackingCard: {
-    backgroundColor: 'rgba(59, 130, 246, 0.1)',
-    borderRadius: 16,
-    padding: 16,
-    marginHorizontal: 16,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(59, 130, 246, 0.3)',
-  },
-  timeTrackingHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 16,
-  },
-  timeTrackingTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#3b82f6',
-  },
-  timeTrackingContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  timeTrackingStat: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  timeTrackingValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#f8fafc',
-    marginBottom: 4,
-  },
-  timeTrackingLabel: {
-    fontSize: 11,
-    color: '#94a3b8',
-    textAlign: 'center',
-  },
-  timeTrackingDivider: {
-    width: 1,
-    height: 40,
-    backgroundColor: 'rgba(59, 130, 246, 0.3)',
-    marginHorizontal: 8,
-  },
-  revenueColor: {
-    color: '#22c55e',
-  },
   statusInfoCard: {
     flexDirection: 'row',
     alignItems: 'center',
