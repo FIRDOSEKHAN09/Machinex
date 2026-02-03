@@ -197,7 +197,7 @@ export default function ForgotPasswordScreen() {
                   <TextInput
                     style={styles.input}
                     placeholder="Confirm new password"
-                    placeholderTextColor="#64748b"}
+                    placeholderTextColor="#64748b"
                     value={confirmPassword}
                     onChangeText={setConfirmPassword}
                     secureTextEntry={!showPassword}
