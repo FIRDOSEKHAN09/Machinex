@@ -218,6 +218,76 @@ export default function AddMachineScreen() {
               </View>
             </View>
 
+            {/* Location Section */}
+            <View style={styles.sectionHeader}>
+              <Ionicons name="location" size={20} color="#f97316" />
+              <Text style={styles.sectionTitle}>Location Details</Text>
+            </View>
+
+            {/* City */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>City *</Text>
+              <View style={styles.inputContainer}>
+                <Ionicons name="business-outline" size={20} color="#94a3b8" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Mumbai"
+                  placeholderTextColor="#64748b"
+                  value={city}
+                  onChangeText={setCity}
+                />
+              </View>
+            </View>
+
+            {/* GPS Coordinates (Optional) */}
+            <View style={styles.ratesRow}>
+              <View style={[styles.inputGroup, styles.rateInput]}>
+                <Text style={styles.label}>GPS Latitude (Optional)</Text>
+                <View style={styles.inputContainer}>
+                  <Ionicons name="navigate-outline" size={20} color="#94a3b8" style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="19.0760"
+                    placeholderTextColor="#64748b"
+                    value={gpsLatitude}
+                    onChangeText={setGpsLatitude}
+                    keyboardType="decimal-pad"
+                  />
+                </View>
+              </View>
+              <View style={[styles.inputGroup, styles.rateInput]}>
+                <Text style={styles.label}>GPS Longitude (Optional)</Text>
+                <View style={styles.inputContainer}>
+                  <Ionicons name="navigate-outline" size={20} color="#94a3b8" style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="72.8777"
+                    placeholderTextColor="#64748b"
+                    value={gpsLongitude}
+                    onChangeText={setGpsLongitude}
+                    keyboardType="decimal-pad"
+                  />
+                </View>
+              </View>
+            </View>
+
+            {/* Operational Radius */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Operational Radius (KM)</Text>
+              <View style={styles.inputContainer}>
+                <Ionicons name="radio-outline" size={20} color="#94a3b8" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="50"
+                  placeholderTextColor="#64748b"
+                  value={operationalRadius}
+                  onChangeText={setOperationalRadius}
+                  keyboardType="numeric"
+                />
+              </View>
+              <Text style={styles.helperText}>How far can this machine operate from its base location?</Text>
+            </View>
+
             {/* Description */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Description (Optional)</Text>
