@@ -587,6 +587,110 @@ async def update_fuel_prices(prices: FuelPricesCreate, current_user: dict = Depe
     
     return FuelPricesResponse(**price_data)
 
+
+# ==================== DIESEL MARKET PRICE ENDPOINTS ====================
+
+@api_router.get("/diesel-price", response_model=DieselPriceResponse)
+async def get_diesel_price(city: Optional[str] = "National Average"):
+    """Get current diesel (HSD) market price"""
+    price = await db.diesel_prices.find_one({"city": city})
+    
+    if not price:
+        # Return national average or default
+        price = await db.diesel_prices.find_one({"city": "National Average"})
+    
+    if not price:
+        # Create default if none exists
+        default_price = {
+            "id": str(uuid.uuid4()),
+            "price_per_liter": 95.0,  # Default HSD price in INR
+            "city": "National Average",
+            "updated_at": datetime.utcnow()
+        }
+        await db.diesel_prices.insert_one(default_price)
+        return DieselPriceResponse(**default_price)
+    
+    return DieselPriceResponse(**price)
+
+@api_router.post("/diesel-price", response_model=DieselPriceResponse)
+async def update_diesel_price(price: DieselPriceCreate, current_user: dict = Depends(get_current_user)):
+    """Update diesel market price (Admin only)"""
+    if current_user["role"] not in ["admin", UserRole.ADMIN]:
+        raise HTTPException(status_code=403, detail="Only admin can update diesel prices")
+    
+    existing = await db.diesel_prices.find_one({"city": price.city})
+    
+    price_data = {
+        "price_per_liter": price.price_per_liter,
+        "city": price.city,
+        "updated_at": datetime.utcnow()
+    }
+    
+    if existing:
+        await db.diesel_prices.update_one({"city": price.city}, {"$set": price_data})
+        price_data["id"] = existing["id"]
+    else:
+        price_data["id"] = str(uuid.uuid4())
+        await db.diesel_prices.insert_one(price_data)
+    
+    return DieselPriceResponse(**price_data)
+
+# ==================== CONSUMABLES ENDPOINTS ====================
+
+@api_router.post("/consumables", response_model=ConsumableResponse)
+async def add_consumable(consumable: ConsumableCreate, current_user: dict = Depends(get_current_user)):
+    """Add consumable (engine oil, hydraulic oil, grease) to daily log"""
+    contract = await db.contracts.find_one({"id": consumable.contract_id})
+    if not contract:
+        raise HTTPException(status_code=404, detail="Contract not found")
+    
+    # Only owner, renter, or supervisor can add consumables
+    is_authorized = (
+        current_user["id"] == contract["owner_id"] or
+        current_user["id"] == contract["renter_id"] or
+        current_user["id"] == contract.get("supervisor_id")
+    )
+    
+    if not is_authorized:
+        raise HTTPException(status_code=403, detail="Not authorized to add consumables")
+    
+    consumable_id = str(uuid.uuid4())
+    total_cost = consumable.quantity * consumable.price_per_unit
+    
+    consumable_doc = {
+        "id": consumable_id,
+        "contract_id": consumable.contract_id,
+        "day_number": consumable.day_number,
+        "consumable_type": consumable.consumable_type,
+        "quantity": consumable.quantity,
+        "price_per_unit": consumable.price_per_unit,
+        "total_cost": total_cost,
+        "filled_by": consumable.filled_by,
+        "created_at": datetime.utcnow()
+    }
+    
+    await db.consumables.insert_one(consumable_doc)
+    
+    # If filled by renter, deduct from contract amount
+    if consumable.filled_by in ["user", "renter"]:
+        await db.contracts.update_one(
+            {"id": consumable.contract_id},
+            {"$inc": {"deductions": total_cost, "remaining_amount": -total_cost}}
+        )
+    
+    return ConsumableResponse(**consumable_doc)
+
+@api_router.get("/consumables/{contract_id}")
+async def get_consumables(contract_id: str, current_user: dict = Depends(get_current_user)):
+    """Get all consumables for a contract"""
+    contract = await db.contracts.find_one({"id": contract_id})
+    if not contract:
+        raise HTTPException(status_code=404, detail="Contract not found")
+    
+    consumables = await db.consumables.find({"contract_id": contract_id}).to_list(1000)
+    return consumables
+
+
 # ==================== CONTRACT ENDPOINTS ====================
 
 @api_router.post("/contracts", response_model=ContractResponse)
