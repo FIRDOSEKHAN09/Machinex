@@ -79,6 +79,10 @@ class MachineCreate(BaseModel):
     fuel_type: str
     hourly_rate: float
     description: Optional[str] = ""
+    city: str
+    gps_latitude: Optional[float] = None
+    gps_longitude: Optional[float] = None
+    operational_radius_km: float = 50  # Default 50km radius
 
 class MachineUpdate(BaseModel):
     model_name: Optional[str] = None
