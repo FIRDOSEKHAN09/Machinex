@@ -255,8 +255,8 @@ export default function ContractDetailScreen() {
           </View>
         </View>
 
-        {/* Engine Control - Only for active contracts */}
-        {contract.status === 'active' && (
+        {/* Engine Control - Only for Supervisor/Manager on active contracts */}
+        {contract.status === 'active' && user?.role === 'manager' && (
           <TouchableOpacity
             style={[
               styles.engineButton,
@@ -287,6 +287,23 @@ export default function ContractDetailScreen() {
               )}
             </View>
           </TouchableOpacity>
+        )}
+
+        {/* Status Info for Owner/Farmer - No Controls */}
+        {contract.status === 'active' && user?.role !== 'manager' && (
+          <View style={styles.statusInfoCard}>
+            <Ionicons name="information-circle" size={24} color="#3b82f6" />
+            <View style={styles.statusInfoText}>
+              <Text style={styles.statusInfoTitle}>
+                {user?.role === 'owner' ? 'Monitoring Mode' : 'View Only Mode'}
+              </Text>
+              <Text style={styles.statusInfoSubtitle}>
+                {user?.role === 'owner' 
+                  ? 'Supervisor manages engine controls'
+                  : 'Contact supervisor for daily operations'}
+              </Text>
+            </View>
+          </View>
         )}
 
         {/* Days Section */}
