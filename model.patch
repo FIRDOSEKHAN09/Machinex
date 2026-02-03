@@ -1,197 +1,300 @@
-diff --git a/frontend/app/home.tsx b/frontend/app/home.tsx
-index d3943fb..f3739bc 100644
---- a/frontend/app/home.tsx
-+++ b/frontend/app/home.tsx
-@@ -86,7 +86,7 @@ export default function HomeScreen() {
-             <Text style={styles.userName}>{user?.name}</Text>
-             <View style={styles.roleBadge}>
-               <Text style={styles.roleText}>
--                {user?.role === 'owner' ? 'Machine Owner' : user?.role === 'user' ? 'User' : 'Manager'}
-+                {user?.role === 'owner' ? 'Machine Owner' : user?.role === 'user' ? 'User' : user?.role === 'admin' ? 'Admin' : 'Manager'}
-               </Text>
-             </View>
+diff --git a/frontend/app/contracts/[id].tsx b/frontend/app/contracts/[id].tsx
+index 837e6d3..00207b8 100644
+--- a/frontend/app/contracts/[id].tsx
++++ b/frontend/app/contracts/[id].tsx
+@@ -263,6 +263,40 @@ export default function ContractDetailScreen() {
            </View>
-@@ -148,6 +148,17 @@ export default function HomeScreen() {
-         <View style={styles.section}>
-           <Text style={styles.sectionTitle}>Quick Actions</Text>
-           <View style={styles.actionsGrid}>
-+            {user?.role === 'admin' && (
-+              <TouchableOpacity
-+                style={styles.actionCard}
-+                onPress={() => router.push('/admin')}
-+              >
-+                <View style={[styles.actionIcon, { backgroundColor: 'rgba(168, 85, 247, 0.1)' }]}>
-+                  <Ionicons name="settings" size={28} color="#a855f7" />
-+                </View>
-+                <Text style={styles.actionText}>Admin Dashboard</Text>
-+              </TouchableOpacity>
-+            )}
-             {user?.role === 'owner' && (
-               <TouchableOpacity
-                 style={styles.actionCard}
-diff --git a/frontend/app/index.tsx b/frontend/app/index.tsx
-index 49deed3..af64af1 100644
---- a/frontend/app/index.tsx
-+++ b/frontend/app/index.tsx
-@@ -4,18 +4,23 @@ import { useRouter } from 'expo-router';
- import { useAuth } from '@/src/context/AuthContext';
+         </View>
  
- export default function Index() {
--  const { isAuthenticated, isLoading } = useAuth();
-+  const { isAuthenticated, isLoading, user } = useAuth();
-   const router = useRouter();
- 
-   useEffect(() => {
-     if (!isLoading) {
-       if (isAuthenticated) {
--        router.replace('/home');
-+        // Redirect admin users to admin dashboard
-+        if (user?.role === 'admin') {
-+          router.replace('/admin');
-+        } else {
-+          router.replace('/home');
-+        }
-       } else {
-         router.replace('/auth/login');
-       }
-     }
--  }, [isLoading, isAuthenticated]);
-+  }, [isLoading, isAuthenticated, user]);
- 
-   return (
-     <View style={styles.container}>
++        {/* Time Tracking Summary - For Machine Owner */}
++        {isOwner && (
++          <View style={styles.timeTrackingCard}>
++            <View style={styles.timeTrackingHeader}>
++              <Ionicons name="time-outline" size={24} color="#3b82f6" />
++              <Text style={styles.timeTrackingTitle}>Engine Working Hours</Text>
++            </View>
++            <View style={styles.timeTrackingContent}>
++              <View style={styles.timeTrackingStat}>
++                <Text style={styles.timeTrackingValue}>
++                  {contract.total_working_hours?.toFixed(1) || '0.0'}
++                </Text>
++                <Text style={styles.timeTrackingLabel}>Total Hours</Text>
++              </View>
++              <View style={styles.timeTrackingDivider} />
++              <View style={styles.timeTrackingStat}>
++                <Text style={styles.timeTrackingValue}>
++                  {contract.total_days > 0 
++                    ? (contract.total_working_hours / contract.total_days).toFixed(1)
++                    : '0.0'}
++                </Text>
++                <Text style={styles.timeTrackingLabel}>Avg Hours/Day</Text>
++              </View>
++              <View style={styles.timeTrackingDivider} />
++              <View style={styles.timeTrackingStat}>
++                <Text style={[styles.timeTrackingValue, styles.revenueColor]}>
++                  ₹{((contract.total_working_hours || 0) * (contract.hourly_rate || 0)).toLocaleString()}
++                </Text>
++                <Text style={styles.timeTrackingLabel}>Total Revenue</Text>
++              </View>
++            </View>
++          </View>
++        )}
++
+         {/* Engine Control - Only for Supervisor/Manager on active contracts */}
+         {contract.status === 'active' && isSupervisor && (
+           <TouchableOpacity
+@@ -769,4 +803,52 @@ const styles = StyleSheet.create({
+     fontSize: 16,
+     fontWeight: '600',
+   },
++  timeTrackingCard: {
++    backgroundColor: '#1e293b',
++    margin: 16,
++    borderRadius: 16,
++    padding: 16,
++    borderWidth: 1,
++    borderColor: 'rgba(59, 130, 246, 0.3)',
++  },
++  timeTrackingHeader: {
++    flexDirection: 'row',
++    alignItems: 'center',
++    marginBottom: 16,
++    gap: 8,
++  },
++  timeTrackingTitle: {
++    fontSize: 16,
++    fontWeight: '600',
++    color: '#3b82f6',
++  },
++  timeTrackingContent: {
++    flexDirection: 'row',
++    alignItems: 'center',
++    justifyContent: 'space-between',
++  },
++  timeTrackingStat: {
++    flex: 1,
++    alignItems: 'center',
++  },
++  timeTrackingValue: {
++    fontSize: 18,
++    fontWeight: 'bold',
++    color: '#f8fafc',
++    marginBottom: 4,
++  },
++  timeTrackingLabel: {
++    fontSize: 12,
++    color: '#94a3b8',
++    textAlign: 'center',
++  },
++  timeTrackingDivider: {
++    width: 1,
++    height: 40,
++    backgroundColor: '#334155',
++    marginHorizontal: 12,
++  },
++  revenueColor: {
++    color: '#22c55e',
++  },
+ });
 diff --git a/model.patch b/model.patch
-index 9b5bfa1..e69de29 100644
+index 60a714e..e69de29 100644
 --- a/model.patch
 +++ b/model.patch
-@@ -1,130 +0,0 @@
--diff --git a/test_result.md b/test_result.md
--index 187cba4..b4d0fc7 100644
----- a/test_result.md
--+++ b/test_result.md
--@@ -100,4 +100,122 @@
+@@ -1,197 +0,0 @@
+-diff --git a/frontend/app/home.tsx b/frontend/app/home.tsx
+-index d3943fb..f3739bc 100644
+---- a/frontend/app/home.tsx
+-+++ b/frontend/app/home.tsx
+-@@ -86,7 +86,7 @@ export default function HomeScreen() {
+-             <Text style={styles.userName}>{user?.name}</Text>
+-             <View style={styles.roleBadge}>
+-               <Text style={styles.roleText}>
+--                {user?.role === 'owner' ? 'Machine Owner' : user?.role === 'user' ? 'User' : 'Manager'}
+-+                {user?.role === 'owner' ? 'Machine Owner' : user?.role === 'user' ? 'User' : user?.role === 'admin' ? 'Admin' : 'Manager'}
+-               </Text>
+-             </View>
+-           </View>
+-@@ -148,6 +148,17 @@ export default function HomeScreen() {
+-         <View style={styles.section}>
+-           <Text style={styles.sectionTitle}>Quick Actions</Text>
+-           <View style={styles.actionsGrid}>
+-+            {user?.role === 'admin' && (
+-+              <TouchableOpacity
+-+                style={styles.actionCard}
+-+                onPress={() => router.push('/admin')}
+-+              >
+-+                <View style={[styles.actionIcon, { backgroundColor: 'rgba(168, 85, 247, 0.1)' }]}>
+-+                  <Ionicons name="settings" size={28} color="#a855f7" />
+-+                </View>
+-+                <Text style={styles.actionText}>Admin Dashboard</Text>
+-+              </TouchableOpacity>
+-+            )}
+-             {user?.role === 'owner' && (
+-               <TouchableOpacity
+-                 style={styles.actionCard}
+-diff --git a/frontend/app/index.tsx b/frontend/app/index.tsx
+-index 49deed3..af64af1 100644
+---- a/frontend/app/index.tsx
+-+++ b/frontend/app/index.tsx
+-@@ -4,18 +4,23 @@ import { useRouter } from 'expo-router';
+- import { useAuth } from '@/src/context/AuthContext';
 - 
-- #====================================================================================================
-- # Testing Data - Main Agent and testing sub agent both should log testing data below this section
---#====================================================================================================
--\ No newline at end of file
--+#====================================================================================================
--+
--+user_problem_statement: "Machine Rental Management API backend testing - comprehensive testing of all API endpoints including auth flow, machine management, contracts, daily logs, engine timer, fuel prices, dashboard and notifications"
--+
--+backend:
--+  - task: "Authentication Flow"
--+    implemented: true
--+    working: true
--+    file: "/app/backend/server.py"
--+    stuck_count: 0
--+    priority: "high"
--+    needs_retesting: false
--+    status_history:
--+        - working: true
--+          agent: "testing"
--+          comment: "All auth endpoints working perfectly - registration, OTP verification, login, and profile retrieval. Mock OTP '123456' working as expected. JWT tokens generated and validated correctly."
--+
--+  - task: "Machine Management"
--+    implemented: true
--+    working: true
--+    file: "/app/backend/server.py"
--+    stuck_count: 0
--+    priority: "high"
--+    needs_retesting: false
--+    status_history:
--+        - working: true
--+          agent: "testing"
--+          comment: "All machine CRUD operations working - create, read (owner/all/single), update, delete. Owner role validation working correctly. Machine status updates properly on contract creation."
--+
--+  - task: "Contract Management"
--+    implemented: true
--+    working: true
--+    file: "/app/backend/server.py"
--+    stuck_count: 0
--+    priority: "high"
--+    needs_retesting: false
--+    status_history:
--+        - working: true
--+          agent: "testing"
--+          comment: "Contract creation, retrieval, and completion working perfectly. Proper owner/renter role handling. Machine status updates correctly. Notifications created on contract events."
--+
--+  - task: "Daily Log Management"
--+    implemented: true
--+    working: true
--+    file: "/app/backend/server.py"
--+    stuck_count: 0
--+    priority: "high"
--+    needs_retesting: false
--+    status_history:
--+        - working: true
--+          agent: "testing"
--+          comment: "Daily log creation, retrieval, and updates working correctly. Expense calculations based on fuel prices working. Proper validation for duplicate day logs."
--+
--+  - task: "Engine Timer Functionality"
--+    implemented: true
--+    working: true
--+    file: "/app/backend/server.py"
--+    stuck_count: 0
--+    priority: "medium"
--+    needs_retesting: false
--+    status_history:
--+        - working: true
--+          agent: "testing"
--+          comment: "Engine timer start/stop functionality working. Creates daily log if doesn't exist. Time calculation working correctly. Minor: Working hours calculation shows 0.0 for very short intervals (expected behavior)."
--+
--+  - task: "Fuel Price Management"
--+    implemented: true
--+    working: true
--+    file: "/app/backend/server.py"
--+    stuck_count: 0
--+    priority: "medium"
--+    needs_retesting: false
--+    status_history:
--+        - working: true
--+          agent: "testing"
--+          comment: "Fuel price retrieval and updates working correctly. Default prices created for new owners. Owner-only update validation working properly."
--+
--+  - task: "Dashboard & Notifications"
--+    implemented: true
--+    working: true
--+    file: "/app/backend/server.py"
--+    stuck_count: 0
--+    priority: "medium"
--+    needs_retesting: false
--+    status_history:
--+        - working: true
--+          agent: "testing"
--+          comment: "Dashboard stats calculation working correctly for owners and users. Notifications system working - created on contract events and retrieved properly."
--+
--+  - task: "API Security & Authorization"
--+    implemented: true
--+    working: true
--+    file: "/app/backend/server.py"
--+    stuck_count: 0
--+    priority: "high"
--+    needs_retesting: false
--+    status_history:
--+        - working: true
--+          agent: "testing"
--+          comment: "JWT token authentication working correctly. Role-based access control implemented properly. Owner-only endpoints protected. Bearer token validation working."
--+
--+frontend:
--+  # Frontend testing not performed as per instructions
--+
--+metadata:
--+  created_by: "testing_agent"
--+  version: "1.0"
--+  test_sequence: 1
--+  run_ui: false
--+
--+test_plan:
--+  current_focus: []
--+  stuck_tasks: []
--+  test_all: true
--+  test_priority: "high_first"
--+
--+agent_communication:
--+    - agent: "testing"
--+      message: "Comprehensive backend API testing completed successfully. All 24 test cases passed (100% success rate). Complete workflow tested: owner registration → login → machine creation → contract creation → daily logs → engine timer → fuel price management → dashboard stats → contract completion → machine deletion. All endpoints working correctly with proper authentication, authorization, and data validation. Backend is production-ready."
--\ No newline at end of file
+- export default function Index() {
+--  const { isAuthenticated, isLoading } = useAuth();
+-+  const { isAuthenticated, isLoading, user } = useAuth();
+-   const router = useRouter();
+- 
+-   useEffect(() => {
+-     if (!isLoading) {
+-       if (isAuthenticated) {
+--        router.replace('/home');
+-+        // Redirect admin users to admin dashboard
+-+        if (user?.role === 'admin') {
+-+          router.replace('/admin');
+-+        } else {
+-+          router.replace('/home');
+-+        }
+-       } else {
+-         router.replace('/auth/login');
+-       }
+-     }
+--  }, [isLoading, isAuthenticated]);
+-+  }, [isLoading, isAuthenticated, user]);
+- 
+-   return (
+-     <View style={styles.container}>
+-diff --git a/model.patch b/model.patch
+-index 9b5bfa1..e69de29 100644
+---- a/model.patch
+-+++ b/model.patch
+-@@ -1,130 +0,0 @@
+--diff --git a/test_result.md b/test_result.md
+--index 187cba4..b4d0fc7 100644
+----- a/test_result.md
+--+++ b/test_result.md
+--@@ -100,4 +100,122 @@
+-- 
+-- #====================================================================================================
+-- # Testing Data - Main Agent and testing sub agent both should log testing data below this section
+---#====================================================================================================
+--\ No newline at end of file
+--+#====================================================================================================
+--+
+--+user_problem_statement: "Machine Rental Management API backend testing - comprehensive testing of all API endpoints including auth flow, machine management, contracts, daily logs, engine timer, fuel prices, dashboard and notifications"
+--+
+--+backend:
+--+  - task: "Authentication Flow"
+--+    implemented: true
+--+    working: true
+--+    file: "/app/backend/server.py"
+--+    stuck_count: 0
+--+    priority: "high"
+--+    needs_retesting: false
+--+    status_history:
+--+        - working: true
+--+          agent: "testing"
+--+          comment: "All auth endpoints working perfectly - registration, OTP verification, login, and profile retrieval. Mock OTP '123456' working as expected. JWT tokens generated and validated correctly."
+--+
+--+  - task: "Machine Management"
+--+    implemented: true
+--+    working: true
+--+    file: "/app/backend/server.py"
+--+    stuck_count: 0
+--+    priority: "high"
+--+    needs_retesting: false
+--+    status_history:
+--+        - working: true
+--+          agent: "testing"
+--+          comment: "All machine CRUD operations working - create, read (owner/all/single), update, delete. Owner role validation working correctly. Machine status updates properly on contract creation."
+--+
+--+  - task: "Contract Management"
+--+    implemented: true
+--+    working: true
+--+    file: "/app/backend/server.py"
+--+    stuck_count: 0
+--+    priority: "high"
+--+    needs_retesting: false
+--+    status_history:
+--+        - working: true
+--+          agent: "testing"
+--+          comment: "Contract creation, retrieval, and completion working perfectly. Proper owner/renter role handling. Machine status updates correctly. Notifications created on contract events."
+--+
+--+  - task: "Daily Log Management"
+--+    implemented: true
+--+    working: true
+--+    file: "/app/backend/server.py"
+--+    stuck_count: 0
+--+    priority: "high"
+--+    needs_retesting: false
+--+    status_history:
+--+        - working: true
+--+          agent: "testing"
+--+          comment: "Daily log creation, retrieval, and updates working correctly. Expense calculations based on fuel prices working. Proper validation for duplicate day logs."
+--+
+--+  - task: "Engine Timer Functionality"
+--+    implemented: true
+--+    working: true
+--+    file: "/app/backend/server.py"
+--+    stuck_count: 0
+--+    priority: "medium"
+--+    needs_retesting: false
+--+    status_history:
+--+        - working: true
+--+          agent: "testing"
+--+          comment: "Engine timer start/stop functionality working. Creates daily log if doesn't exist. Time calculation working correctly. Minor: Working hours calculation shows 0.0 for very short intervals (expected behavior)."
+--+
+--+  - task: "Fuel Price Management"
+--+    implemented: true
+--+    working: true
+--+    file: "/app/backend/server.py"
+--+    stuck_count: 0
+--+    priority: "medium"
+--+    needs_retesting: false
+--+    status_history:
+--+        - working: true
+--+          agent: "testing"
+--+          comment: "Fuel price retrieval and updates working correctly. Default prices created for new owners. Owner-only update validation working properly."
+--+
+--+  - task: "Dashboard & Notifications"
+--+    implemented: true
+--+    working: true
+--+    file: "/app/backend/server.py"
+--+    stuck_count: 0
+--+    priority: "medium"
+--+    needs_retesting: false
+--+    status_history:
+--+        - working: true
+--+          agent: "testing"
+--+          comment: "Dashboard stats calculation working correctly for owners and users. Notifications system working - created on contract events and retrieved properly."
+--+
+--+  - task: "API Security & Authorization"
+--+    implemented: true
+--+    working: true
+--+    file: "/app/backend/server.py"
+--+    stuck_count: 0
+--+    priority: "high"
+--+    needs_retesting: false
+--+    status_history:
+--+        - working: true
+--+          agent: "testing"
+--+          comment: "JWT token authentication working correctly. Role-based access control implemented properly. Owner-only endpoints protected. Bearer token validation working."
+--+
+--+frontend:
+--+  # Frontend testing not performed as per instructions
+--+
+--+metadata:
+--+  created_by: "testing_agent"
+--+  version: "1.0"
+--+  test_sequence: 1
+--+  run_ui: false
+--+
+--+test_plan:
+--+  current_focus: []
+--+  stuck_tasks: []
+--+  test_all: true
+--+  test_priority: "high_first"
+--+
+--+agent_communication:
+--+    - agent: "testing"
+--+      message: "Comprehensive backend API testing completed successfully. All 24 test cases passed (100% success rate). Complete workflow tested: owner registration → login → machine creation → contract creation → daily logs → engine timer → fuel price management → dashboard stats → contract completion → machine deletion. All endpoints working correctly with proper authentication, authorization, and data validation. Backend is production-ready."
+--\ No newline at end of file
