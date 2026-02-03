@@ -127,6 +127,10 @@ class ContractCreate(BaseModel):
     total_days: int
     advance_amount: float
     total_amount: float
+    transport_charges: float = 0
+    transport_paid: float = 0
+    initial_fuel_filled: bool = False  # Does machine already have fuel?
+    initial_fuel_liters: float = 0
 
 class ContractResponse(BaseModel):
     id: str
