@@ -591,19 +591,20 @@ async def update_fuel_prices(prices: FuelPricesCreate, current_user: dict = Depe
 
 @api_router.post("/contracts", response_model=ContractResponse)
 async def create_contract(contract: ContractCreate, current_user: dict = Depends(get_current_user)):
+    """Create a contract request (Farmer requests, Owner must approve)"""
     machine = await db.machines.find_one({"id": contract.machine_id})
     if not machine:
         raise HTTPException(status_code=404, detail="Machine not found")
     
-    # Determine owner_id based on who creates the contract
-    if current_user["role"] == UserRole.OWNER:
-        if machine["owner_id"] != current_user["id"]:
-            raise HTTPException(status_code=403, detail="Not your machine")
-        owner_id = current_user["id"]
-        renter_id = None
-    else:
-        owner_id = machine["owner_id"]
-        renter_id = current_user["id"]
+    # Get machine owner details
+    owner = await db.users.find_one({"id": machine["owner_id"]})
+    
+    # Only farmers/users can request contracts
+    if current_user["role"] not in [UserRole.USER, "user"]:
+        raise HTTPException(status_code=403, detail="Only renters can create contract requests")
+    
+    owner_id = machine["owner_id"]
+    renter_id = current_user["id"]
     
     contract_id = str(uuid.uuid4())
     contract_doc = {
@@ -618,28 +619,36 @@ async def create_contract(contract: ContractCreate, current_user: dict = Depends
         "total_amount": contract.total_amount,
         "remaining_amount": contract.total_amount - contract.advance_amount,
         "deductions": 0,
+        "transport_charges": contract.transport_charges,
+        "transport_paid": contract.transport_paid,
+        "initial_fuel_filled": contract.initial_fuel_filled,
+        "initial_fuel_liters": contract.initial_fuel_liters,
         "start_date": datetime.utcnow(),
-        "status": "active",
+        "status": "pending",  # Changed: Starts as pending
+        "approval_status": "pending",  # Requires owner approval
+        "supervisor_id": None,
+        "supervisor_name": None,
         "created_at": datetime.utcnow()
     }
     
     await db.contracts.insert_one(contract_doc)
     
-    # Update machine status
-    await db.machines.update_one({"id": contract.machine_id}, {"$set": {"status": "rented"}})
+    # Machine status remains "available" until approved
     
-    # Create notification for owner
+    # Create notification for owner to approve
     notification = {
         "id": str(uuid.uuid4()),
         "user_id": owner_id,
-        "message": f"New contract created for {machine['model_name']} with {contract.renter_name}",
-        "notification_type": "contract",
+        "message": f"🔔 {contract.renter_name} is waiting for approval to rent {machine['model_name']}",
+        "notification_type": "contract_approval_request",
+        "contract_id": contract_id,
         "read": False,
         "created_at": datetime.utcnow()
     }
     await db.notifications.insert_one(notification)
     
     contract_doc["machine_name"] = machine["model_name"]
+    contract_doc["machine_type"] = machine.get("machine_type", "")
     return ContractResponse(**contract_doc)
 
 @api_router.get("/contracts", response_model=List[ContractResponse])
