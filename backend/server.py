@@ -145,9 +145,17 @@ class ContractResponse(BaseModel):
     remaining_amount: float
     deductions: float
     start_date: datetime
-    status: str
+    status: str  # pending, approved, active, rejected, completed
+    approval_status: str = "pending"  # pending, approved, rejected
+    supervisor_id: Optional[str] = None
+    supervisor_name: Optional[str] = None
+    transport_charges: float = 0
+    transport_paid: float = 0
+    initial_fuel_filled: bool = False
+    initial_fuel_liters: float = 0
     created_at: datetime
     machine_name: Optional[str] = None
+    machine_type: Optional[str] = None
 
 class DailyLogCreate(BaseModel):
     contract_id: str
