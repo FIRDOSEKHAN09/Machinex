@@ -32,16 +32,20 @@ export default function AddMachineScreen() {
   const [modelName, setModelName] = useState('');
   const [machineType, setMachineType] = useState('');
   const [engineCapacity, setEngineCapacity] = useState('');
-  const [fuelType, setFuelType] = useState('');
+  const [fuelType, setFuelType] = useState('Diesel'); // Default to Diesel
   const [hourlyRate, setHourlyRate] = useState('');
   const [description, setDescription] = useState('');
+  const [city, setCity] = useState('');
+  const [gpsLatitude, setGpsLatitude] = useState('');
+  const [gpsLongitude, setGpsLongitude] = useState('');
+  const [operationalRadius, setOperationalRadius] = useState('50'); // Default 50km
   const [isLoading, setIsLoading] = useState(false);
   const [showTypeDropdown, setShowTypeDropdown] = useState(false);
   const [showFuelDropdown, setShowFuelDropdown] = useState(false);
 
   const handleSubmit = async () => {
-    if (!modelName.trim() || !machineType || !engineCapacity.trim() || !fuelType || !hourlyRate) {
-      Alert.alert('Error', 'Please fill in all required fields');
+    if (!modelName.trim() || !machineType || !engineCapacity.trim() || !fuelType || !hourlyRate || !city.trim()) {
+      Alert.alert('Error', 'Please fill in all required fields (including city)');
       return;
     }
 
@@ -54,6 +58,10 @@ export default function AddMachineScreen() {
         fuel_type: fuelType,
         hourly_rate: parseFloat(hourlyRate),
         description: description.trim(),
+        city: city.trim(),
+        gps_latitude: gpsLatitude ? parseFloat(gpsLatitude) : null,
+        gps_longitude: gpsLongitude ? parseFloat(gpsLongitude) : null,
+        operational_radius_km: operationalRadius ? parseFloat(operationalRadius) : 50,
       });
       
       Alert.alert('Success', 'Machine added successfully', [
