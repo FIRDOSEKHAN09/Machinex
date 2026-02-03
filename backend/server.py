@@ -103,6 +103,10 @@ class MachineResponse(BaseModel):
     hourly_rate: float
     description: str
     status: str
+    city: Optional[str] = None
+    gps_latitude: Optional[float] = None
+    gps_longitude: Optional[float] = None
+    operational_radius_km: Optional[float] = 50
     created_at: datetime
 
 class FuelPricesCreate(BaseModel):
