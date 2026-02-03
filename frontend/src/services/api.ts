@@ -81,4 +81,32 @@ export const adminAPI = {
   getRunningMachines: () => api.get('/admin/running-machines'),
   getRecentActivity: () => api.get('/admin/recent-activity'),
   getAllDailyLogs: () => api.get('/admin/daily-logs-all'),
+  createInvite: (data: { invited_phone: string; invited_name: string }) =>
+    api.post('/admin/create-invite', data),
+  getSecurityAlerts: () => api.get('/admin/security-alerts'),
+};
+
+// Location/Discovery API
+export const discoveryAPI = {
+  nearbyMachines: (lat: number, lon: number, machineType?: string, maxDistance?: number) =>
+    api.get('/machines/discover/nearby', {
+      params: { user_lat: lat, user_lon: lon, machine_type: machineType, max_distance_km: maxDistance },
+    }),
+};
+
+// Diesel Price API
+export const dieselPriceAPI = {
+  get: (city?: string) => api.get('/diesel-price', { params: { city } }),
+  update: (data: { price_per_liter: number; city: string }) => api.post('/diesel-price', data),
+};
+
+// Consumables API
+export const consumablesAPI = {
+  add: (data: any) => api.post('/consumables', data),
+  getByContract: (contractId: string) => api.get(`/consumables/${contractId}`),
+};
+
+// Reports API
+export const reportsAPI = {
+  monthlyReport: (machineId: string, month: string) => api.get(`/reports/monthly/${machineId}`, { params: { month } }),
 };
