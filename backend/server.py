@@ -478,6 +478,10 @@ async def create_machine(machine: MachineCreate, current_user: dict = Depends(ge
         "fuel_type": machine.fuel_type,
         "hourly_rate": machine.hourly_rate,
         "description": machine.description or "",
+        "city": machine.city,
+        "gps_latitude": machine.gps_latitude,
+        "gps_longitude": machine.gps_longitude,
+        "operational_radius_km": machine.operational_radius_km,
         "status": "available",
         "created_at": datetime.utcnow()
     }
