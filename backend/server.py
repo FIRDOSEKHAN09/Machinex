@@ -717,6 +717,136 @@ async def delete_contract(contract_id: str, current_user: dict = Depends(get_cur
     return {"message": "Contract deleted successfully"}
 
 
+@api_router.post("/contracts/{contract_id}/approve")
+async def approve_contract(contract_id: str, current_user: dict = Depends(get_current_user)):
+    """Owner approves a contract request"""
+    contract = await db.contracts.find_one({"id": contract_id})
+    if not contract:
+        raise HTTPException(status_code=404, detail="Contract not found")
+    
+    # Only owner can approve
+    if contract["owner_id"] != current_user["id"]:
+        raise HTTPException(status_code=403, detail="Only machine owner can approve contracts")
+    
+    if contract["approval_status"] != "pending":
+        raise HTTPException(status_code=400, detail="Contract already processed")
+    
+    # Update contract to approved and active
+    await db.contracts.update_one(
+        {"id": contract_id},
+        {"$set": {
+            "approval_status": "approved",
+            "status": "active",
+            "start_date": datetime.utcnow()
+        }}
+    )
+    
+    # Update machine status to rented
+    await db.machines.update_one(
+        {"id": contract["machine_id"]},
+        {"$set": {"status": "rented"}}
+    )
+    
+    # Notify renter
+    notification = {
+        "id": str(uuid.uuid4()),
+        "user_id": contract["renter_id"],
+        "message": f"✅ Your contract request has been approved! You can now start using the machine.",
+        "notification_type": "contract_approved",
+        "contract_id": contract_id,
+        "read": False,
+        "created_at": datetime.utcnow()
+    }
+    await db.notifications.insert_one(notification)
+    
+    return {"message": "Contract approved successfully", "contract_id": contract_id}
+
+@api_router.post("/contracts/{contract_id}/reject")
+async def reject_contract(contract_id: str, reason: Optional[str] = None, current_user: dict = Depends(get_current_user)):
+    """Owner rejects a contract request"""
+    contract = await db.contracts.find_one({"id": contract_id})
+    if not contract:
+        raise HTTPException(status_code=404, detail="Contract not found")
+    
+    # Only owner can reject
+    if contract["owner_id"] != current_user["id"]:
+        raise HTTPException(status_code=403, detail="Only machine owner can reject contracts")
+    
+    if contract["approval_status"] != "pending":
+        raise HTTPException(status_code=400, detail="Contract already processed")
+    
+    # Update contract to rejected
+    await db.contracts.update_one(
+        {"id": contract_id},
+        {"$set": {
+            "approval_status": "rejected",
+            "status": "rejected"
+        }}
+    )
+    
+    # Notify renter
+    rejection_msg = f"❌ Your contract request has been rejected."
+    if reason:
+        rejection_msg += f" Reason: {reason}"
+    
+    notification = {
+        "id": str(uuid.uuid4()),
+        "user_id": contract["renter_id"],
+        "message": rejection_msg,
+        "notification_type": "contract_rejected",
+        "contract_id": contract_id,
+        "read": False,
+        "created_at": datetime.utcnow()
+    }
+    await db.notifications.insert_one(notification)
+    
+    return {"message": "Contract rejected", "contract_id": contract_id}
+
+@api_router.post("/contracts/{contract_id}/assign-supervisor")
+async def assign_supervisor(contract_id: str, assignment: SupervisorAssignment, current_user: dict = Depends(get_current_user)):
+    """Owner assigns a supervisor to a contract"""
+    contract = await db.contracts.find_one({"id": contract_id})
+    if not contract:
+        raise HTTPException(status_code=404, detail="Contract not found")
+    
+    # Only owner can assign supervisor
+    if contract["owner_id"] != current_user["id"]:
+        raise HTTPException(status_code=403, detail="Only machine owner can assign supervisors")
+    
+    # Get supervisor details
+    supervisor = await db.users.find_one({"id": assignment.supervisor_id})
+    if not supervisor:
+        raise HTTPException(status_code=404, detail="Supervisor not found")
+    
+    if supervisor["role"] not in ["manager", "supervisor"]:
+        raise HTTPException(status_code=400, detail="User is not a supervisor/manager")
+    
+    # Update contract with supervisor
+    await db.contracts.update_one(
+        {"id": contract_id},
+        {"$set": {
+            "supervisor_id": assignment.supervisor_id,
+            "supervisor_name": supervisor["name"]
+        }}
+    )
+    
+    # Notify supervisor
+    machine = await db.machines.find_one({"id": contract["machine_id"]})
+    notification = {
+        "id": str(uuid.uuid4()),
+        "user_id": assignment.supervisor_id,
+        "message": f"👷 You've been assigned as supervisor for {machine['model_name']} contract",
+        "notification_type": "supervisor_assigned",
+        "contract_id": contract_id,
+        "read": False,
+        "created_at": datetime.utcnow()
+    }
+    await db.notifications.insert_one(notification)
+    
+    return {"message": "Supervisor assigned successfully"}
+
+
+
 # ==================== DAILY LOG ENDPOINTS ====================
 
 @api_router.post("/daily-logs", response_model=DailyLogResponse)
