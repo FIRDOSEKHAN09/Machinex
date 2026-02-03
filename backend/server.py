@@ -536,6 +536,73 @@ async def delete_machine(machine_id: str, current_user: dict = Depends(get_curre
     await db.machines.delete_one({"id": machine_id})
     return {"message": "Machine deleted"}
 
+
+@api_router.get("/machines/discover/nearby")
+async def discover_machines(
+    user_lat: float,
+    user_lon: float,
+    machine_type: Optional[str] = None,
+    max_distance_km: float = 50,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Discover available machines near user location (like Rapido/OLX)
+    Uses Haversine formula for distance calculation
+    """
+    import math
+    
+    def haversine_distance(lat1, lon1, lat2, lon2):
+        """Calculate distance between two points in kilometers"""
+        R = 6371  # Earth radius in kilometers
+        
+        lat1_rad = math.radians(lat1)
+        lat2_rad = math.radians(lat2)
+        delta_lat = math.radians(lat2 - lat1)
+        delta_lon = math.radians(lon2 - lon1)
+        
+        a = math.sin(delta_lat/2)**2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(delta_lon/2)**2
+        c = 2 * math.asin(math.sqrt(a))
+        
+        return R * c
+    
+    # Get all available machines
+    query = {"status": "available"}
+    if machine_type:
+        query["machine_type"] = machine_type
+    
+    machines = await db.machines.find(query).to_list(1000)
+    
+    # Filter by distance and add distance info
+    nearby_machines = []
+    for machine in machines:
+        if machine.get("gps_latitude") and machine.get("gps_longitude"):
+            distance = haversine_distance(
+                user_lat, user_lon,
+                machine["gps_latitude"], machine["gps_longitude"]
+            )
+            
+            # Check if within operational radius
+            operational_radius = machine.get("operational_radius_km", 50)
+            if distance <= max_distance_km and distance <= operational_radius:
+                # Get owner details
+                owner = await db.users.find_one({"id": machine["owner_id"]})
+                
+                # Count total machines owned by this owner
+                total_owned = await db.machines.count_documents({"owner_id": machine["owner_id"]})
+                
+                machine["distance_km"] = round(distance, 2)
+                machine["owner_name"] = owner["name"] if owner else "Unknown"
+                machine["owner_contact"] = owner["phone_or_email"] if owner else ""
+                machine["owner_total_machines"] = total_owned
+                nearby_machines.append(machine)
+    
+    # Sort by distance
+    nearby_machines.sort(key=lambda x: x["distance_km"])
+    
+    return nearby_machines
+
+
+
 # ==================== FUEL PRICES ENDPOINTS ====================
 
 @api_router.get("/fuel-prices", response_model=FuelPricesResponse)
