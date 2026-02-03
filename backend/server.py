@@ -325,6 +325,13 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
+
+def generate_otp():
+    """Generate 6-digit OTP"""
+    import random
+    return str(random.randint(100000, 999999))
+
+
 # ==================== AUTH ENDPOINTS ====================
 
 @api_router.post("/auth/register", response_model=dict)
