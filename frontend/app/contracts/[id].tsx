@@ -263,6 +263,40 @@ export default function ContractDetailScreen() {
           </View>
         </View>
 
+        {/* Time Tracking Summary - For Machine Owner */}
+        {isOwner && (
+          <View style={styles.timeTrackingCard}>
+            <View style={styles.timeTrackingHeader}>
+              <Ionicons name="time-outline" size={24} color="#3b82f6" />
+              <Text style={styles.timeTrackingTitle}>Engine Working Hours</Text>
+            </View>
+            <View style={styles.timeTrackingContent}>
+              <View style={styles.timeTrackingStat}>
+                <Text style={styles.timeTrackingValue}>
+                  {contract.total_working_hours?.toFixed(1) || '0.0'}
+                </Text>
+                <Text style={styles.timeTrackingLabel}>Total Hours</Text>
+              </View>
+              <View style={styles.timeTrackingDivider} />
+              <View style={styles.timeTrackingStat}>
+                <Text style={styles.timeTrackingValue}>
+                  {contract.total_days > 0 
+                    ? (contract.total_working_hours / contract.total_days).toFixed(1)
+                    : '0.0'}
+                </Text>
+                <Text style={styles.timeTrackingLabel}>Avg Hours/Day</Text>
+              </View>
+              <View style={styles.timeTrackingDivider} />
+              <View style={styles.timeTrackingStat}>
+                <Text style={[styles.timeTrackingValue, styles.revenueColor]}>
+                  ₹{((contract.total_working_hours || 0) * (contract.hourly_rate || 0)).toLocaleString()}
+                </Text>
+                <Text style={styles.timeTrackingLabel}>Total Revenue</Text>
+              </View>
+            </View>
+          </View>
+        )}
+
         {/* Engine Control - Only for Supervisor/Manager on active contracts */}
         {contract.status === 'active' && isSupervisor && (
           <TouchableOpacity
