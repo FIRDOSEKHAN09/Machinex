@@ -83,16 +83,30 @@ export default function Index() {
   useEffect(() => {
     if (!showSplash && !isLoading) {
       if (isAuthenticated) {
-        if (user?.role === 'admin') {
-          router.replace('/admin');
+        // Check if we should show admin modal (only once per session)
+        if (!hasCheckedAdmin && !isAdmin) {
+          setShowAdminModal(true);
+          setHasCheckedAdmin(true);
         } else {
+          // Navigate based on role
           router.replace('/home');
         }
       } else {
         router.replace('/auth/login');
       }
     }
-  }, [showSplash, isLoading, isAuthenticated, user]);
+  }, [showSplash, isLoading, isAuthenticated, user, hasCheckedAdmin, isAdmin]);
+
+  const handleAdminModalClose = () => {
+    setShowAdminModal(false);
+    // Navigate to home after modal closes (whether admin or not)
+    router.replace('/home');
+  };
+
+  const handleAdminSuccess = () => {
+    // Admin access granted, just navigate to home
+    // Home screen will show admin features based on role
+  };
 
   const spin = wheelRotation.interpolate({
     inputRange: [0, 1],
