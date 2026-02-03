@@ -189,6 +189,14 @@ export default function ContractDetailScreen() {
   }
 
   const isOwner = user?.role === 'owner';
+  const isSupervisor = user?.role === 'manager';
+  const isFarmer = user?.role === 'user';
+  
+  // Debug log
+  console.log('Current user role:', user?.role);
+  console.log('Is Supervisor:', isSupervisor);
+  console.log('Is Owner:', isOwner);
+  console.log('Is Farmer:', isFarmer);
 
   return (
     <SafeAreaView style={styles.container}>
