@@ -8,6 +8,7 @@ interface User {
   phone_or_email: string;
   role: string;
   created_at: string;
+  is_primary_admin?: boolean;
 }
 
 interface AuthContextType {
@@ -16,7 +17,9 @@ interface AuthContextType {
   isLoading: boolean;
   login: (token: string, user: User) => Promise<void>;
   logout: () => Promise<void>;
+  updateUser: (user: User) => Promise<void>;
   isAuthenticated: boolean;
+  isAdmin: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
