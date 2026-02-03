@@ -601,6 +601,31 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: '#fff',
   },
+  statusInfoCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+    borderRadius: 12,
+    padding: 16,
+    marginHorizontal: 16,
+    marginBottom: 16,
+    gap: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.3)',
+  },
+  statusInfoText: {
+    flex: 1,
+  },
+  statusInfoTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#3b82f6',
+    marginBottom: 4,
+  },
+  statusInfoSubtitle: {
+    fontSize: 12,
+    color: '#94a3b8',
+  },
   section: {
     padding: 16,
   },
