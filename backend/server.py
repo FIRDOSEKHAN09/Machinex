@@ -63,6 +63,9 @@ class UserResponse(BaseModel):
     phone_or_email: str
     role: str
     created_at: datetime
+    upi_id: Optional[str] = None
+    qr_code_image: Optional[str] = None
+    total_machines_owned: Optional[int] = 0
 
 class TokenResponse(BaseModel):
     access_token: str
