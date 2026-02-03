@@ -267,6 +267,27 @@ class MonthlyReportResponse(BaseModel):
     consumables_cost: float
     net_earnings: float
 
+
+# Admin Security Models
+class AdminPasswordVerify(BaseModel):
+    admin_password: str
+
+class AdminInviteCreate(BaseModel):
+    invited_phone: str
+    invited_name: str
+
+class AdminInviteAccept(BaseModel):
+    invite_code: str
+    phone_number: str
+    full_name: str
+
+class SecurityAlertCreate(BaseModel):
+    alert_type: str  # "wrong_password", "unauthorized_access", "impersonation"
+    phone_number: str
+    device_info: Optional[str] = None
+    ip_address: Optional[str] = None
+
+
 # ==================== AUTH HELPERS ====================
 
 def hash_password(password: str) -> str:
