@@ -211,6 +211,58 @@ class NotificationResponse(BaseModel):
     read: bool
     created_at: datetime
 
+
+# Diesel Market Price Model
+class DieselPriceCreate(BaseModel):
+    price_per_liter: float
+    city: str = "National Average"
+
+class DieselPriceResponse(BaseModel):
+    id: str
+    price_per_liter: float
+    city: str
+    updated_at: datetime
+
+# Consumables Model
+class ConsumableCreate(BaseModel):
+    contract_id: str
+    day_number: int
+    consumable_type: str  # engine_oil, hydraulic_oil, grease_oil
+    quantity: float
+    price_per_unit: float
+    filled_by: str  # "owner" or "user" or "supervisor"
+
+class ConsumableResponse(BaseModel):
+    id: str
+    contract_id: str
+    day_number: int
+    consumable_type: str
+    quantity: float
+    price_per_unit: float
+    total_cost: float
+    filled_by: str
+    created_at: datetime
+
+# Supervisor Assignment Model
+class SupervisorAssignment(BaseModel):
+    contract_id: str
+    supervisor_id: str
+
+# Monthly Report Response
+class MonthlyReportResponse(BaseModel):
+    month: str  # "2025-01"
+    machine_id: str
+    machine_name: str
+    total_working_hours: float
+    diesel_consumed: float
+    grease_consumed: float
+    engine_oil_used: float
+    hydraulic_oil_used: float
+    total_earnings: float
+    diesel_cost: float
+    consumables_cost: float
+    net_earnings: float
+
 # ==================== AUTH HELPERS ====================
 
 def hash_password(password: str) -> str:
