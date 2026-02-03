@@ -180,6 +180,13 @@ export default function Index() {
   return (
     <View style={styles.container}>
       <ActivityIndicator size="large" color="#f97316" />
+      
+      {/* Hidden Admin Password Modal */}
+      <AdminPasswordModal
+        visible={showAdminModal}
+        onClose={handleAdminModalClose}
+        onSuccess={handleAdminSuccess}
+      />
     </View>
   );
 }
