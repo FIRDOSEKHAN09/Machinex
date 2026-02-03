@@ -26,6 +26,9 @@ SECRET_KEY = os.environ.get('JWT_SECRET', 'machine-rental-secret-key-2025')
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_DAYS = 30
 
+# Admin Security Configuration
+ADMIN_SECRET_PASSWORD = os.environ.get('ADMIN_SECRET_PASSWORD', 'MachineRentalAdmin@2025Secure')
+
 # Create the main app
 app = FastAPI(title="Machine Rental API")
 api_router = APIRouter(prefix="/api")
