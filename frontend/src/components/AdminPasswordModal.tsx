@@ -34,7 +34,9 @@ export default function AdminPasswordModal({ visible, onClose, onSuccess }: Admi
     try {
       const response = await authAPI.verifyAdminAccess({ admin_password: password });
       
-      if (response.data.success && response.data.is_admin) {
+      console.log('Admin verify response:', response.data);
+      
+      if (response?.data?.success && response?.data?.is_admin) {
         // Update token
         if (response.data.token) {
           api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
@@ -49,9 +51,10 @@ export default function AdminPasswordModal({ visible, onClose, onSuccess }: Admi
         setPassword('');
         onClose();
       }
-    } catch (error) {
+    } catch (error: any) {
       // Network error - close silently
       console.error('Admin verification error:', error);
+      console.error('Error details:', JSON.stringify(error, null, 2));
       setPassword('');
       onClose();
     } finally {
