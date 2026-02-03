@@ -264,7 +264,7 @@ export default function ContractDetailScreen() {
         </View>
 
         {/* Engine Control - Only for Supervisor/Manager on active contracts */}
-        {contract.status === 'active' && user?.role === 'manager' && (
+        {contract.status === 'active' && isSupervisor && (
           <TouchableOpacity
             style={[
               styles.engineButton,
