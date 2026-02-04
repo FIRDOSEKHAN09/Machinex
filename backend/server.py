@@ -1035,9 +1035,6 @@ async def create_contract(contract: ContractCreate, current_user: dict = Depends
     if not machine:
         raise HTTPException(status_code=404, detail="Machine not found")
     
-    # Get machine owner details
-    owner = await db.users.find_one({"id": machine["owner_id"]})
-    
     # Only farmers/users can request contracts
     if current_user["role"] not in [UserRole.USER, "user"]:
         raise HTTPException(status_code=403, detail="Only renters can create contract requests")
