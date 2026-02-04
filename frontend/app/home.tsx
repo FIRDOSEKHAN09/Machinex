@@ -98,12 +98,19 @@ export default function HomeScreen() {
 
   // ROLE-BASED RENDERING
   if (user?.role === 'owner') {
-    // MACHINE OWNER VIEW - Show Contracts
+    // MACHINE OWNER VIEW - Enhanced Dashboard
+    const pendingContracts = sortedContracts.filter(c => c.status === 'pending');
+    const activeContracts = sortedContracts.filter(c => c.status === 'active');
+    
+    // Calculate earnings
+    const todayEarnings = activeContracts.reduce((sum, c) => sum + ((c.total_working_hours || 0) * (c.hourly_rate || 0)), 0);
+    const totalEarnings = sortedContracts.reduce((sum, c) => sum + (c.total_amount || 0), 0);
+    
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <View>
-            <Text style={styles.greeting}>Welcome Back</Text>
+            <Text style={styles.greeting}>Dashboard</Text>
             <Text style={styles.userName}>{user.name}</Text>
           </View>
           <View style={styles.headerActions}>
@@ -122,60 +129,134 @@ export default function HomeScreen() {
         </View>
 
         <ScrollView style={styles.scrollView} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#f97316" />}>
-          <Text style={styles.sectionTitle}>My Contracts</Text>
-
-          {sortedContracts.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Ionicons name="document-text-outline" size={64} color="#64748b" />
-              <Text style={styles.emptyText}>No contracts yet</Text>
+          {/* Earnings Summary */}
+          <View style={styles.earningsSection}>
+            <Text style={styles.sectionTitle}>Earnings Overview</Text>
+            <View style={styles.earningsGrid}>
+              <View style={styles.earningCard}>
+                <Ionicons name="trending-up" size={24} color="#22c55e" />
+                <Text style={styles.earningLabel}>Today's Earnings</Text>
+                <Text style={styles.earningValue}>₹{todayEarnings.toLocaleString()}</Text>
+              </View>
+              <View style={styles.earningCard}>
+                <Ionicons name="cash" size={24} color="#3b82f6" />
+                <Text style={styles.earningLabel}>Total Revenue</Text>
+                <Text style={styles.earningValue}>₹{totalEarnings.toLocaleString()}</Text>
+              </View>
             </View>
-          ) : (
-            sortedContracts.map((contract) => (
-              <TouchableOpacity
-                key={contract.id}
-                style={styles.contractCard}
-                onPress={() => router.push(`/contracts/${contract.id}`)}
-              >
-                <View style={styles.contractHeader}>
-                  <View>
-                    <Text style={styles.machineName}>{contract.machine_name || 'Machine'}</Text>
-                    <Text style={styles.renterName}>Renter: {contract.renter_name}</Text>
-                  </View>
-                  <View style={[styles.statusBadge, { backgroundColor: `${getStatusColor(contract.status)}20` }]}>
-                    <Text style={[styles.statusText, { color: getStatusColor(contract.status) }]}>
-                      {contract.status.toUpperCase()}
-                    </Text>
-                  </View>
-                </View>
+            <View style={styles.earningsGrid}>
+              <View style={styles.earningCard}>
+                <Ionicons name="documents" size={24} color="#f97316" />
+                <Text style={styles.earningLabel}>Active Contracts</Text>
+                <Text style={styles.earningValue}>{activeContracts.length}</Text>
+              </View>
+              <View style={styles.earningCard}>
+                <Ionicons name="time" size={24} color="#a855f7" />
+                <Text style={styles.earningLabel}>Pending Approval</Text>
+                <Text style={styles.earningValue}>{pendingContracts.length}</Text>
+              </View>
+            </View>
+            <TouchableOpacity 
+              style={styles.monthlyReportButton}
+              onPress={() => router.push('/profile/monthly-summary')}
+            >
+              <Ionicons name="bar-chart" size={20} color="#f97316" />
+              <Text style={styles.monthlyReportText}>View Monthly Report</Text>
+              <Ionicons name="chevron-forward" size={20} color="#f97316" />
+            </TouchableOpacity>
+          </View>
 
-                {contract.supervisor_name && (
-                  <View style={styles.supervisorRow}>
-                    <Ionicons name="person" size={16} color="#94a3b8" />
-                    <Text style={styles.supervisorText}>Supervisor: {contract.supervisor_name}</Text>
-                  </View>
-                )}
-
-                <View style={styles.contractFooter}>
-                  <Text style={styles.amountText}>₹{contract.total_amount}</Text>
-                  {contract.status === 'pending' && (
-                    <View style={styles.actionButtons}>
-                      <TouchableOpacity style={styles.rejectButton} onPress={() => handleReject(contract.id)}>
-                        <Text style={styles.rejectText}>Reject</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity style={styles.approveButton} onPress={() => handleApprove(contract.id)}>
-                        <Text style={styles.approveText}>Approve</Text>
-                      </TouchableOpacity>
+          {/* Pending Contracts Section */}
+          {pendingContracts.length > 0 && (
+            <>
+              <Text style={styles.sectionTitle}>Pending Approvals</Text>
+              {pendingContracts.map((contract) => (
+                <View key={contract.id} style={styles.pendingContractCard}>
+                  <TouchableOpacity 
+                    style={styles.pendingContractInfo}
+                    onPress={() => router.push(`/contracts/${contract.id}`)}
+                  >
+                    <View style={styles.pendingContractHeader}>
+                      <Ionicons name="alert-circle" size={24} color="#f97316" />
+                      <View style={styles.pendingContractDetails}>
+                        <Text style={styles.machineName}>{contract.machine_name || 'Machine'}</Text>
+                        <Text style={styles.renterName}>Requested by: {contract.renter_name}</Text>
+                        <Text style={styles.contractAmount}>Amount: ₹{contract.total_amount?.toLocaleString()}</Text>
+                      </View>
                     </View>
-                  )}
+                  </TouchableOpacity>
+                  <View style={styles.actionButtons}>
+                    <TouchableOpacity 
+                      style={styles.rejectButton} 
+                      onPress={() => handleReject(contract.id)}
+                    >
+                      <Ionicons name="close" size={18} color="#fff" />
+                      <Text style={styles.rejectText}>Reject</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      style={styles.approveButton} 
+                      onPress={() => handleApprove(contract.id)}
+                    >
+                      <Ionicons name="checkmark" size={18} color="#fff" />
+                      <Text style={styles.approveText}>Approve</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
-              </TouchableOpacity>
-            ))
+              ))}
+            </>
           )}
 
+          {/* Active Contracts Section */}
+          {activeContracts.length > 0 && (
+            <>
+              <Text style={styles.sectionTitle}>Active Contracts</Text>
+              {activeContracts.map((contract) => (
+                <TouchableOpacity
+                  key={contract.id}
+                  style={styles.contractCard}
+                  onPress={() => router.push(`/contracts/${contract.id}`)}
+                >
+                  <View style={styles.contractHeader}>
+                    <View style={styles.contractInfo}>
+                      <Text style={styles.machineName}>{contract.machine_name || 'Machine'}</Text>
+                      <Text style={styles.renterName}>Renter: {contract.renter_name}</Text>
+                      {contract.total_working_hours > 0 && (
+                        <Text style={styles.workingHours}>
+                          {contract.total_working_hours.toFixed(1)}h worked
+                        </Text>
+                      )}
+                    </View>
+                    <View style={styles.contractStatus}>
+                      <View style={styles.engineStatusBadge}>
+                        {contract.engine_status === 'running' ? (
+                          <>
+                            <View style={styles.runningIndicator} />
+                            <Text style={styles.engineStatusText}>Running</Text>
+                          </>
+                        ) : (
+                          <>
+                            <View style={styles.idleIndicator} />
+                            <Text style={styles.engineStatusText}>Idle</Text>
+                          </>
+                        )}
+                      </View>
+                      <Text style={styles.earningsText}>
+                        ₹{((contract.total_working_hours || 0) * (contract.hourly_rate || 0)).toLocaleString()}
+                      </Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </>
+          )}
+
+          {/* Manage Machines Button */}
           <TouchableOpacity style={styles.addButton} onPress={() => router.push('/machines')}>
-            <Ionicons name="add-circle" size={20} color="#fff" />
+            <Ionicons name="construct" size={20} color="#fff" />
             <Text style={styles.addButtonText}>Manage Machines</Text>
           </TouchableOpacity>
+
+          <View style={styles.bottomSpacer} />
         </ScrollView>
       </SafeAreaView>
     );
