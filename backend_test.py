@@ -485,33 +485,42 @@ class MachineRentalTester:
         
         # Test 1: Admin Overview
         response = self.make_request("GET", "/admin/overview", token=self.tokens["owner"])
-        if response and response.status_code == 403:
-            self.log_test("Admin Overview (Access Control)", True, "Correctly blocked non-admin access")
-        elif response and response.status_code == 200:
-            overview = response.json()
-            self.log_test("Admin Overview", True, f"Total users: {overview['users']['total']}")
+        if response:
+            if response.status_code == 403:
+                self.log_test("Admin Overview (Access Control)", True, "Correctly blocked non-admin access")
+            elif response.status_code == 200:
+                overview = response.json()
+                self.log_test("Admin Overview", True, f"Total users: {overview['users']['total']}")
+            else:
+                self.log_test("Admin Overview", False, f"Unexpected response: {response.status_code}")
         else:
-            self.log_test("Admin Overview", False, f"Unexpected response: {response.status_code if response else 'No response'}")
+            self.log_test("Admin Overview", False, "No response received")
             
         # Test 2: Running Machines
         response = self.make_request("GET", "/admin/running-machines", token=self.tokens["owner"])
-        if response and response.status_code == 403:
-            self.log_test("Running Machines (Access Control)", True, "Correctly blocked non-admin access")
-        elif response and response.status_code == 200:
-            machines = response.json()
-            self.log_test("Running Machines", True, f"Found {len(machines)} running machines")
+        if response:
+            if response.status_code == 403:
+                self.log_test("Running Machines (Access Control)", True, "Correctly blocked non-admin access")
+            elif response.status_code == 200:
+                machines = response.json()
+                self.log_test("Running Machines", True, f"Found {len(machines)} running machines")
+            else:
+                self.log_test("Running Machines", False, f"Unexpected response: {response.status_code}")
         else:
-            self.log_test("Running Machines", False, f"Unexpected response: {response.status_code if response else 'No response'}")
+            self.log_test("Running Machines", False, "No response received")
             
         # Test 3: Recent Activity
         response = self.make_request("GET", "/admin/recent-activity", token=self.tokens["owner"])
-        if response and response.status_code == 403:
-            self.log_test("Recent Activity (Access Control)", True, "Correctly blocked non-admin access")
-        elif response and response.status_code == 200:
-            activity = response.json()
-            self.log_test("Recent Activity", True, f"Retrieved recent activity data")
+        if response:
+            if response.status_code == 403:
+                self.log_test("Recent Activity (Access Control)", True, "Correctly blocked non-admin access")
+            elif response.status_code == 200:
+                activity = response.json()
+                self.log_test("Recent Activity", True, f"Retrieved recent activity data")
+            else:
+                self.log_test("Recent Activity", False, f"Unexpected response: {response.status_code}")
         else:
-            self.log_test("Recent Activity", False, f"Unexpected response: {response.status_code if response else 'No response'}")
+            self.log_test("Recent Activity", False, "No response received")
             
         return True
 
