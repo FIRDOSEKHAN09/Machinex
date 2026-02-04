@@ -1540,7 +1540,7 @@ async def get_monthly_report(
             end_date = datetime(year + 1, 1, 1)
         else:
             end_date = datetime(year, month_num + 1, 1)
-    except:
+    except (ValueError, IndexError):
         raise HTTPException(status_code=400, detail="Invalid month format. Use YYYY-MM")
     
     # Get all contracts for this machine in the month
