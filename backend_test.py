@@ -379,7 +379,7 @@ class MachineRentalTester:
         # Test 1: Create Daily Log
         log_data = {
             "contract_id": self.contracts["main"]["id"],
-            "day_number": 1,
+            "day_number": 2,  # Use day 2 since day 1 already exists from engine timer
             "diesel_filled": 25.0,
             "diesel_used": 20.0,
             "diesel_price_snapshot": 95.0,
@@ -387,7 +387,7 @@ class MachineRentalTester:
             "grease_oil": 1.0,
             "hydraulic_oil": 3.0,
             "filled_by": "owner",
-            "notes": "First day of operation, machine running smoothly"
+            "notes": "Second day of operation, machine running smoothly"
         }
         
         response = self.make_request("POST", "/daily-logs", log_data, self.tokens["owner"])
