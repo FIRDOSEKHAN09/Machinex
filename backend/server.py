@@ -118,7 +118,7 @@ class MachineResponse(BaseModel):
     created_at: datetime
 
 class FuelPricesCreate(BaseModel):
-    petrol_price: float
+    diesel_price: float
     engine_oil_price: float
     grease_oil_price: float
     hydraulic_oil_price: float
@@ -126,7 +126,7 @@ class FuelPricesCreate(BaseModel):
 class FuelPricesResponse(BaseModel):
     id: str
     owner_id: str
-    petrol_price: float
+    diesel_price: float
     engine_oil_price: float
     grease_oil_price: float
     hydraulic_oil_price: float
