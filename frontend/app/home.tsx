@@ -180,7 +180,7 @@ export default function HomeScreen() {
       </SafeAreaView>
     );
   } else if (user?.role === 'user') {
-    // FARMER VIEW - Show Discovery
+    // FARMER VIEW - Show Machine Discovery
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
@@ -204,11 +204,59 @@ export default function HomeScreen() {
         </View>
 
         <ScrollView style={styles.scrollView} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#f97316" />}>
-          <TouchableOpacity style={styles.discoveryCard} onPress={() => router.push('/machines/discover')}>
-            <Ionicons name="search" size={48} color="#f97316" />
-            <Text style={styles.discoveryTitle}>Discover Nearby Machines</Text>
-            <Text style={styles.discoverySubtitle}>Find excavators and JCBs near you</Text>
-          </TouchableOpacity>
+          <Text style={styles.sectionTitle}>Available Machines</Text>
+
+          {machines.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Ionicons name="construct-outline" size={64} color="#64748b" />
+              <Text style={styles.emptyText}>No machines available</Text>
+            </View>
+          ) : (
+            machines.map((machine) => (
+              <TouchableOpacity
+                key={machine.id}
+                style={styles.machineCard}
+                onPress={() => router.push(`/machines/detail/${machine.id}`)}
+              >
+                <View style={styles.machineImageContainer}>
+                  {machine.images && machine.images.length > 0 && machine.images[0] ? (
+                    <Image
+                      source={{ uri: machine.images[0] }}
+                      style={styles.machineImage}
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <View style={styles.machineImagePlaceholder}>
+                      <Ionicons name="construct" size={32} color="#64748b" />
+                    </View>
+                  )}
+                </View>
+                <View style={styles.machineInfo}>
+                  <Text style={styles.machineNameText}>{machine.model_name}</Text>
+                  <Text style={styles.machineTypeText}>{machine.machine_type}</Text>
+                  <View style={styles.machineDetails}>
+                    <View style={styles.detailRow}>
+                      <Ionicons name="person-outline" size={14} color="#94a3b8" />
+                      <Text style={styles.detailText}>{machine.owner_name}</Text>
+                    </View>
+                    <View style={styles.detailRow}>
+                      <Ionicons name="location-outline" size={14} color="#94a3b8" />
+                      <Text style={styles.detailText}>{machine.city || 'N/A'}</Text>
+                    </View>
+                    <View style={styles.detailRow}>
+                      <Ionicons name="water-outline" size={14} color="#94a3b8" />
+                      <Text style={styles.detailText}>{machine.fuel_type}</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.machineRateText}>\u20b9{machine.hourly_rate}/hour</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="#64748b" />
+              </TouchableOpacity>
+            ))
+          )}
+        </ScrollView>
+      </SafeAreaView>
+    );
 
           <Text style={styles.sectionTitle}>My Contracts</Text>
           {contracts.length === 0 ? (
