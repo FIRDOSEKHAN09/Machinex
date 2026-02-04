@@ -95,6 +95,9 @@ export default function AddMachineScreen() {
 
         <ScrollView style={styles.scrollView} keyboardShouldPersistTaps="handled">
           <View style={styles.form}>
+            {/* Image Picker */}
+            <ImagePickerComponent images={images} onImagesChange={setImages} maxImages={6} />
+
             {/* Model Name */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Model Name *</Text>
