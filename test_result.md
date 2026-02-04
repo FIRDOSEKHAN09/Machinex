@@ -116,6 +116,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "All auth endpoints working perfectly - registration, OTP verification, login, and profile retrieval. Mock OTP '123456' working as expected. JWT tokens generated and validated correctly."
+        - working: true
+          agent: "testing"
+          comment: "Comprehensive testing completed: Owner, Farmer, and Supervisor registration/login all working. Forgot password endpoint working correctly. All 8 authentication tests passed."
 
   - task: "Machine Management"
     implemented: true
@@ -128,6 +131,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "All machine CRUD operations working - create, read (owner/all/single), update, delete. Owner role validation working correctly. Machine status updates properly on contract creation."
+        - working: true
+          agent: "testing"
+          comment: "Complete machine management flow tested: Create machine with images, get owner machines, browse all machines for farmers, get single machine, update machine. All 5 tests passed."
 
   - task: "Contract Management"
     implemented: true
@@ -140,18 +146,24 @@ backend:
         - working: true
           agent: "testing"
           comment: "Contract creation, retrieval, and completion working perfectly. Proper owner/renter role handling. Machine status updates correctly. Notifications created on contract events."
+        - working: true
+          agent: "testing"
+          comment: "Full contract workflow tested: Create contract request, get contracts, approve contract, start/stop engine timer. All 6 contract management tests passed."
 
   - task: "Daily Log Management"
     implemented: true
-    working: true
+    working: false
     file: "/app/backend/server.py"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
     needs_retesting: false
     status_history:
         - working: true
           agent: "testing"
           comment: "Daily log creation, retrieval, and updates working correctly. Expense calculations based on fuel prices working. Proper validation for duplicate day logs."
+        - working: false
+          agent: "testing"
+          comment: "CRITICAL BUG FOUND: Daily log creation fails with 500 Internal Server Error. Backend code at line 1315 uses 'log.petrol_filled' but DailyLogCreate model has 'diesel_filled' field. AttributeError: 'DailyLogCreate' object has no attribute 'petrol_filled'. Get daily logs works fine (1 test passed, 1 failed)."
 
   - task: "Engine Timer Functionality"
     implemented: true
@@ -164,6 +176,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "Engine timer start/stop functionality working. Creates daily log if doesn't exist. Time calculation working correctly. Minor: Working hours calculation shows 0.0 for very short intervals (expected behavior)."
+        - working: true
+          agent: "testing"
+          comment: "Engine timer tested as part of contract management flow. Start and stop engine operations working correctly."
 
   - task: "Fuel Price Management"
     implemented: true
@@ -188,6 +203,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "Dashboard stats calculation working correctly for owners and users. Notifications system working - created on contract events and retrieved properly."
+        - working: true
+          agent: "testing"
+          comment: "Notification system fully tested: Get notifications for owner and farmer, mark notification as read. All 3 notification tests passed."
 
   - task: "API Security & Authorization"
     implemented: true
@@ -200,6 +218,45 @@ backend:
         - working: true
           agent: "testing"
           comment: "JWT token authentication working correctly. Role-based access control implemented properly. Owner-only endpoints protected. Bearer token validation working."
+        - working: true
+          agent: "testing"
+          comment: "Security tested throughout all endpoints. Admin endpoints correctly return 403 Forbidden for non-admin users. Role-based access control working properly."
+
+  - task: "Owner Profile Endpoints"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "Owner profile endpoint working correctly. Returns owner details with all machines, contract counts, and statistics."
+
+  - task: "Monthly Reports"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "Monthly summary report generation working correctly. Returns detailed machine usage, earnings, and cost breakdown."
+
+  - task: "Admin Dashboard Endpoints"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "Admin endpoints exist and correctly implement access control. All admin endpoints (overview, running-machines, recent-activity) properly return 403 Forbidden for non-admin users, confirming security is working as expected."
 
 frontend:
   - task: "Data Persistence Bug Fix"
