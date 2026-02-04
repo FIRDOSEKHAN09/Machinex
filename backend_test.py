@@ -139,7 +139,7 @@ class MachineRentalTester:
         # Test 5: Register Supervisor
         supervisor_data = {
             "name": "Amit Singh",
-            "phone_or_email": "amit.singh@gmail.com",
+            "phone_or_email": self.supervisor_email,
             "password": "SuperPass789",
             "role": "manager"
         }
@@ -153,7 +153,7 @@ class MachineRentalTester:
             
         # Test 6: Verify OTP for Supervisor
         otp_data = {
-            "phone_or_email": "amit.singh@gmail.com",
+            "phone_or_email": self.supervisor_email,
             "otp": "123456"
         }
         
