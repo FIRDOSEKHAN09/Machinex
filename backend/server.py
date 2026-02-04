@@ -101,6 +101,8 @@ class MachineUpdate(BaseModel):
 class MachineResponse(BaseModel):
     id: str
     owner_id: str
+    owner_name: Optional[str] = None  # Added for farmer view
+    owner_contact: Optional[str] = None  # Added for farmer view
     model_name: str
     machine_type: str
     engine_capacity: str
@@ -112,6 +114,7 @@ class MachineResponse(BaseModel):
     gps_latitude: Optional[float] = None
     gps_longitude: Optional[float] = None
     operational_radius_km: Optional[float] = 50
+    images: Optional[List[str]] = []  # Array of base64 images
     created_at: datetime
 
 class FuelPricesCreate(BaseModel):
