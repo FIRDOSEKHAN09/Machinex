@@ -157,6 +157,28 @@ export default function AdminDashboardScreen() {
           </TouchableOpacity>
         </View>
 
+        {/* Today's Activity */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Today's Activity</Text>
+          <View style={styles.todayGrid}>
+            <View style={styles.todayCard}>
+              <Ionicons name="log-in" size={24} color="#3b82f6" />
+              <Text style={styles.todayValue}>{todayStats.logins}</Text>
+              <Text style={styles.todayLabel}>Logins</Text>
+            </View>
+            <View style={styles.todayCard}>
+              <Ionicons name="document-text" size={24} color="#22c55e" />
+              <Text style={styles.todayValue}>{todayStats.newContracts}</Text>
+              <Text style={styles.todayLabel}>New Contracts</Text>
+            </View>
+            <View style={styles.todayCard}>
+              <Ionicons name="person-add" size={24} color="#f97316" />
+              <Text style={styles.todayValue}>{todayStats.newUsers}</Text>
+              <Text style={styles.todayLabel}>New Users</Text>
+            </View>
+          </View>
+        </View>
+
         {/* Overview Stats */}
         {overview && (
           <>
