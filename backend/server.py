@@ -398,7 +398,7 @@ async def verify_otp(data: OTPVerify):
         fuel_prices = {
             "id": str(uuid.uuid4()),
             "owner_id": user_id,
-            "petrol_price": 100.0,
+            "diesel_price": 100.0,
             "engine_oil_price": 500.0,
             "grease_oil_price": 300.0,
             "hydraulic_oil_price": 400.0,
@@ -888,7 +888,7 @@ async def get_fuel_prices(current_user: dict = Depends(get_current_user)):
         return FuelPricesResponse(
             id="default",
             owner_id=owner_id or "system",
-            petrol_price=100.0,
+            diesel_price=100.0,
             engine_oil_price=500.0,
             grease_oil_price=300.0,
             hydraulic_oil_price=400.0,
@@ -906,7 +906,7 @@ async def update_fuel_prices(prices: FuelPricesCreate, current_user: dict = Depe
     
     price_data = {
         "owner_id": current_user["id"],
-        "petrol_price": prices.petrol_price,
+        "diesel_price": prices.diesel_price,
         "engine_oil_price": prices.engine_oil_price,
         "grease_oil_price": prices.grease_oil_price,
         "hydraulic_oil_price": prices.hydraulic_oil_price,
@@ -1306,7 +1306,7 @@ async def create_daily_log(log: DailyLogCreate, current_user: dict = Depends(get
     prices = await db.fuel_prices.find_one({"owner_id": contract["owner_id"]})
     if not prices:
         prices = {
-            "petrol_price": 100.0,
+            "diesel_price": 100.0,
             "engine_oil_price": 500.0,
             "grease_oil_price": 300.0,
             "hydraulic_oil_price": 400.0
@@ -1383,19 +1383,19 @@ async def update_daily_log(log_id: str, update: DailyLogUpdate, current_user: di
         prices = await db.fuel_prices.find_one({"owner_id": contract["owner_id"]})
         if not prices:
             prices = {
-                "petrol_price": 100.0,
+                "diesel_price": 100.0,
                 "engine_oil_price": 500.0,
                 "grease_oil_price": 300.0,
                 "hydraulic_oil_price": 400.0
             }
         
-        petrol = update_data.get("petrol_filled", log["petrol_filled"])
+        petrol = update_data.get("diesel_filled", log["diesel_filled"])
         engine_oil = update_data.get("engine_oil", log["engine_oil"])
         grease_oil = update_data.get("grease_oil", log["grease_oil"])
         hydraulic_oil = update_data.get("hydraulic_oil", log["hydraulic_oil"])
         
         expenses = (
-            petrol * prices["petrol_price"] +
+            petrol * prices["diesel_price"] +
             engine_oil * prices["engine_oil_price"] +
             grease_oil * prices["grease_oil_price"] +
             hydraulic_oil * prices["hydraulic_oil_price"]
@@ -1424,8 +1424,8 @@ async def engine_timer(data: EngineTimerUpdate, current_user: dict = Depends(get
             "start_time": None,
             "end_time": None,
             "working_hours": 0,
-            "petrol_filled": 0,
-            "petrol_used": 0,
+            "diesel_filled": 0,
+            "diesel_used": 0,
             "engine_oil": 0,
             "grease_oil": 0,
             "hydraulic_oil": 0,
@@ -1941,8 +1941,8 @@ async def admin_get_all_daily_logs(current_user: dict = Depends(get_current_user
             "start_time": log["start_time"],
             "end_time": log["end_time"],
             "working_hours": log["working_hours"],
-            "petrol_filled": log["petrol_filled"],
-            "petrol_used": log["petrol_used"],
+            "diesel_filled": log["diesel_filled"],
+            "diesel_used": log["diesel_used"],
             "engine_oil": log["engine_oil"],
             "grease_oil": log["grease_oil"],
             "hydraulic_oil": log["hydraulic_oil"],
