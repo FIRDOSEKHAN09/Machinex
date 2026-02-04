@@ -459,7 +459,6 @@ const styles = StyleSheet.create({
   earningsText: { fontSize: 16, fontWeight: 'bold', color: '#f97316', marginTop: 4 },
   workingHours: { fontSize: 12, color: '#3b82f6', marginTop: 2 },
   bottomSpacer: { height: 32 },
-});
   machineImagePlaceholder: { width: '100%', height: '100%', backgroundColor: '#0f172a', alignItems: 'center', justifyContent: 'center' },
   machineInfo: { flex: 1 },
   machineNameText: { fontSize: 16, fontWeight: '600', color: '#f8fafc' },
