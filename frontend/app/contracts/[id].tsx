@@ -336,14 +336,8 @@ export default function ContractDetailScreen() {
           <View style={styles.statusInfoCard}>
             <Ionicons name="information-circle" size={24} color="#3b82f6" />
             <View style={styles.statusInfoText}>
-              <Text style={styles.statusInfoTitle}>
-                {isOwner ? 'Monitoring Mode' : 'View Only Mode'}
-              </Text>
-              <Text style={styles.statusInfoSubtitle}>
-                {isOwner 
-                  ? 'Supervisor manages engine controls'
-                  : 'Contact supervisor for daily operations'}
-              </Text>
+              <Text style={styles.statusInfoTitle}>Monitoring Mode</Text>
+              <Text style={styles.statusInfoSubtitle}>Supervisor/Farmer manages engine controls</Text>
             </View>
           </View>
         )}
