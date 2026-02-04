@@ -299,7 +299,7 @@ class MachineRentalTester:
         contract_data = {
             "machine_id": self.machines["jcb"]["id"],
             "renter_name": "Suresh Patel",
-            "renter_contact": "suresh.patel@gmail.com",
+            "renter_contact": self.farmer_email,
             "total_days": 7,
             "advance_amount": 5000.0,
             "total_amount": 25000.0,
