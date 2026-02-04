@@ -96,6 +96,7 @@ class MachineUpdate(BaseModel):
     hourly_rate: Optional[float] = None
     description: Optional[str] = None
     status: Optional[str] = None
+    images: Optional[List[str]] = None
 
 class MachineResponse(BaseModel):
     id: str
