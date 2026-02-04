@@ -474,6 +474,28 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     paddingHorizontal: 20,
   },
+  todayGrid: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  todayCard: {
+    flex: 1,
+    backgroundColor: '#1e293b',
+    borderRadius: 16,
+    padding: 16,
+    alignItems: 'center',
+    gap: 8,
+  },
+  todayValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#f8fafc',
+  },
+  todayLabel: {
+    fontSize: 11,
+    color: '#94a3b8',
+    textAlign: 'center',
+  },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
