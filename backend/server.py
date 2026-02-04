@@ -86,6 +86,7 @@ class MachineCreate(BaseModel):
     gps_latitude: Optional[float] = None
     gps_longitude: Optional[float] = None
     operational_radius_km: float = 50  # Default 50km radius
+    images: Optional[List[str]] = []  # Array of base64 encoded images
 
 class MachineUpdate(BaseModel):
     model_name: Optional[str] = None
