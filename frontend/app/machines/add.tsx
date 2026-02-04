@@ -64,6 +64,7 @@ export default function AddMachineScreen() {
         gps_latitude: gpsLatitude ? parseFloat(gpsLatitude) : null,
         gps_longitude: gpsLongitude ? parseFloat(gpsLongitude) : null,
         operational_radius_km: operationalRadius ? parseFloat(operationalRadius) : 50,
+        images: images, // Include images array
       });
       
       Alert.alert('Success', 'Machine added successfully', [
