@@ -10,19 +10,30 @@ export default function HomeScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const [contracts, setContracts] = useState<any[]>([]);
+  const [machines, setMachines] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const fetchData = async () => {
     try {
-      const [contractsRes, notifRes] = await Promise.all([
-        contractAPI.getAll(),
-        notificationAPI.getAll(),
-      ]);
-      
-      setContracts(contractsRes.data || []);
-      setUnreadCount(notifRes.data?.filter((n: any) => !n.read).length || 0);
+      if (user?.role === 'user') {
+        // Farmer: Fetch available machines
+        const [machinesRes, notifRes] = await Promise.all([
+          machineAPI.browseAll(),
+          notificationAPI.getAll(),
+        ]);
+        setMachines(machinesRes.data || []);
+        setUnreadCount(notifRes.data?.filter((n: any) => !n.read).length || 0);
+      } else {
+        // Owner/Manager: Fetch contracts
+        const [contractsRes, notifRes] = await Promise.all([
+          contractAPI.getAll(),
+          notificationAPI.getAll(),
+        ]);
+        setContracts(contractsRes.data || []);
+        setUnreadCount(notifRes.data?.filter((n: any) => !n.read).length || 0);
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
