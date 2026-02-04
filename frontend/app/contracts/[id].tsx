@@ -297,8 +297,8 @@ export default function ContractDetailScreen() {
           </View>
         )}
 
-        {/* Engine Control - Only for Supervisor/Manager on active contracts */}
-        {contract.status === 'active' && isSupervisor && (
+        {/* Engine Control - For Supervisor AND Farmer on active contracts */}
+        {contract.status === 'active' && (isSupervisor || isFarmer) && (
           <TouchableOpacity
             style={[
               styles.engineButton,
