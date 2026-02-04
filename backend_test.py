@@ -45,16 +45,19 @@ class MachineRentalTester:
             
         try:
             if method == "GET":
-                response = self.session.get(url, headers=headers, params=params)
+                response = self.session.get(url, headers=headers, params=params, timeout=30)
             elif method == "POST":
-                response = self.session.post(url, headers=headers, json=data)
+                response = self.session.post(url, headers=headers, json=data, timeout=30)
             elif method == "PUT":
-                response = self.session.put(url, headers=headers, json=data)
+                response = self.session.put(url, headers=headers, json=data, timeout=30)
             elif method == "DELETE":
-                response = self.session.delete(url, headers=headers)
+                response = self.session.delete(url, headers=headers, timeout=30)
             else:
                 raise ValueError(f"Unsupported method: {method}")
                 
+            print(f"DEBUG: {method} {url} -> {response.status_code}")
+            if response.status_code >= 400:
+                print(f"DEBUG: Error response: {response.text}")
             return response
         except Exception as e:
             print(f"Request failed: {e}")
