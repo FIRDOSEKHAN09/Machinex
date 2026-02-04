@@ -171,7 +171,8 @@ class MachineRentalTester:
             
         # Test 8: Forgot Password
         forgot_data = {
-            "phone_or_email": "rajesh.kumar@gmail.com"
+            "phone_or_email": "rajesh.kumar@gmail.com",
+            "password": "dummy"  # Required by UserLogin model but not used
         }
         
         response = self.make_request("POST", "/auth/forgot-password", forgot_data)
