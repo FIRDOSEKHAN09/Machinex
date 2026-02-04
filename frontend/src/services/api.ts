@@ -27,9 +27,15 @@ export const machineAPI = {
   create: (data: any) => api.post('/machines', data),
   getAll: () => api.get('/machines'),
   getAllPublic: () => api.get('/machines/all'),
+  browseAll: () => api.get('/machines/browse/all'),  // New: Get all with owner details
   getOne: (id: string) => api.get(`/machines/${id}`),
   update: (id: string, data: any) => api.put(`/machines/${id}`, data),
   delete: (id: string) => api.delete(`/machines/${id}`),
+};
+
+// Owner API
+export const ownerAPI = {
+  getProfile: (ownerId: string) => api.get(`/owners/${ownerId}/profile`),
 };
 
 // Contract API
