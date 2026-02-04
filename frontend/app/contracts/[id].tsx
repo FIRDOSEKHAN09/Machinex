@@ -331,8 +331,8 @@ export default function ContractDetailScreen() {
           </TouchableOpacity>
         )}
 
-        {/* Status Info for Owner/Farmer - No Controls */}
-        {contract.status === 'active' && !isSupervisor && (
+        {/* Status Info for Owner Only - No Controls */}
+        {contract.status === 'active' && isOwner && (
           <View style={styles.statusInfoCard}>
             <Ionicons name="information-circle" size={24} color="#3b82f6" />
             <View style={styles.statusInfoText}>
