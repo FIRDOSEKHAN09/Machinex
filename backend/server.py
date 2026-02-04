@@ -817,6 +817,57 @@ async def discover_machines(
     return nearby_machines
 
 
+# Get owner profile with all their machines
+@api_router.get("/owners/{owner_id}/profile")
+async def get_owner_profile(owner_id: str, current_user: dict = Depends(get_current_user)):
+    """Get owner's profile including all their machines"""
+    owner = await db.users.find_one({"id": owner_id})
+    if not owner:
+        raise HTTPException(status_code=404, detail="Owner not found")
+    
+    # Get all machines owned by this owner
+    machines = await db.machines.find({"owner_id": owner_id}).to_list(1000)
+    
+    # Get total contracts for this owner
+    total_contracts = await db.contracts.count_documents({"owner_id": owner_id})
+    active_contracts = await db.contracts.count_documents({"owner_id": owner_id, "status": "active"})
+    
+    return {
+        "id": owner["id"],
+        "name": owner["name"],
+        "contact": owner["phone_or_email"],
+        "upi_id": owner.get("upi_id"),
+        "qr_code_image": owner.get("qr_code_image"),
+        "total_machines": len(machines),
+        "total_contracts": total_contracts,
+        "active_contracts": active_contracts,
+        "machines": [MachineResponse(**m) for m in machines]
+    }
+
+# Get machines with owner details for discovery
+@api_router.get("/machines/browse/all")
+async def browse_all_machines(current_user: dict = Depends(get_current_user)):
+    """Get all available machines with owner details for farmers to browse"""
+    machines = await db.machines.find({"status": "available"}).to_list(1000)
+    
+    result = []
+    for machine in machines:
+        # Get owner details
+        owner = await db.users.find_one({"id": machine["owner_id"]})
+        if owner:
+            machine["owner_name"] = owner["name"]
+            machine["owner_contact"] = owner["phone_or_email"]
+            
+            # Count total machines owned
+            total_machines = await db.machines.count_documents({"owner_id": machine["owner_id"]})
+            machine["owner_total_machines"] = total_machines
+        
+        result.append(MachineResponse(**machine))
+    
+    return result
+
+
+
 
 # ==================== FUEL PRICES ENDPOINTS ====================
 
