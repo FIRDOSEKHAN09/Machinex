@@ -14,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { machineAPI } from '@/src/services/api';
+import ImagePickerComponent from '@/src/components/ImagePickerComponent';
 
 const MACHINE_TYPES = [
   'Excavator',
