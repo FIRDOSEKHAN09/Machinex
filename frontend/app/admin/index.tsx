@@ -20,6 +20,7 @@ export default function AdminDashboardScreen() {
   const [overview, setOverview] = useState<any>(null);
   const [runningMachines, setRunningMachines] = useState<any[]>([]);
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [todayStats, setTodayStats] = useState<any>({ logins: 0, newContracts: 0, newUsers: 0 });
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -34,6 +35,17 @@ export default function AdminDashboardScreen() {
       setOverview(overviewRes.data);
       setRunningMachines(runningRes.data || []);
       setRecentActivity(activityRes.data || []);
+      
+      // Calculate today's stats
+      const today = new Date().toDateString();
+      const todayActivity = (activityRes.data || []).filter((a: any) => 
+        new Date(a.timestamp).toDateString() === today
+      );
+      setTodayStats({
+        logins: todayActivity.filter((a: any) => a.type === 'login').length,
+        newContracts: todayActivity.filter((a: any) => a.type === 'contract_created').length,
+        newUsers: todayActivity.filter((a: any) => a.type === 'user_registered').length,
+      });
     } catch (error: any) {
       console.error('Error fetching admin data:', error);
       if (error.response?.status === 403) {
