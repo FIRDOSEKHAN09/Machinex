@@ -1314,7 +1314,7 @@ async def create_daily_log(log: DailyLogCreate, current_user: dict = Depends(get
     
     # Calculate expenses
     expenses = (
-        log.petrol_filled * prices["petrol_price"] +
+        log.diesel_filled * prices.get("diesel_price", log.diesel_price_snapshot) +
         log.engine_oil * prices["engine_oil_price"] +
         log.grease_oil * prices["grease_oil_price"] +
         log.hydraulic_oil * prices["hydraulic_oil_price"]
@@ -1328,8 +1328,9 @@ async def create_daily_log(log: DailyLogCreate, current_user: dict = Depends(get
         "start_time": None,
         "end_time": None,
         "working_hours": 0,
-        "petrol_filled": log.petrol_filled,
-        "petrol_used": log.petrol_used,
+        "diesel_filled": log.diesel_filled,
+        "diesel_used": log.diesel_used,
+        "diesel_price_snapshot": log.diesel_price_snapshot,
         "engine_oil": log.engine_oil,
         "grease_oil": log.grease_oil,
         "hydraulic_oil": log.hydraulic_oil,
