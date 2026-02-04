@@ -77,7 +77,7 @@ class MachineRentalTester:
         # Test 1: Register Owner
         owner_data = {
             "name": "Rajesh Kumar",
-            "phone_or_email": "rajesh.kumar@gmail.com",
+            "phone_or_email": self.owner_email,
             "password": "SecurePass123",
             "role": "owner"
         }
@@ -91,7 +91,7 @@ class MachineRentalTester:
             
         # Test 2: Verify OTP for Owner
         otp_data = {
-            "phone_or_email": "rajesh.kumar@gmail.com",
+            "phone_or_email": self.owner_email,
             "otp": "123456"
         }
         
