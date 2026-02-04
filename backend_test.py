@@ -169,7 +169,7 @@ class MachineRentalTester:
             
         # Test 7: Login Test
         login_data = {
-            "phone_or_email": "rajesh.kumar@gmail.com",
+            "phone_or_email": self.owner_email,
             "password": "SecurePass123"
         }
         
@@ -181,7 +181,7 @@ class MachineRentalTester:
             
         # Test 8: Forgot Password
         forgot_data = {
-            "phone_or_email": "rajesh.kumar@gmail.com",
+            "phone_or_email": self.owner_email,
             "password": "dummy"  # Required by UserLogin model but not used
         }
         
