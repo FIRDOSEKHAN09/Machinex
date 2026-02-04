@@ -257,33 +257,6 @@ export default function HomeScreen() {
         </ScrollView>
       </SafeAreaView>
     );
-
-          <Text style={styles.sectionTitle}>My Contracts</Text>
-          {contracts.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Ionicons name="document-text-outline" size={64} color="#64748b" />
-              <Text style={styles.emptyText}>No active contracts</Text>
-            </View>
-          ) : (
-            contracts.map((contract) => (
-              <TouchableOpacity key={contract.id} style={styles.contractCard} onPress={() => router.push(`/contracts/${contract.id}`)}>
-                <View style={styles.contractHeader}>
-                  <View>
-                    <Text style={styles.machineName}>{contract.machine_name || 'Machine'}</Text>
-                    <Text style={styles.renterName}>Type: {contract.machine_type}</Text>
-                  </View>
-                  <View style={[styles.statusBadge, { backgroundColor: `${getStatusColor(contract.status)}20` }]}>
-                    <Text style={[styles.statusText, { color: getStatusColor(contract.status) }]}>
-                      {contract.status.toUpperCase()}
-                    </Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            ))
-          )}
-        </ScrollView>
-      </SafeAreaView>
-    );
   } else if (user?.role === 'manager') {
     // SUPERVISOR VIEW - Show Assigned Contracts
     const assignedContracts = contracts.filter((c) => c.supervisor_id === user.id);
