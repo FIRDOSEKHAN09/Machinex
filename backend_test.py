@@ -108,7 +108,7 @@ class MachineRentalTester:
         # Test 3: Register Farmer
         farmer_data = {
             "name": "Suresh Patel",
-            "phone_or_email": "suresh.patel@gmail.com", 
+            "phone_or_email": self.farmer_email, 
             "password": "FarmPass456",
             "role": "user"
         }
@@ -122,7 +122,7 @@ class MachineRentalTester:
             
         # Test 4: Verify OTP for Farmer
         otp_data = {
-            "phone_or_email": "suresh.patel@gmail.com",
+            "phone_or_email": self.farmer_email,
             "otp": "123456"
         }
         
