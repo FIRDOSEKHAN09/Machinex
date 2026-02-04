@@ -40,6 +40,7 @@ export default function AddMachineScreen() {
   const [gpsLatitude, setGpsLatitude] = useState('');
   const [gpsLongitude, setGpsLongitude] = useState('');
   const [operationalRadius, setOperationalRadius] = useState('50'); // Default 50km
+  const [images, setImages] = useState<string[]>([]); // NEW: Images state
   const [isLoading, setIsLoading] = useState(false);
   const [showTypeDropdown, setShowTypeDropdown] = useState(false);
   const [showFuelDropdown, setShowFuelDropdown] = useState(false);
