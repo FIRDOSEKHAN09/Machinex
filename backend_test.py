@@ -9,6 +9,7 @@ import json
 import time
 from datetime import datetime
 import os
+import uuid
 
 # Get backend URL from environment
 BACKEND_URL = "https://machinehub-5.preview.emergentagent.com/api"
@@ -23,6 +24,12 @@ class MachineRentalTester:
         self.contracts = {}
         self.notifications = {}
         self.test_results = []
+        
+        # Generate unique identifiers for this test run
+        self.test_id = uuid.uuid4().hex[:8]
+        self.owner_email = f"owner_{self.test_id}@example.com"
+        self.farmer_email = f"farmer_{self.test_id}@example.com"
+        self.supervisor_email = f"supervisor_{self.test_id}@example.com"
         
     def log_test(self, test_name, success, message="", data=None):
         """Log test results"""
