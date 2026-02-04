@@ -182,8 +182,9 @@ class DailyLogCreate(BaseModel):
     notes: Optional[str] = ""
 
 class DailyLogUpdate(BaseModel):
-    petrol_filled: Optional[float] = None
-    petrol_used: Optional[float] = None
+    diesel_filled: Optional[float] = None
+    diesel_used: Optional[float] = None
+    diesel_price_snapshot: Optional[float] = None
     engine_oil: Optional[float] = None
     grease_oil: Optional[float] = None
     hydraulic_oil: Optional[float] = None
@@ -200,8 +201,9 @@ class DailyLogResponse(BaseModel):
     start_time: Optional[str]
     end_time: Optional[str]
     working_hours: float
-    petrol_filled: float
-    petrol_used: float
+    diesel_filled: float
+    diesel_used: float
+    diesel_price_snapshot: float
     engine_oil: float
     grease_oil: float
     hydraulic_oil: float
