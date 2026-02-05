@@ -501,4 +501,8 @@ const styles = StyleSheet.create({
   detailRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   detailText: { fontSize: 11, color: '#94a3b8' },
   machineRateText: { fontSize: 14, fontWeight: '600', color: '#22c55e', marginTop: 6 },
+  contractCard: { backgroundColor: '#1e293b', borderRadius: 16, padding: 16, marginBottom: 12 },
+  contractHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  contractInfo: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12 },
+  machineName: { fontSize: 16, fontWeight: '600', color: '#f8fafc', flex: 1 },
 });
