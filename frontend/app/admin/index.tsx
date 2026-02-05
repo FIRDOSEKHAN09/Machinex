@@ -26,12 +26,14 @@ export default function AdminDashboardScreen() {
 
   const fetchData = async () => {
     try {
+      console.log('Admin: Fetching data, user:', user);
       const [overviewRes, runningRes, activityRes] = await Promise.all([
         adminAPI.getOverview(),
         adminAPI.getRunningMachines(),
         adminAPI.getRecentActivity(),
       ]);
       
+      console.log('Admin: Data fetched successfully');
       setOverview(overviewRes.data);
       setRunningMachines(runningRes.data || []);
       setRecentActivity(activityRes.data || []);
@@ -47,8 +49,10 @@ export default function AdminDashboardScreen() {
         newUsers: todayActivity.filter((a: any) => a.type === 'user_registered').length,
       });
     } catch (error: any) {
-      console.error('Error fetching admin data:', error);
+      console.error('Admin: Error fetching data:', error);
+      console.error('Admin: Error response:', error.response?.data);
       if (error.response?.status === 403) {
+        alert('Admin access denied. Please ensure you have admin privileges.');
         router.replace('/home');
       }
     } finally {
