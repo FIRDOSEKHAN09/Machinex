@@ -63,15 +63,20 @@ export default function AdminDashboardScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      fetchData();
+      console.log('Admin page mounted, user:', user);
+      if (user) {
+        fetchData();
+      }
       
       // Auto-refresh every 30 seconds for live data
       const interval = setInterval(() => {
-        fetchData();
+        if (user) {
+          fetchData();
+        }
       }, 30000);
       
       return () => clearInterval(interval);
-    }, [])
+    }, [user?.id])
   );
 
   const onRefresh = () => {
