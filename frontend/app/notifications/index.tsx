@@ -44,7 +44,7 @@ export default function NotificationsScreen() {
 
   const markAsRead = async (id: string) => {
     try {
-      await notificationAPI.markAsRead(id);
+      await notificationAPI.markRead(id);
       setNotifications(prev =>
         prev.map(n => (n.id === id ? { ...n, read: true } : n))
       );
