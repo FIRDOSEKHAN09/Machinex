@@ -337,6 +337,38 @@ export default function HomeScreen() {
               </TouchableOpacity>
             ))
           )}
+
+          {/* Active Contracts Section for Farmers */}
+          {contracts.length > 0 && (
+            <>
+              <Text style={styles.sectionTitle}>My Contracts</Text>
+              {contracts.filter(c => c.status === 'active' || c.status === 'pending').map((contract) => (
+                <TouchableOpacity
+                  key={contract.id}
+                  style={styles.contractCard}
+                  onPress={() => router.push(`/contracts/${contract.id}`)}
+                >
+                  <View style={styles.contractHeader}>
+                    <View style={styles.contractInfo}>
+                      <Text style={styles.machineName}>{contract.machine_name || 'Machine'}</Text>
+                      <View style={[
+                        styles.statusBadge,
+                        contract.status === 'active' ? { backgroundColor: 'rgba(34, 197, 94, 0.2)' } : { backgroundColor: 'rgba(249, 115, 22, 0.2)' }
+                      ]}>
+                        <Text style={[
+                          styles.statusText,
+                          contract.status === 'active' ? { color: '#22c55e' } : { color: '#f97316' }
+                        ]}>
+                          {contract.status.toUpperCase()}
+                        </Text>
+                      </View>
+                    </View>
+                    <Ionicons name="chevron-forward" size={20} color="#64748b" />
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </>
+          )}
         </ScrollView>
       </SafeAreaView>
     );
