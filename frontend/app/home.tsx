@@ -18,12 +18,14 @@ export default function HomeScreen() {
   const fetchData = async () => {
     try {
       if (user?.role === 'user') {
-        // Farmer: Fetch available machines
-        const [machinesRes, notifRes] = await Promise.all([
+        // Farmer: Fetch available machines AND contracts
+        const [machinesRes, contractsRes, notifRes] = await Promise.all([
           machineAPI.browseAll(),
+          contractAPI.getAll(),
           notificationAPI.getAll(),
         ]);
         setMachines(machinesRes.data || []);
+        setContracts(contractsRes.data || []);
         setUnreadCount(notifRes.data?.filter((n: any) => !n.read).length || 0);
       } else {
         // Owner/Manager: Fetch contracts
