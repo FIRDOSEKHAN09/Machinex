@@ -114,8 +114,18 @@ export default function MachinesScreen() {
                 style={styles.machineCard}
                 onPress={() => router.push(`/machines/${machine.id}`)}
               >
-                <View style={styles.machineIconContainer}>
-                  <Ionicons name="construct" size={32} color="#f97316" />
+                <View style={styles.machineImageContainer}>
+                  {machine.images && machine.images.length > 0 && machine.images[0] ? (
+                    <Image
+                      source={{ uri: machine.images[0] }}
+                      style={styles.machineImage}
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <View style={styles.machineIconPlaceholder}>
+                      <Ionicons name="construct" size={32} color="#64748b" />
+                    </View>
+                  )}
                 </View>
                 <View style={styles.machineInfo}>
                   <Text style={styles.machineName}>{machine.model_name}</Text>
