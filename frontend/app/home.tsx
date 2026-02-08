@@ -93,7 +93,25 @@ export default function HomeScreen() {
   if (isLoading) {
     return (
       <SafeAreaView style={styles.container}>
-        <ActivityIndicator size="large" color="#f97316" />
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color="#f97316" />
+          <Text style={{ color: '#94a3b8', marginTop: 12 }}>Loading...</Text>
+
+          <TouchableOpacity
+            style={{
+              marginTop: 24,
+              paddingHorizontal: 24,
+              paddingVertical: 12,
+              borderRadius: 10,
+              backgroundColor: '#1e293b',
+            }}
+            onPress={() => router.replace('/auth/login')}
+          >
+            <Text style={{ color: '#f97316', fontWeight: '600' }}>
+              Back to Login
+            </Text>
+          </TouchableOpacity>
+        </View>
       </SafeAreaView>
     );
   }
