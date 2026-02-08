@@ -128,21 +128,7 @@ export default function AdminDashboardScreen() {
     );
   }
 
-  if (user?.role !== 'admin') {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.errorContainer}>
-          <Ionicons name="lock-closed" size={64} color="#ef4444" />
-          <Text style={styles.errorTitle}>Access Denied</Text>
-          <Text style={styles.errorText}>Admin access required</Text>
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-            <Text style={styles.backButtonText}>Go Back</Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
+  // Don't block on role check - let users see the page and handle auth via API
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
