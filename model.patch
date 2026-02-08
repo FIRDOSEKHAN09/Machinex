@@ -1,622 +1,655 @@
-diff --git a/frontend/app/admin/index.tsx b/frontend/app/admin/index.tsx
-index 53b71cb..d39ec06 100644
---- a/frontend/app/admin/index.tsx
-+++ b/frontend/app/admin/index.tsx
-@@ -183,22 +183,22 @@ export default function AdminDashboardScreen() {
-               <View style={styles.statsGrid}>
-                 <View style={[styles.statCard, styles.statCardPrimary]}>
-                   <Ionicons name="people" size={28} color="#f97316" />
--                  <Text style={styles.statValue}>{overview.users.total}</Text>
-+                  <Text style={styles.statValue}>{overview.users?.total || 0}</Text>
-                   <Text style={styles.statLabel}>Total Users</Text>
-                 </View>
-                 <View style={styles.statCard}>
-                   <Ionicons name="business" size={24} color="#3b82f6" />
--                  <Text style={styles.statValue}>{overview.users.owners}</Text>
-+                  <Text style={styles.statValue}>{overview.users?.owners || 0}</Text>
-                   <Text style={styles.statLabel}>Owners</Text>
-                 </View>
-                 <View style={styles.statCard}>
-                   <Ionicons name="person" size={24} color="#22c55e" />
--                  <Text style={styles.statValue}>{overview.users.renters}</Text>
-+                  <Text style={styles.statValue}>{overview.users?.renters || 0}</Text>
-                   <Text style={styles.statLabel}>Renters</Text>
-                 </View>
-                 <View style={styles.statCard}>
-                   <Ionicons name="settings" size={24} color="#a855f7" />
--                  <Text style={styles.statValue}>{overview.users.managers}</Text>
-+                  <Text style={styles.statValue}>{overview.users?.managers || 0}</Text>
-                   <Text style={styles.statLabel}>Managers</Text>
-                 </View>
-               </View>
-@@ -210,22 +210,22 @@ export default function AdminDashboardScreen() {
-               <View style={styles.statsGrid}>
-                 <View style={styles.statCard}>
-                   <Ionicons name="construct" size={24} color="#f97316" />
--                  <Text style={styles.statValue}>{overview.machines.total}</Text>
-+                  <Text style={styles.statValue}>{overview.machines?.total || 0}</Text>
-                   <Text style={styles.statLabel}>Total</Text>
-                 </View>
-                 <View style={styles.statCard}>
-                   <Ionicons name="checkmark-circle" size={24} color="#22c55e" />
--                  <Text style={styles.statValue}>{overview.machines.available}</Text>
-+                  <Text style={styles.statValue}>{overview.machines?.available || 0}</Text>
-                   <Text style={styles.statLabel}>Available</Text>
-                 </View>
-                 <View style={styles.statCard}>
-                   <Ionicons name="swap-horizontal" size={24} color="#3b82f6" />
--                  <Text style={styles.statValue}>{overview.machines.rented}</Text>
-+                  <Text style={styles.statValue}>{overview.machines?.rented || 0}</Text>
-                   <Text style={styles.statLabel}>Rented</Text>
-                 </View>
-                 <View style={[styles.statCard, styles.statCardRunning]}>
-                   <Ionicons name="pulse" size={24} color="#ef4444" />
--                  <Text style={[styles.statValue, styles.runningValue]}>{overview.machines.running}</Text>
-+                  <Text style={[styles.statValue, styles.runningValue]}>{overview.machines?.running || 0}</Text>
-                   <Text style={styles.statLabel}>Running NOW</Text>
-                 </View>
-               </View>
-@@ -239,24 +239,24 @@ export default function AdminDashboardScreen() {
-                   <Ionicons name="cash" size={32} color="#22c55e" />
-                   <View>
-                     <Text style={styles.revenueLabel}>Total Revenue</Text>
--                    <Text style={styles.revenueValue}>₹{overview.revenue.total.toLocaleString()}</Text>
-+                    <Text style={styles.revenueValue}>₹{(overview.revenue?.total || 0).toLocaleString()}</Text>
-                   </View>
-                 </View>
-               </View>
-               <View style={styles.statsGrid}>
-                 <View style={styles.statCard}>
-                   <Ionicons name="document-text" size={24} color="#3b82f6" />
--                  <Text style={styles.statValue}>{overview.contracts.total}</Text>
-+                  <Text style={styles.statValue}>{overview.contracts?.total || 0}</Text>
-                   <Text style={styles.statLabel}>Total</Text>
-                 </View>
-                 <View style={styles.statCard}>
-                   <Ionicons name="time" size={24} color="#f97316" />
--                  <Text style={styles.statValue}>{overview.contracts.active}</Text>
-+                  <Text style={styles.statValue}>{overview.contracts?.active || 0}</Text>
-                   <Text style={styles.statLabel}>Active</Text>
-                 </View>
-                 <View style={styles.statCard}>
-                   <Ionicons name="checkmark-done" size={24} color="#22c55e" />
--                  <Text style={styles.statValue}>{overview.contracts.completed}</Text>
-+                  <Text style={styles.statValue}>{overview.contracts?.completed || 0}</Text>
-                   <Text style={styles.statLabel}>Completed</Text>
-                 </View>
-               </View>
+diff --git a/frontend/app/machines/index.tsx b/frontend/app/machines/index.tsx
+index 291d2e2..e32f417 100644
+--- a/frontend/app/machines/index.tsx
++++ b/frontend/app/machines/index.tsx
+@@ -264,6 +264,23 @@ const styles = StyleSheet.create({
+     alignItems: 'center',
+     justifyContent: 'center',
+   },
++  machineImageContainer: {
++    width: 80,
++    height: 80,
++    borderRadius: 12,
++    overflow: 'hidden',
++  },
++  machineImage: {
++    width: '100%',
++    height: '100%',
++  },
++  machineIconPlaceholder: {
++    width: '100%',
++    height: '100%',
++    backgroundColor: '#1e293b',
++    alignItems: 'center',
++    justifyContent: 'center',
++  },
+   machineInfo: {
+     flex: 1,
+     marginLeft: 16,
 diff --git a/model.patch b/model.patch
-index 40db13a..313f94e 100644
+index be2de5f..e69de29 100644
 --- a/model.patch
 +++ b/model.patch
-@@ -1,530 +0,0 @@
+@@ -1,622 +0,0 @@
 -diff --git a/frontend/app/admin/index.tsx b/frontend/app/admin/index.tsx
--index 240cef6..53b71cb 100644
+-index 53b71cb..d39ec06 100644
 ---- a/frontend/app/admin/index.tsx
 -+++ b/frontend/app/admin/index.tsx
--@@ -128,21 +128,7 @@ export default function AdminDashboardScreen() {
--     );
--   }
-- 
---  if (user?.role !== 'admin') {
---    return (
---      <SafeAreaView style={styles.container}>
---        <View style={styles.errorContainer}>
---          <Ionicons name="lock-closed" size={64} color="#ef4444" />
---          <Text style={styles.errorTitle}>Access Denied</Text>
---          <Text style={styles.errorText}>Admin access required</Text>
---          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
---            <Text style={styles.backButtonText}>Go Back</Text>
---          </TouchableOpacity>
---        </View>
---      </SafeAreaView>
---    );
---  }
---
--+  // Don't block on role check - let users see the page and handle auth via API
--   return (
--     <SafeAreaView style={styles.container}>
--       <ScrollView
+-@@ -183,22 +183,22 @@ export default function AdminDashboardScreen() {
+-               <View style={styles.statsGrid}>
+-                 <View style={[styles.statCard, styles.statCardPrimary]}>
+-                   <Ionicons name="people" size={28} color="#f97316" />
+--                  <Text style={styles.statValue}>{overview.users.total}</Text>
+-+                  <Text style={styles.statValue}>{overview.users?.total || 0}</Text>
+-                   <Text style={styles.statLabel}>Total Users</Text>
+-                 </View>
+-                 <View style={styles.statCard}>
+-                   <Ionicons name="business" size={24} color="#3b82f6" />
+--                  <Text style={styles.statValue}>{overview.users.owners}</Text>
+-+                  <Text style={styles.statValue}>{overview.users?.owners || 0}</Text>
+-                   <Text style={styles.statLabel}>Owners</Text>
+-                 </View>
+-                 <View style={styles.statCard}>
+-                   <Ionicons name="person" size={24} color="#22c55e" />
+--                  <Text style={styles.statValue}>{overview.users.renters}</Text>
+-+                  <Text style={styles.statValue}>{overview.users?.renters || 0}</Text>
+-                   <Text style={styles.statLabel}>Renters</Text>
+-                 </View>
+-                 <View style={styles.statCard}>
+-                   <Ionicons name="settings" size={24} color="#a855f7" />
+--                  <Text style={styles.statValue}>{overview.users.managers}</Text>
+-+                  <Text style={styles.statValue}>{overview.users?.managers || 0}</Text>
+-                   <Text style={styles.statLabel}>Managers</Text>
+-                 </View>
+-               </View>
+-@@ -210,22 +210,22 @@ export default function AdminDashboardScreen() {
+-               <View style={styles.statsGrid}>
+-                 <View style={styles.statCard}>
+-                   <Ionicons name="construct" size={24} color="#f97316" />
+--                  <Text style={styles.statValue}>{overview.machines.total}</Text>
+-+                  <Text style={styles.statValue}>{overview.machines?.total || 0}</Text>
+-                   <Text style={styles.statLabel}>Total</Text>
+-                 </View>
+-                 <View style={styles.statCard}>
+-                   <Ionicons name="checkmark-circle" size={24} color="#22c55e" />
+--                  <Text style={styles.statValue}>{overview.machines.available}</Text>
+-+                  <Text style={styles.statValue}>{overview.machines?.available || 0}</Text>
+-                   <Text style={styles.statLabel}>Available</Text>
+-                 </View>
+-                 <View style={styles.statCard}>
+-                   <Ionicons name="swap-horizontal" size={24} color="#3b82f6" />
+--                  <Text style={styles.statValue}>{overview.machines.rented}</Text>
+-+                  <Text style={styles.statValue}>{overview.machines?.rented || 0}</Text>
+-                   <Text style={styles.statLabel}>Rented</Text>
+-                 </View>
+-                 <View style={[styles.statCard, styles.statCardRunning]}>
+-                   <Ionicons name="pulse" size={24} color="#ef4444" />
+--                  <Text style={[styles.statValue, styles.runningValue]}>{overview.machines.running}</Text>
+-+                  <Text style={[styles.statValue, styles.runningValue]}>{overview.machines?.running || 0}</Text>
+-                   <Text style={styles.statLabel}>Running NOW</Text>
+-                 </View>
+-               </View>
+-@@ -239,24 +239,24 @@ export default function AdminDashboardScreen() {
+-                   <Ionicons name="cash" size={32} color="#22c55e" />
+-                   <View>
+-                     <Text style={styles.revenueLabel}>Total Revenue</Text>
+--                    <Text style={styles.revenueValue}>₹{overview.revenue.total.toLocaleString()}</Text>
+-+                    <Text style={styles.revenueValue}>₹{(overview.revenue?.total || 0).toLocaleString()}</Text>
+-                   </View>
+-                 </View>
+-               </View>
+-               <View style={styles.statsGrid}>
+-                 <View style={styles.statCard}>
+-                   <Ionicons name="document-text" size={24} color="#3b82f6" />
+--                  <Text style={styles.statValue}>{overview.contracts.total}</Text>
+-+                  <Text style={styles.statValue}>{overview.contracts?.total || 0}</Text>
+-                   <Text style={styles.statLabel}>Total</Text>
+-                 </View>
+-                 <View style={styles.statCard}>
+-                   <Ionicons name="time" size={24} color="#f97316" />
+--                  <Text style={styles.statValue}>{overview.contracts.active}</Text>
+-+                  <Text style={styles.statValue}>{overview.contracts?.active || 0}</Text>
+-                   <Text style={styles.statLabel}>Active</Text>
+-                 </View>
+-                 <View style={styles.statCard}>
+-                   <Ionicons name="checkmark-done" size={24} color="#22c55e" />
+--                  <Text style={styles.statValue}>{overview.contracts.completed}</Text>
+-+                  <Text style={styles.statValue}>{overview.contracts?.completed || 0}</Text>
+-                   <Text style={styles.statLabel}>Completed</Text>
+-                 </View>
+-               </View>
 -diff --git a/model.patch b/model.patch
--index 84d5846..e69de29 100644
+-index 40db13a..313f94e 100644
 ---- a/model.patch
 -+++ b/model.patch
--@@ -1,498 +0,0 @@
---diff --git a/frontend/app/home.tsx b/frontend/app/home.tsx
---index 2f5f990..287e2ba 100644
------ a/frontend/app/home.tsx
---+++ b/frontend/app/home.tsx
---@@ -501,4 +501,8 @@ const styles = StyleSheet.create({
---   detailRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
---   detailText: { fontSize: 11, color: '#94a3b8' },
---   machineRateText: { fontSize: 14, fontWeight: '600', color: '#22c55e', marginTop: 6 },
---+  contractCard: { backgroundColor: '#1e293b', borderRadius: 16, padding: 16, marginBottom: 12 },
---+  contractHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
---+  contractInfo: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12 },
---+  machineName: { fontSize: 16, fontWeight: '600', color: '#f8fafc', flex: 1 },
--- });
+-@@ -1,530 +0,0 @@
+--diff --git a/frontend/app/admin/index.tsx b/frontend/app/admin/index.tsx
+--index 240cef6..53b71cb 100644
+----- a/frontend/app/admin/index.tsx
+--+++ b/frontend/app/admin/index.tsx
+--@@ -128,21 +128,7 @@ export default function AdminDashboardScreen() {
+--     );
+--   }
+-- 
+---  if (user?.role !== 'admin') {
+---    return (
+---      <SafeAreaView style={styles.container}>
+---        <View style={styles.errorContainer}>
+---          <Ionicons name="lock-closed" size={64} color="#ef4444" />
+---          <Text style={styles.errorTitle}>Access Denied</Text>
+---          <Text style={styles.errorText}>Admin access required</Text>
+---          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+---            <Text style={styles.backButtonText}>Go Back</Text>
+---          </TouchableOpacity>
+---        </View>
+---      </SafeAreaView>
+---    );
+---  }
+---
+--+  // Don't block on role check - let users see the page and handle auth via API
+--   return (
+--     <SafeAreaView style={styles.container}>
+--       <ScrollView
 --diff --git a/model.patch b/model.patch
---index f8db7ce..e69de29 100644
+--index 84d5846..e69de29 100644
 ----- a/model.patch
 --+++ b/model.patch
---@@ -1,480 +0,0 @@
+--@@ -1,498 +0,0 @@
 ---diff --git a/frontend/app/home.tsx b/frontend/app/home.tsx
----index c65cc6e..2f5f990 100644
+---index 2f5f990..287e2ba 100644
 ------ a/frontend/app/home.tsx
 ---+++ b/frontend/app/home.tsx
----@@ -337,6 +337,38 @@ export default function HomeScreen() {
----               </TouchableOpacity>
----             ))
----           )}
----+
----+          {/* Active Contracts Section for Farmers */}
----+          {contracts.length > 0 && (
----+            <>
----+              <Text style={styles.sectionTitle}>My Contracts</Text>
----+              {contracts.filter(c => c.status === 'active' || c.status === 'pending').map((contract) => (
----+                <TouchableOpacity
----+                  key={contract.id}
----+                  style={styles.contractCard}
----+                  onPress={() => router.push(`/contracts/${contract.id}`)}
----+                >
----+                  <View style={styles.contractHeader}>
----+                    <View style={styles.contractInfo}>
----+                      <Text style={styles.machineName}>{contract.machine_name || 'Machine'}</Text>
----+                      <View style={[
----+                        styles.statusBadge,
----+                        contract.status === 'active' ? { backgroundColor: 'rgba(34, 197, 94, 0.2)' } : { backgroundColor: 'rgba(249, 115, 22, 0.2)' }
----+                      ]}>
----+                        <Text style={[
----+                          styles.statusText,
----+                          contract.status === 'active' ? { color: '#22c55e' } : { color: '#f97316' }
----+                        ]}>
----+                          {contract.status.toUpperCase()}
----+                        </Text>
----+                      </View>
----+                    </View>
----+                    <Ionicons name="chevron-forward" size={20} color="#64748b" />
----+                  </View>
----+                </TouchableOpacity>
----+              ))}
----+            </>
----+          )}
----         </ScrollView>
----       </SafeAreaView>
----     );
+---@@ -501,4 +501,8 @@ const styles = StyleSheet.create({
+---   detailRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+---   detailText: { fontSize: 11, color: '#94a3b8' },
+---   machineRateText: { fontSize: 14, fontWeight: '600', color: '#22c55e', marginTop: 6 },
+---+  contractCard: { backgroundColor: '#1e293b', borderRadius: 16, padding: 16, marginBottom: 12 },
+---+  contractHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+---+  contractInfo: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12 },
+---+  machineName: { fontSize: 16, fontWeight: '600', color: '#f8fafc', flex: 1 },
+--- });
 ---diff --git a/model.patch b/model.patch
----index ff5434b..e69de29 100644
+---index f8db7ce..e69de29 100644
 ------ a/model.patch
 ---+++ b/model.patch
----@@ -1,432 +0,0 @@
+---@@ -1,480 +0,0 @@
+----diff --git a/frontend/app/home.tsx b/frontend/app/home.tsx
+----index c65cc6e..2f5f990 100644
+------- a/frontend/app/home.tsx
+----+++ b/frontend/app/home.tsx
+----@@ -337,6 +337,38 @@ export default function HomeScreen() {
+----               </TouchableOpacity>
+----             ))
+----           )}
+----+
+----+          {/* Active Contracts Section for Farmers */}
+----+          {contracts.length > 0 && (
+----+            <>
+----+              <Text style={styles.sectionTitle}>My Contracts</Text>
+----+              {contracts.filter(c => c.status === 'active' || c.status === 'pending').map((contract) => (
+----+                <TouchableOpacity
+----+                  key={contract.id}
+----+                  style={styles.contractCard}
+----+                  onPress={() => router.push(`/contracts/${contract.id}`)}
+----+                >
+----+                  <View style={styles.contractHeader}>
+----+                    <View style={styles.contractInfo}>
+----+                      <Text style={styles.machineName}>{contract.machine_name || 'Machine'}</Text>
+----+                      <View style={[
+----+                        styles.statusBadge,
+----+                        contract.status === 'active' ? { backgroundColor: 'rgba(34, 197, 94, 0.2)' } : { backgroundColor: 'rgba(249, 115, 22, 0.2)' }
+----+                      ]}>
+----+                        <Text style={[
+----+                          styles.statusText,
+----+                          contract.status === 'active' ? { color: '#22c55e' } : { color: '#f97316' }
+----+                        ]}>
+----+                          {contract.status.toUpperCase()}
+----+                        </Text>
+----+                      </View>
+----+                    </View>
+----+                    <Ionicons name="chevron-forward" size={20} color="#64748b" />
+----+                  </View>
+----+                </TouchableOpacity>
+----+              ))}
+----+            </>
+----+          )}
+----         </ScrollView>
+----       </SafeAreaView>
+----     );
 ----diff --git a/model.patch b/model.patch
-----index c4d48df..e69de29 100644
+----index ff5434b..e69de29 100644
 ------- a/model.patch
 ----+++ b/model.patch
-----@@ -1,300 +0,0 @@
------diff --git a/frontend/app/contracts/[id].tsx b/frontend/app/contracts/[id].tsx
------index 837e6d3..00207b8 100644
--------- a/frontend/app/contracts/[id].tsx
------+++ b/frontend/app/contracts/[id].tsx
------@@ -263,6 +263,40 @@ export default function ContractDetailScreen() {
------           </View>
------         </View>
------ 
------+        {/* Time Tracking Summary - For Machine Owner */}
------+        {isOwner && (
------+          <View style={styles.timeTrackingCard}>
------+            <View style={styles.timeTrackingHeader}>
------+              <Ionicons name="time-outline" size={24} color="#3b82f6" />
------+              <Text style={styles.timeTrackingTitle}>Engine Working Hours</Text>
------+            </View>
------+            <View style={styles.timeTrackingContent}>
------+              <View style={styles.timeTrackingStat}>
------+                <Text style={styles.timeTrackingValue}>
------+                  {contract.total_working_hours?.toFixed(1) || '0.0'}
------+                </Text>
------+                <Text style={styles.timeTrackingLabel}>Total Hours</Text>
------+              </View>
------+              <View style={styles.timeTrackingDivider} />
------+              <View style={styles.timeTrackingStat}>
------+                <Text style={styles.timeTrackingValue}>
------+                  {contract.total_days > 0 
------+                    ? (contract.total_working_hours / contract.total_days).toFixed(1)
------+                    : '0.0'}
------+                </Text>
------+                <Text style={styles.timeTrackingLabel}>Avg Hours/Day</Text>
------+              </View>
------+              <View style={styles.timeTrackingDivider} />
------+              <View style={styles.timeTrackingStat}>
------+                <Text style={[styles.timeTrackingValue, styles.revenueColor]}>
------+                  ₹{((contract.total_working_hours || 0) * (contract.hourly_rate || 0)).toLocaleString()}
------+                </Text>
------+                <Text style={styles.timeTrackingLabel}>Total Revenue</Text>
------+              </View>
------+            </View>
------+          </View>
------+        )}
------+
------         {/* Engine Control - Only for Supervisor/Manager on active contracts */}
------         {contract.status === 'active' && isSupervisor && (
------           <TouchableOpacity
------@@ -769,4 +803,52 @@ const styles = StyleSheet.create({
------     fontSize: 16,
------     fontWeight: '600',
------   },
------+  timeTrackingCard: {
------+    backgroundColor: '#1e293b',
------+    margin: 16,
------+    borderRadius: 16,
------+    padding: 16,
------+    borderWidth: 1,
------+    borderColor: 'rgba(59, 130, 246, 0.3)',
------+  },
------+  timeTrackingHeader: {
------+    flexDirection: 'row',
------+    alignItems: 'center',
------+    marginBottom: 16,
------+    gap: 8,
------+  },
------+  timeTrackingTitle: {
------+    fontSize: 16,
------+    fontWeight: '600',
------+    color: '#3b82f6',
------+  },
------+  timeTrackingContent: {
------+    flexDirection: 'row',
------+    alignItems: 'center',
------+    justifyContent: 'space-between',
------+  },
------+  timeTrackingStat: {
------+    flex: 1,
------+    alignItems: 'center',
------+  },
------+  timeTrackingValue: {
------+    fontSize: 18,
------+    fontWeight: 'bold',
------+    color: '#f8fafc',
------+    marginBottom: 4,
------+  },
------+  timeTrackingLabel: {
------+    fontSize: 12,
------+    color: '#94a3b8',
------+    textAlign: 'center',
------+  },
------+  timeTrackingDivider: {
------+    width: 1,
------+    height: 40,
------+    backgroundColor: '#334155',
------+    marginHorizontal: 12,
------+  },
------+  revenueColor: {
------+    color: '#22c55e',
------+  },
------ });
+----@@ -1,432 +0,0 @@
 -----diff --git a/model.patch b/model.patch
------index 60a714e..e69de29 100644
+-----index c4d48df..e69de29 100644
 -------- a/model.patch
 -----+++ b/model.patch
------@@ -1,197 +0,0 @@
-------diff --git a/frontend/app/home.tsx b/frontend/app/home.tsx
-------index d3943fb..f3739bc 100644
---------- a/frontend/app/home.tsx
-------+++ b/frontend/app/home.tsx
-------@@ -86,7 +86,7 @@ export default function HomeScreen() {
-------             <Text style={styles.userName}>{user?.name}</Text>
-------             <View style={styles.roleBadge}>
-------               <Text style={styles.roleText}>
--------                {user?.role === 'owner' ? 'Machine Owner' : user?.role === 'user' ? 'User' : 'Manager'}
-------+                {user?.role === 'owner' ? 'Machine Owner' : user?.role === 'user' ? 'User' : user?.role === 'admin' ? 'Admin' : 'Manager'}
-------               </Text>
-------             </View>
+-----@@ -1,300 +0,0 @@
+------diff --git a/frontend/app/contracts/[id].tsx b/frontend/app/contracts/[id].tsx
+------index 837e6d3..00207b8 100644
+--------- a/frontend/app/contracts/[id].tsx
+------+++ b/frontend/app/contracts/[id].tsx
+------@@ -263,6 +263,40 @@ export default function ContractDetailScreen() {
 ------           </View>
-------@@ -148,6 +148,17 @@ export default function HomeScreen() {
-------         <View style={styles.section}>
-------           <Text style={styles.sectionTitle}>Quick Actions</Text>
-------           <View style={styles.actionsGrid}>
-------+            {user?.role === 'admin' && (
-------+              <TouchableOpacity
-------+                style={styles.actionCard}
-------+                onPress={() => router.push('/admin')}
-------+              >
-------+                <View style={[styles.actionIcon, { backgroundColor: 'rgba(168, 85, 247, 0.1)' }]}>
-------+                  <Ionicons name="settings" size={28} color="#a855f7" />
-------+                </View>
-------+                <Text style={styles.actionText}>Admin Dashboard</Text>
-------+              </TouchableOpacity>
-------+            )}
-------             {user?.role === 'owner' && (
-------               <TouchableOpacity
-------                 style={styles.actionCard}
-------diff --git a/frontend/app/index.tsx b/frontend/app/index.tsx
-------index 49deed3..af64af1 100644
---------- a/frontend/app/index.tsx
-------+++ b/frontend/app/index.tsx
-------@@ -4,18 +4,23 @@ import { useRouter } from 'expo-router';
------- import { useAuth } from '@/src/context/AuthContext';
+------         </View>
 ------ 
------- export default function Index() {
--------  const { isAuthenticated, isLoading } = useAuth();
-------+  const { isAuthenticated, isLoading, user } = useAuth();
-------   const router = useRouter();
------- 
-------   useEffect(() => {
-------     if (!isLoading) {
-------       if (isAuthenticated) {
--------        router.replace('/home');
-------+        // Redirect admin users to admin dashboard
-------+        if (user?.role === 'admin') {
-------+          router.replace('/admin');
-------+        } else {
-------+          router.replace('/home');
-------+        }
-------       } else {
-------         router.replace('/auth/login');
-------       }
-------     }
--------  }, [isLoading, isAuthenticated]);
-------+  }, [isLoading, isAuthenticated, user]);
------- 
-------   return (
-------     <View style={styles.container}>
+------+        {/* Time Tracking Summary - For Machine Owner */}
+------+        {isOwner && (
+------+          <View style={styles.timeTrackingCard}>
+------+            <View style={styles.timeTrackingHeader}>
+------+              <Ionicons name="time-outline" size={24} color="#3b82f6" />
+------+              <Text style={styles.timeTrackingTitle}>Engine Working Hours</Text>
+------+            </View>
+------+            <View style={styles.timeTrackingContent}>
+------+              <View style={styles.timeTrackingStat}>
+------+                <Text style={styles.timeTrackingValue}>
+------+                  {contract.total_working_hours?.toFixed(1) || '0.0'}
+------+                </Text>
+------+                <Text style={styles.timeTrackingLabel}>Total Hours</Text>
+------+              </View>
+------+              <View style={styles.timeTrackingDivider} />
+------+              <View style={styles.timeTrackingStat}>
+------+                <Text style={styles.timeTrackingValue}>
+------+                  {contract.total_days > 0 
+------+                    ? (contract.total_working_hours / contract.total_days).toFixed(1)
+------+                    : '0.0'}
+------+                </Text>
+------+                <Text style={styles.timeTrackingLabel}>Avg Hours/Day</Text>
+------+              </View>
+------+              <View style={styles.timeTrackingDivider} />
+------+              <View style={styles.timeTrackingStat}>
+------+                <Text style={[styles.timeTrackingValue, styles.revenueColor]}>
+------+                  ₹{((contract.total_working_hours || 0) * (contract.hourly_rate || 0)).toLocaleString()}
+------+                </Text>
+------+                <Text style={styles.timeTrackingLabel}>Total Revenue</Text>
+------+              </View>
+------+            </View>
+------+          </View>
+------+        )}
+------+
+------         {/* Engine Control - Only for Supervisor/Manager on active contracts */}
+------         {contract.status === 'active' && isSupervisor && (
+------           <TouchableOpacity
+------@@ -769,4 +803,52 @@ const styles = StyleSheet.create({
+------     fontSize: 16,
+------     fontWeight: '600',
+------   },
+------+  timeTrackingCard: {
+------+    backgroundColor: '#1e293b',
+------+    margin: 16,
+------+    borderRadius: 16,
+------+    padding: 16,
+------+    borderWidth: 1,
+------+    borderColor: 'rgba(59, 130, 246, 0.3)',
+------+  },
+------+  timeTrackingHeader: {
+------+    flexDirection: 'row',
+------+    alignItems: 'center',
+------+    marginBottom: 16,
+------+    gap: 8,
+------+  },
+------+  timeTrackingTitle: {
+------+    fontSize: 16,
+------+    fontWeight: '600',
+------+    color: '#3b82f6',
+------+  },
+------+  timeTrackingContent: {
+------+    flexDirection: 'row',
+------+    alignItems: 'center',
+------+    justifyContent: 'space-between',
+------+  },
+------+  timeTrackingStat: {
+------+    flex: 1,
+------+    alignItems: 'center',
+------+  },
+------+  timeTrackingValue: {
+------+    fontSize: 18,
+------+    fontWeight: 'bold',
+------+    color: '#f8fafc',
+------+    marginBottom: 4,
+------+  },
+------+  timeTrackingLabel: {
+------+    fontSize: 12,
+------+    color: '#94a3b8',
+------+    textAlign: 'center',
+------+  },
+------+  timeTrackingDivider: {
+------+    width: 1,
+------+    height: 40,
+------+    backgroundColor: '#334155',
+------+    marginHorizontal: 12,
+------+  },
+------+  revenueColor: {
+------+    color: '#22c55e',
+------+  },
+------ });
 ------diff --git a/model.patch b/model.patch
-------index 9b5bfa1..e69de29 100644
+------index 60a714e..e69de29 100644
 --------- a/model.patch
 ------+++ b/model.patch
-------@@ -1,130 +0,0 @@
--------diff --git a/test_result.md b/test_result.md
--------index 187cba4..b4d0fc7 100644
----------- a/test_result.md
--------+++ b/test_result.md
--------@@ -100,4 +100,122 @@
+------@@ -1,197 +0,0 @@
+-------diff --git a/frontend/app/home.tsx b/frontend/app/home.tsx
+-------index d3943fb..f3739bc 100644
+---------- a/frontend/app/home.tsx
+-------+++ b/frontend/app/home.tsx
+-------@@ -86,7 +86,7 @@ export default function HomeScreen() {
+-------             <Text style={styles.userName}>{user?.name}</Text>
+-------             <View style={styles.roleBadge}>
+-------               <Text style={styles.roleText}>
+--------                {user?.role === 'owner' ? 'Machine Owner' : user?.role === 'user' ? 'User' : 'Manager'}
+-------+                {user?.role === 'owner' ? 'Machine Owner' : user?.role === 'user' ? 'User' : user?.role === 'admin' ? 'Admin' : 'Manager'}
+-------               </Text>
+-------             </View>
+-------           </View>
+-------@@ -148,6 +148,17 @@ export default function HomeScreen() {
+-------         <View style={styles.section}>
+-------           <Text style={styles.sectionTitle}>Quick Actions</Text>
+-------           <View style={styles.actionsGrid}>
+-------+            {user?.role === 'admin' && (
+-------+              <TouchableOpacity
+-------+                style={styles.actionCard}
+-------+                onPress={() => router.push('/admin')}
+-------+              >
+-------+                <View style={[styles.actionIcon, { backgroundColor: 'rgba(168, 85, 247, 0.1)' }]}>
+-------+                  <Ionicons name="settings" size={28} color="#a855f7" />
+-------+                </View>
+-------+                <Text style={styles.actionText}>Admin Dashboard</Text>
+-------+              </TouchableOpacity>
+-------+            )}
+-------             {user?.role === 'owner' && (
+-------               <TouchableOpacity
+-------                 style={styles.actionCard}
+-------diff --git a/frontend/app/index.tsx b/frontend/app/index.tsx
+-------index 49deed3..af64af1 100644
+---------- a/frontend/app/index.tsx
+-------+++ b/frontend/app/index.tsx
+-------@@ -4,18 +4,23 @@ import { useRouter } from 'expo-router';
+------- import { useAuth } from '@/src/context/AuthContext';
 ------- 
-------- #====================================================================================================
-------- # Testing Data - Main Agent and testing sub agent both should log testing data below this section
---------#====================================================================================================
--------\ No newline at end of file
--------+#====================================================================================================
--------+
--------+user_problem_statement: "Machine Rental Management API backend testing - comprehensive testing of all API endpoints including auth flow, machine management, contracts, daily logs, engine timer, fuel prices, dashboard and notifications"
--------+
--------+backend:
--------+  - task: "Authentication Flow"
--------+    implemented: true
--------+    working: true
--------+    file: "/app/backend/server.py"
--------+    stuck_count: 0
--------+    priority: "high"
--------+    needs_retesting: false
--------+    status_history:
--------+        - working: true
--------+          agent: "testing"
--------+          comment: "All auth endpoints working perfectly - registration, OTP verification, login, and profile retrieval. Mock OTP '123456' working as expected. JWT tokens generated and validated correctly."
--------+
--------+  - task: "Machine Management"
--------+    implemented: true
--------+    working: true
--------+    file: "/app/backend/server.py"
--------+    stuck_count: 0
--------+    priority: "high"
--------+    needs_retesting: false
--------+    status_history:
--------+        - working: true
--------+          agent: "testing"
--------+          comment: "All machine CRUD operations working - create, read (owner/all/single), update, delete. Owner role validation working correctly. Machine status updates properly on contract creation."
--------+
--------+  - task: "Contract Management"
--------+    implemented: true
--------+    working: true
--------+    file: "/app/backend/server.py"
--------+    stuck_count: 0
--------+    priority: "high"
--------+    needs_retesting: false
--------+    status_history:
--------+        - working: true
--------+          agent: "testing"
--------+          comment: "Contract creation, retrieval, and completion working perfectly. Proper owner/renter role handling. Machine status updates correctly. Notifications created on contract events."
--------+
--------+  - task: "Daily Log Management"
--------+    implemented: true
--------+    working: true
--------+    file: "/app/backend/server.py"
--------+    stuck_count: 0
--------+    priority: "high"
--------+    needs_retesting: false
--------+    status_history:
--------+        - working: true
--------+          agent: "testing"
--------+          comment: "Daily log creation, retrieval, and updates working correctly. Expense calculations based on fuel prices working. Proper validation for duplicate day logs."
--------+
--------+  - task: "Engine Timer Functionality"
--------+    implemented: true
--------+    working: true
--------+    file: "/app/backend/server.py"
--------+    stuck_count: 0
--------+    priority: "medium"
--------+    needs_retesting: false
--------+    status_history:
--------+        - working: true
--------+          agent: "testing"
--------+          comment: "Engine timer start/stop functionality working. Creates daily log if doesn't exist. Time calculation working correctly. Minor: Working hours calculation shows 0.0 for very short intervals (expected behavior)."
--------+
--------+  - task: "Fuel Price Management"
--------+    implemented: true
--------+    working: true
--------+    file: "/app/backend/server.py"
--------+    stuck_count: 0
--------+    priority: "medium"
--------+    needs_retesting: false
--------+    status_history:
--------+        - working: true
--------+          agent: "testing"
--------+          comment: "Fuel price retrieval and updates working correctly. Default prices created for new owners. Owner-only update validation working properly."
--------+
--------+  - task: "Dashboard & Notifications"
--------+    implemented: true
--------+    working: true
--------+    file: "/app/backend/server.py"
--------+    stuck_count: 0
--------+    priority: "medium"
--------+    needs_retesting: false
--------+    status_history:
--------+        - working: true
--------+          agent: "testing"
--------+          comment: "Dashboard stats calculation working correctly for owners and users. Notifications system working - created on contract events and retrieved properly."
--------+
--------+  - task: "API Security & Authorization"
--------+    implemented: true
--------+    working: true
--------+    file: "/app/backend/server.py"
--------+    stuck_count: 0
--------+    priority: "high"
--------+    needs_retesting: false
--------+    status_history:
--------+        - working: true
--------+          agent: "testing"
--------+          comment: "JWT token authentication working correctly. Role-based access control implemented properly. Owner-only endpoints protected. Bearer token validation working."
--------+
--------+frontend:
--------+  # Frontend testing not performed as per instructions
--------+
--------+metadata:
--------+  created_by: "testing_agent"
--------+  version: "1.0"
--------+  test_sequence: 1
--------+  run_ui: false
--------+
--------+test_plan:
--------+  current_focus: []
--------+  stuck_tasks: []
--------+  test_all: true
--------+  test_priority: "high_first"
--------+
--------+agent_communication:
--------+    - agent: "testing"
--------+      message: "Comprehensive backend API testing completed successfully. All 24 test cases passed (100% success rate). Complete workflow tested: owner registration → login → machine creation → contract creation → daily logs → engine timer → fuel price management → dashboard stats → contract completion → machine deletion. All endpoints working correctly with proper authentication, authorization, and data validation. Backend is production-ready."
--------\ No newline at end of file
-----diff --git a/test_result.md b/test_result.md
-----index 4e5e1d5..cd12406 100644
-------- a/test_result.md
-----+++ b/test_result.md
-----@@ -116,6 +116,9 @@ backend:
-----         - working: true
-----           agent: "testing"
-----           comment: "All auth endpoints working perfectly - registration, OTP verification, login, and profile retrieval. Mock OTP '123456' working as expected. JWT tokens generated and validated correctly."
-----+        - working: true
-----+          agent: "testing"
-----+          comment: "Comprehensive testing completed: Owner, Farmer, and Supervisor registration/login all working. Forgot password endpoint working correctly. All 8 authentication tests passed."
----- 
-----   - task: "Machine Management"
-----     implemented: true
-----@@ -128,6 +131,9 @@ backend:
-----         - working: true
-----           agent: "testing"
-----           comment: "All machine CRUD operations working - create, read (owner/all/single), update, delete. Owner role validation working correctly. Machine status updates properly on contract creation."
-----+        - working: true
-----+          agent: "testing"
-----+          comment: "Complete machine management flow tested: Create machine with images, get owner machines, browse all machines for farmers, get single machine, update machine. All 5 tests passed."
----- 
-----   - task: "Contract Management"
-----     implemented: true
-----@@ -140,18 +146,24 @@ backend:
-----         - working: true
-----           agent: "testing"
-----           comment: "Contract creation, retrieval, and completion working perfectly. Proper owner/renter role handling. Machine status updates correctly. Notifications created on contract events."
-----+        - working: true
-----+          agent: "testing"
-----+          comment: "Full contract workflow tested: Create contract request, get contracts, approve contract, start/stop engine timer. All 6 contract management tests passed."
----- 
-----   - task: "Daily Log Management"
-----     implemented: true
------    working: true
-----+    working: false
-----     file: "/app/backend/server.py"
------    stuck_count: 0
-----+    stuck_count: 1
-----     priority: "high"
-----     needs_retesting: false
-----     status_history:
-----         - working: true
-----           agent: "testing"
-----           comment: "Daily log creation, retrieval, and updates working correctly. Expense calculations based on fuel prices working. Proper validation for duplicate day logs."
-----+        - working: false
-----+          agent: "testing"
-----+          comment: "CRITICAL BUG FOUND: Daily log creation fails with 500 Internal Server Error. Backend code at line 1315 uses 'log.petrol_filled' but DailyLogCreate model has 'diesel_filled' field. AttributeError: 'DailyLogCreate' object has no attribute 'petrol_filled'. Get daily logs works fine (1 test passed, 1 failed)."
----- 
-----   - task: "Engine Timer Functionality"
-----     implemented: true
-----@@ -164,6 +176,9 @@ backend:
-----         - working: true
-----           agent: "testing"
-----           comment: "Engine timer start/stop functionality working. Creates daily log if doesn't exist. Time calculation working correctly. Minor: Working hours calculation shows 0.0 for very short intervals (expected behavior)."
-----+        - working: true
-----+          agent: "testing"
-----+          comment: "Engine timer tested as part of contract management flow. Start and stop engine operations working correctly."
----- 
-----   - task: "Fuel Price Management"
-----     implemented: true
-----@@ -188,6 +203,9 @@ backend:
-----         - working: true
-----           agent: "testing"
-----           comment: "Dashboard stats calculation working correctly for owners and users. Notifications system working - created on contract events and retrieved properly."
-----+        - working: true
-----+          agent: "testing"
-----+          comment: "Notification system fully tested: Get notifications for owner and farmer, mark notification as read. All 3 notification tests passed."
----- 
-----   - task: "API Security & Authorization"
-----     implemented: true
-----@@ -200,6 +218,45 @@ backend:
-----         - working: true
-----           agent: "testing"
-----           comment: "JWT token authentication working correctly. Role-based access control implemented properly. Owner-only endpoints protected. Bearer token validation working."
-----+        - working: true
-----+          agent: "testing"
-----+          comment: "Security tested throughout all endpoints. Admin endpoints correctly return 403 Forbidden for non-admin users. Role-based access control working properly."
-----+
-----+  - task: "Owner Profile Endpoints"
-----+    implemented: true
-----+    working: true
-----+    file: "/app/backend/server.py"
-----+    stuck_count: 0
-----+    priority: "medium"
-----+    needs_retesting: false
-----+    status_history:
-----+        - working: true
-----+          agent: "testing"
-----+          comment: "Owner profile endpoint working correctly. Returns owner details with all machines, contract counts, and statistics."
-----+
-----+  - task: "Monthly Reports"
-----+    implemented: true
-----+    working: true
-----+    file: "/app/backend/server.py"
-----+    stuck_count: 0
-----+    priority: "medium"
-----+    needs_retesting: false
-----+    status_history:
-----+        - working: true
-----+          agent: "testing"
-----+          comment: "Monthly summary report generation working correctly. Returns detailed machine usage, earnings, and cost breakdown."
-----+
-----+  - task: "Admin Dashboard Endpoints"
-----+    implemented: true
-----+    working: true
-----+    file: "/app/backend/server.py"
-----+    stuck_count: 0
-----+    priority: "medium"
-----+    needs_retesting: false
-----+    status_history:
-----+        - working: true
-----+          agent: "testing"
-----+          comment: "Admin endpoints exist and correctly implement access control. All admin endpoints (overview, running-machines, recent-activity) properly return 403 Forbidden for non-admin users, confirming security is working as expected."
----- 
----- frontend:
-----   - task: "Data Persistence Bug Fix"
-----@@ -242,4 +299,6 @@ agent_communication:
-----     - agent: "testing"
-----       message: "Comprehensive backend API testing completed successfully. All 24 test cases passed (100% success rate). Complete workflow tested: owner registration → login → machine creation → contract creation → daily logs → engine timer → fuel price management → dashboard stats → contract completion → machine deletion. All endpoints working correctly with proper authentication, authorization, and data validation. Backend is production-ready."
-----     - agent: "main"
------      message: "Fixed critical data deletion bug. Root cause was missing user dependencies in useFocusEffect hooks. Updated home.tsx, machines/index.tsx, contracts/index.tsx, and admin/index.tsx to properly refetch data when user changes (login/logout). MongoDB persistence verified working - no data loss on server side. Ready for frontend testing to verify the fix works correctly."
-----\ No newline at end of file
-----+      message: "Fixed critical data deletion bug. Root cause was missing user dependencies in useFocusEffect hooks. Updated home.tsx, machines/index.tsx, contracts/index.tsx, and admin/index.tsx to properly refetch data when user changes (login/logout). MongoDB persistence verified working - no data loss on server side. Ready for frontend testing to verify the fix works correctly."
-----+    - agent: "testing"
-----+      message: "COMPREHENSIVE BACKEND TESTING COMPLETED: 26/30 tests passed (86.7% success rate). ✅ WORKING: Authentication (8/8), Machine Management (5/5), Contract Management (6/6), Owner Endpoints (1/1), Notifications (3/3), Reports (1/1), Admin Security (3/3). ❌ CRITICAL BUG FOUND: Daily log creation fails with 500 error - backend code uses 'log.petrol_filled' but model has 'diesel_filled' field (line 1315 in server.py). All other endpoints working perfectly with proper security and validation."
-----\ No newline at end of file
+------- export default function Index() {
+--------  const { isAuthenticated, isLoading } = useAuth();
+-------+  const { isAuthenticated, isLoading, user } = useAuth();
+-------   const router = useRouter();
+------- 
+-------   useEffect(() => {
+-------     if (!isLoading) {
+-------       if (isAuthenticated) {
+--------        router.replace('/home');
+-------+        // Redirect admin users to admin dashboard
+-------+        if (user?.role === 'admin') {
+-------+          router.replace('/admin');
+-------+        } else {
+-------+          router.replace('/home');
+-------+        }
+-------       } else {
+-------         router.replace('/auth/login');
+-------       }
+-------     }
+--------  }, [isLoading, isAuthenticated]);
+-------+  }, [isLoading, isAuthenticated, user]);
+------- 
+-------   return (
+-------     <View style={styles.container}>
+-------diff --git a/model.patch b/model.patch
+-------index 9b5bfa1..e69de29 100644
+---------- a/model.patch
+-------+++ b/model.patch
+-------@@ -1,130 +0,0 @@
+--------diff --git a/test_result.md b/test_result.md
+--------index 187cba4..b4d0fc7 100644
+----------- a/test_result.md
+--------+++ b/test_result.md
+--------@@ -100,4 +100,122 @@
+-------- 
+-------- #====================================================================================================
+-------- # Testing Data - Main Agent and testing sub agent both should log testing data below this section
+---------#====================================================================================================
+--------\ No newline at end of file
+--------+#====================================================================================================
+--------+
+--------+user_problem_statement: "Machine Rental Management API backend testing - comprehensive testing of all API endpoints including auth flow, machine management, contracts, daily logs, engine timer, fuel prices, dashboard and notifications"
+--------+
+--------+backend:
+--------+  - task: "Authentication Flow"
+--------+    implemented: true
+--------+    working: true
+--------+    file: "/app/backend/server.py"
+--------+    stuck_count: 0
+--------+    priority: "high"
+--------+    needs_retesting: false
+--------+    status_history:
+--------+        - working: true
+--------+          agent: "testing"
+--------+          comment: "All auth endpoints working perfectly - registration, OTP verification, login, and profile retrieval. Mock OTP '123456' working as expected. JWT tokens generated and validated correctly."
+--------+
+--------+  - task: "Machine Management"
+--------+    implemented: true
+--------+    working: true
+--------+    file: "/app/backend/server.py"
+--------+    stuck_count: 0
+--------+    priority: "high"
+--------+    needs_retesting: false
+--------+    status_history:
+--------+        - working: true
+--------+          agent: "testing"
+--------+          comment: "All machine CRUD operations working - create, read (owner/all/single), update, delete. Owner role validation working correctly. Machine status updates properly on contract creation."
+--------+
+--------+  - task: "Contract Management"
+--------+    implemented: true
+--------+    working: true
+--------+    file: "/app/backend/server.py"
+--------+    stuck_count: 0
+--------+    priority: "high"
+--------+    needs_retesting: false
+--------+    status_history:
+--------+        - working: true
+--------+          agent: "testing"
+--------+          comment: "Contract creation, retrieval, and completion working perfectly. Proper owner/renter role handling. Machine status updates correctly. Notifications created on contract events."
+--------+
+--------+  - task: "Daily Log Management"
+--------+    implemented: true
+--------+    working: true
+--------+    file: "/app/backend/server.py"
+--------+    stuck_count: 0
+--------+    priority: "high"
+--------+    needs_retesting: false
+--------+    status_history:
+--------+        - working: true
+--------+          agent: "testing"
+--------+          comment: "Daily log creation, retrieval, and updates working correctly. Expense calculations based on fuel prices working. Proper validation for duplicate day logs."
+--------+
+--------+  - task: "Engine Timer Functionality"
+--------+    implemented: true
+--------+    working: true
+--------+    file: "/app/backend/server.py"
+--------+    stuck_count: 0
+--------+    priority: "medium"
+--------+    needs_retesting: false
+--------+    status_history:
+--------+        - working: true
+--------+          agent: "testing"
+--------+          comment: "Engine timer start/stop functionality working. Creates daily log if doesn't exist. Time calculation working correctly. Minor: Working hours calculation shows 0.0 for very short intervals (expected behavior)."
+--------+
+--------+  - task: "Fuel Price Management"
+--------+    implemented: true
+--------+    working: true
+--------+    file: "/app/backend/server.py"
+--------+    stuck_count: 0
+--------+    priority: "medium"
+--------+    needs_retesting: false
+--------+    status_history:
+--------+        - working: true
+--------+          agent: "testing"
+--------+          comment: "Fuel price retrieval and updates working correctly. Default prices created for new owners. Owner-only update validation working properly."
+--------+
+--------+  - task: "Dashboard & Notifications"
+--------+    implemented: true
+--------+    working: true
+--------+    file: "/app/backend/server.py"
+--------+    stuck_count: 0
+--------+    priority: "medium"
+--------+    needs_retesting: false
+--------+    status_history:
+--------+        - working: true
+--------+          agent: "testing"
+--------+          comment: "Dashboard stats calculation working correctly for owners and users. Notifications system working - created on contract events and retrieved properly."
+--------+
+--------+  - task: "API Security & Authorization"
+--------+    implemented: true
+--------+    working: true
+--------+    file: "/app/backend/server.py"
+--------+    stuck_count: 0
+--------+    priority: "high"
+--------+    needs_retesting: false
+--------+    status_history:
+--------+        - working: true
+--------+          agent: "testing"
+--------+          comment: "JWT token authentication working correctly. Role-based access control implemented properly. Owner-only endpoints protected. Bearer token validation working."
+--------+
+--------+frontend:
+--------+  # Frontend testing not performed as per instructions
+--------+
+--------+metadata:
+--------+  created_by: "testing_agent"
+--------+  version: "1.0"
+--------+  test_sequence: 1
+--------+  run_ui: false
+--------+
+--------+test_plan:
+--------+  current_focus: []
+--------+  stuck_tasks: []
+--------+  test_all: true
+--------+  test_priority: "high_first"
+--------+
+--------+agent_communication:
+--------+    - agent: "testing"
+--------+      message: "Comprehensive backend API testing completed successfully. All 24 test cases passed (100% success rate). Complete workflow tested: owner registration → login → machine creation → contract creation → daily logs → engine timer → fuel price management → dashboard stats → contract completion → machine deletion. All endpoints working correctly with proper authentication, authorization, and data validation. Backend is production-ready."
+--------\ No newline at end of file
+-----diff --git a/test_result.md b/test_result.md
+-----index 4e5e1d5..cd12406 100644
+-------- a/test_result.md
+-----+++ b/test_result.md
+-----@@ -116,6 +116,9 @@ backend:
+-----         - working: true
+-----           agent: "testing"
+-----           comment: "All auth endpoints working perfectly - registration, OTP verification, login, and profile retrieval. Mock OTP '123456' working as expected. JWT tokens generated and validated correctly."
+-----+        - working: true
+-----+          agent: "testing"
+-----+          comment: "Comprehensive testing completed: Owner, Farmer, and Supervisor registration/login all working. Forgot password endpoint working correctly. All 8 authentication tests passed."
+----- 
+-----   - task: "Machine Management"
+-----     implemented: true
+-----@@ -128,6 +131,9 @@ backend:
+-----         - working: true
+-----           agent: "testing"
+-----           comment: "All machine CRUD operations working - create, read (owner/all/single), update, delete. Owner role validation working correctly. Machine status updates properly on contract creation."
+-----+        - working: true
+-----+          agent: "testing"
+-----+          comment: "Complete machine management flow tested: Create machine with images, get owner machines, browse all machines for farmers, get single machine, update machine. All 5 tests passed."
+----- 
+-----   - task: "Contract Management"
+-----     implemented: true
+-----@@ -140,18 +146,24 @@ backend:
+-----         - working: true
+-----           agent: "testing"
+-----           comment: "Contract creation, retrieval, and completion working perfectly. Proper owner/renter role handling. Machine status updates correctly. Notifications created on contract events."
+-----+        - working: true
+-----+          agent: "testing"
+-----+          comment: "Full contract workflow tested: Create contract request, get contracts, approve contract, start/stop engine timer. All 6 contract management tests passed."
+----- 
+-----   - task: "Daily Log Management"
+-----     implemented: true
+------    working: true
+-----+    working: false
+-----     file: "/app/backend/server.py"
+------    stuck_count: 0
+-----+    stuck_count: 1
+-----     priority: "high"
+-----     needs_retesting: false
+-----     status_history:
+-----         - working: true
+-----           agent: "testing"
+-----           comment: "Daily log creation, retrieval, and updates working correctly. Expense calculations based on fuel prices working. Proper validation for duplicate day logs."
+-----+        - working: false
+-----+          agent: "testing"
+-----+          comment: "CRITICAL BUG FOUND: Daily log creation fails with 500 Internal Server Error. Backend code at line 1315 uses 'log.petrol_filled' but DailyLogCreate model has 'diesel_filled' field. AttributeError: 'DailyLogCreate' object has no attribute 'petrol_filled'. Get daily logs works fine (1 test passed, 1 failed)."
+----- 
+-----   - task: "Engine Timer Functionality"
+-----     implemented: true
+-----@@ -164,6 +176,9 @@ backend:
+-----         - working: true
+-----           agent: "testing"
+-----           comment: "Engine timer start/stop functionality working. Creates daily log if doesn't exist. Time calculation working correctly. Minor: Working hours calculation shows 0.0 for very short intervals (expected behavior)."
+-----+        - working: true
+-----+          agent: "testing"
+-----+          comment: "Engine timer tested as part of contract management flow. Start and stop engine operations working correctly."
+----- 
+-----   - task: "Fuel Price Management"
+-----     implemented: true
+-----@@ -188,6 +203,9 @@ backend:
+-----         - working: true
+-----           agent: "testing"
+-----           comment: "Dashboard stats calculation working correctly for owners and users. Notifications system working - created on contract events and retrieved properly."
+-----+        - working: true
+-----+          agent: "testing"
+-----+          comment: "Notification system fully tested: Get notifications for owner and farmer, mark notification as read. All 3 notification tests passed."
+----- 
+-----   - task: "API Security & Authorization"
+-----     implemented: true
+-----@@ -200,6 +218,45 @@ backend:
+-----         - working: true
+-----           agent: "testing"
+-----           comment: "JWT token authentication working correctly. Role-based access control implemented properly. Owner-only endpoints protected. Bearer token validation working."
+-----+        - working: true
+-----+          agent: "testing"
+-----+          comment: "Security tested throughout all endpoints. Admin endpoints correctly return 403 Forbidden for non-admin users. Role-based access control working properly."
+-----+
+-----+  - task: "Owner Profile Endpoints"
+-----+    implemented: true
+-----+    working: true
+-----+    file: "/app/backend/server.py"
+-----+    stuck_count: 0
+-----+    priority: "medium"
+-----+    needs_retesting: false
+-----+    status_history:
+-----+        - working: true
+-----+          agent: "testing"
+-----+          comment: "Owner profile endpoint working correctly. Returns owner details with all machines, contract counts, and statistics."
+-----+
+-----+  - task: "Monthly Reports"
+-----+    implemented: true
+-----+    working: true
+-----+    file: "/app/backend/server.py"
+-----+    stuck_count: 0
+-----+    priority: "medium"
+-----+    needs_retesting: false
+-----+    status_history:
+-----+        - working: true
+-----+          agent: "testing"
+-----+          comment: "Monthly summary report generation working correctly. Returns detailed machine usage, earnings, and cost breakdown."
+-----+
+-----+  - task: "Admin Dashboard Endpoints"
+-----+    implemented: true
+-----+    working: true
+-----+    file: "/app/backend/server.py"
+-----+    stuck_count: 0
+-----+    priority: "medium"
+-----+    needs_retesting: false
+-----+    status_history:
+-----+        - working: true
+-----+          agent: "testing"
+-----+          comment: "Admin endpoints exist and correctly implement access control. All admin endpoints (overview, running-machines, recent-activity) properly return 403 Forbidden for non-admin users, confirming security is working as expected."
+----- 
+----- frontend:
+-----   - task: "Data Persistence Bug Fix"
+-----@@ -242,4 +299,6 @@ agent_communication:
+-----     - agent: "testing"
+-----       message: "Comprehensive backend API testing completed successfully. All 24 test cases passed (100% success rate). Complete workflow tested: owner registration → login → machine creation → contract creation → daily logs → engine timer → fuel price management → dashboard stats → contract completion → machine deletion. All endpoints working correctly with proper authentication, authorization, and data validation. Backend is production-ready."
+-----     - agent: "main"
+------      message: "Fixed critical data deletion bug. Root cause was missing user dependencies in useFocusEffect hooks. Updated home.tsx, machines/index.tsx, contracts/index.tsx, and admin/index.tsx to properly refetch data when user changes (login/logout). MongoDB persistence verified working - no data loss on server side. Ready for frontend testing to verify the fix works correctly."
+-----\ No newline at end of file
+-----+      message: "Fixed critical data deletion bug. Root cause was missing user dependencies in useFocusEffect hooks. Updated home.tsx, machines/index.tsx, contracts/index.tsx, and admin/index.tsx to properly refetch data when user changes (login/logout). MongoDB persistence verified working - no data loss on server side. Ready for frontend testing to verify the fix works correctly."
+-----+    - agent: "testing"
+-----+      message: "COMPREHENSIVE BACKEND TESTING COMPLETED: 26/30 tests passed (86.7% success rate). ✅ WORKING: Authentication (8/8), Machine Management (5/5), Contract Management (6/6), Owner Endpoints (1/1), Notifications (3/3), Reports (1/1), Admin Security (3/3). ❌ CRITICAL BUG FOUND: Daily log creation fails with 500 error - backend code uses 'log.petrol_filled' but model has 'diesel_filled' field (line 1315 in server.py). All other endpoints working perfectly with proper security and validation."
+-----\ No newline at end of file
