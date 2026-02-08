@@ -262,7 +262,7 @@ export default function AdminDashboardScreen() {
               </View>
             </View>
           </>
-        ) : (
+        )  (
           <View style={styles.section}>
             <View style={styles.emptyState}>
               <Ionicons name="analytics-outline" size={64} color="#475569" />
