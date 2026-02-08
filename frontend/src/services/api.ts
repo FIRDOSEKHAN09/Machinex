@@ -115,4 +115,5 @@ export const consumablesAPI = {
 // Reports API
 export const reportsAPI = {
   monthlyReport: (machineId: string, month: string) => api.get(`/reports/monthly/${machineId}`, { params: { month } }),
+  getMonthlySummary: (year: number, month: number) => api.get(`/owner/monthly-summary`, { params: { year, month } }),
 };
