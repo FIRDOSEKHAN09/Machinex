@@ -273,16 +273,25 @@ export default function ContractDetailScreen() {
             <View style={styles.timeTrackingContent}>
               <View style={styles.timeTrackingStat}>
                 <Text style={styles.timeTrackingValue}>
-                  {contract.total_working_hours?.toFixed(1) || '0.0'}
+                  {(() => {
+                    const totalHours = contract.total_working_hours || 0;
+                    const hours = Math.floor(totalHours);
+                    const minutes = Math.floor((totalHours - hours) * 60);
+                    const seconds = Math.floor((((totalHours - hours) * 60) - minutes) * 60);
+                    return `${hours}h ${minutes}m ${seconds}s`;
+                  })()}
                 </Text>
-                <Text style={styles.timeTrackingLabel}>Total Hours</Text>
+                <Text style={styles.timeTrackingLabel}>Total Time</Text>
               </View>
               <View style={styles.timeTrackingDivider} />
               <View style={styles.timeTrackingStat}>
                 <Text style={styles.timeTrackingValue}>
-                  {contract.total_days > 0 
-                    ? (contract.total_working_hours / contract.total_days).toFixed(1)
-                    : '0.0'}
+                  {(() => {
+                    const totalHours = contract.total_working_hours || 0;
+                    const days = contract.total_days || 1;
+                    const avgHours = totalHours / days;
+                    return avgHours > 0 ? avgHours.toFixed(1) + 'h' : '0h';
+                  })()}
                 </Text>
                 <Text style={styles.timeTrackingLabel}>Avg Hours/Day</Text>
               </View>
