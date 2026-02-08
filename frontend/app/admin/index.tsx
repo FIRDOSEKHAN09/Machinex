@@ -210,22 +210,22 @@ export default function AdminDashboardScreen() {
               <View style={styles.statsGrid}>
                 <View style={styles.statCard}>
                   <Ionicons name="construct" size={24} color="#f97316" />
-                  <Text style={styles.statValue}>{overview.machines.total}</Text>
+                  <Text style={styles.statValue}>{overview.machines?.total || 0}</Text>
                   <Text style={styles.statLabel}>Total</Text>
                 </View>
                 <View style={styles.statCard}>
                   <Ionicons name="checkmark-circle" size={24} color="#22c55e" />
-                  <Text style={styles.statValue}>{overview.machines.available}</Text>
+                  <Text style={styles.statValue}>{overview.machines?.available || 0}</Text>
                   <Text style={styles.statLabel}>Available</Text>
                 </View>
                 <View style={styles.statCard}>
                   <Ionicons name="swap-horizontal" size={24} color="#3b82f6" />
-                  <Text style={styles.statValue}>{overview.machines.rented}</Text>
+                  <Text style={styles.statValue}>{overview.machines?.rented || 0}</Text>
                   <Text style={styles.statLabel}>Rented</Text>
                 </View>
                 <View style={[styles.statCard, styles.statCardRunning]}>
                   <Ionicons name="pulse" size={24} color="#ef4444" />
-                  <Text style={[styles.statValue, styles.runningValue]}>{overview.machines.running}</Text>
+                  <Text style={[styles.statValue, styles.runningValue]}>{overview.machines?.running || 0}</Text>
                   <Text style={styles.statLabel}>Running NOW</Text>
                 </View>
               </View>
