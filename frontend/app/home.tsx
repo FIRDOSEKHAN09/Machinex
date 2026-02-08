@@ -427,13 +427,16 @@ export default function HomeScreen() {
     );
   }
 
-  // Default fallback
-  return (
-    <SafeAreaView style={styles.container}>
-      <Text>Loading...</Text>
-    </SafeAreaView>
-  );
-}
+ // Default fallback 
+ return
+  ( 
+  <SafeAreaView style={styles.container}> 
+  <Text>Loading...</Text> 
+  </SafeAreaView> 
+  ); 
+  }
+
+
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0f172a' },
