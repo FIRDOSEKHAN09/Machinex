@@ -239,24 +239,24 @@ export default function AdminDashboardScreen() {
                   <Ionicons name="cash" size={32} color="#22c55e" />
                   <View>
                     <Text style={styles.revenueLabel}>Total Revenue</Text>
-                    <Text style={styles.revenueValue}>₹{overview.revenue.total.toLocaleString()}</Text>
+                    <Text style={styles.revenueValue}>₹{(overview.revenue?.total || 0).toLocaleString()}</Text>
                   </View>
                 </View>
               </View>
               <View style={styles.statsGrid}>
                 <View style={styles.statCard}>
                   <Ionicons name="document-text" size={24} color="#3b82f6" />
-                  <Text style={styles.statValue}>{overview.contracts.total}</Text>
+                  <Text style={styles.statValue}>{overview.contracts?.total || 0}</Text>
                   <Text style={styles.statLabel}>Total</Text>
                 </View>
                 <View style={styles.statCard}>
                   <Ionicons name="time" size={24} color="#f97316" />
-                  <Text style={styles.statValue}>{overview.contracts.active}</Text>
+                  <Text style={styles.statValue}>{overview.contracts?.active || 0}</Text>
                   <Text style={styles.statLabel}>Active</Text>
                 </View>
                 <View style={styles.statCard}>
                   <Ionicons name="checkmark-done" size={24} color="#22c55e" />
-                  <Text style={styles.statValue}>{overview.contracts.completed}</Text>
+                  <Text style={styles.statValue}>{overview.contracts?.completed || 0}</Text>
                   <Text style={styles.statLabel}>Completed</Text>
                 </View>
               </View>
