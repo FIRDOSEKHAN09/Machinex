@@ -183,22 +183,22 @@ export default function AdminDashboardScreen() {
               <View style={styles.statsGrid}>
                 <View style={[styles.statCard, styles.statCardPrimary]}>
                   <Ionicons name="people" size={28} color="#f97316" />
-                  <Text style={styles.statValue}>{overview.users.total}</Text>
+                  <Text style={styles.statValue}>{overview.users?.total || 0}</Text>
                   <Text style={styles.statLabel}>Total Users</Text>
                 </View>
                 <View style={styles.statCard}>
                   <Ionicons name="business" size={24} color="#3b82f6" />
-                  <Text style={styles.statValue}>{overview.users.owners}</Text>
+                  <Text style={styles.statValue}>{overview.users?.owners || 0}</Text>
                   <Text style={styles.statLabel}>Owners</Text>
                 </View>
                 <View style={styles.statCard}>
                   <Ionicons name="person" size={24} color="#22c55e" />
-                  <Text style={styles.statValue}>{overview.users.renters}</Text>
+                  <Text style={styles.statValue}>{overview.users?.renters || 0}</Text>
                   <Text style={styles.statLabel}>Renters</Text>
                 </View>
                 <View style={styles.statCard}>
                   <Ionicons name="settings" size={24} color="#a855f7" />
-                  <Text style={styles.statValue}>{overview.users.managers}</Text>
+                  <Text style={styles.statValue}>{overview.users?.managers || 0}</Text>
                   <Text style={styles.statLabel}>Managers</Text>
                 </View>
               </View>
