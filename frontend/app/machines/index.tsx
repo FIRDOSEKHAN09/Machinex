@@ -264,6 +264,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  machineImageContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  machineImage: {
+    width: '100%',
+    height: '100%',
+  },
+  machineIconPlaceholder: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#1e293b',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   machineInfo: {
     flex: 1,
     marginLeft: 16,
