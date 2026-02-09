@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, RefreshControl, ActivityIndicator, Image } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, RefreshControl, ActivityIndicator, Image, Modal, TextInput, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,6 +14,13 @@ export default function HomeScreen() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  
+  // Negotiation modal state
+  const [showNegotiationModal, setShowNegotiationModal] = useState(false);
+  const [selectedContract, setSelectedContract] = useState<any>(null);
+  const [counterOfferRate, setCounterOfferRate] = useState('');
+  const [counterMessage, setCounterMessage] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const fetchData = async () => {
     try {
