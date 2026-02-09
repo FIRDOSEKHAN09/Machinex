@@ -565,31 +565,81 @@ export default function HomeScreen() {
           {contracts.length > 0 && (
             <>
               <Text style={styles.sectionTitle}>My Contracts</Text>
-              {contracts.filter(c => c.status === 'active' || c.status === 'pending').map((contract) => (
-                <TouchableOpacity
-                  key={contract.id}
-                  style={styles.contractCard}
-                  onPress={() => router.push(`/contracts/${contract.id}`)}
-                >
-                  <View style={styles.contractHeader}>
-                    <View style={styles.contractInfo}>
-                      <Text style={styles.machineName}>{contract.machine_name || 'Machine'}</Text>
-                      <View style={[
-                        styles.statusBadge,
-                        contract.status === 'active' ? { backgroundColor: 'rgba(34, 197, 94, 0.2)' } : { backgroundColor: 'rgba(249, 115, 22, 0.2)' }
-                      ]}>
-                        <Text style={[
-                          styles.statusText,
-                          contract.status === 'active' ? { color: '#22c55e' } : { color: '#f97316' }
-                        ]}>
-                          {contract.status.toUpperCase()}
-                        </Text>
+              {contracts.filter(c => c.status === 'active' || c.status === 'pending').map((contract) => {
+                const hasCounterOffer = contract.negotiation_status === 'countered';
+                
+                return (
+                  <View key={contract.id}>
+                    <TouchableOpacity
+                      style={[styles.contractCard, hasCounterOffer && styles.counterOfferCard]}
+                      onPress={() => router.push(`/contracts/${contract.id}`)}
+                    >
+                      <View style={styles.contractHeader}>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.machineName}>{contract.machine_name || 'Machine'}</Text>
+                          <View style={[
+                            styles.statusBadge,
+                            contract.status === 'active' ? { backgroundColor: 'rgba(34, 197, 94, 0.2)' } : { backgroundColor: 'rgba(249, 115, 22, 0.2)' }
+                          ]}>
+                            <Text style={[
+                              styles.statusText,
+                              contract.status === 'active' ? { color: '#22c55e' } : { color: '#f97316' }
+                            ]}>
+                              {contract.status.toUpperCase()}
+                            </Text>
+                          </View>
+                          
+                          {/* Show counter-offer info */}
+                          {hasCounterOffer && (
+                            <View style={styles.counterOfferBadge}>
+                              <Ionicons name="swap-horizontal" size={14} color="#f97316" />
+                              <Text style={styles.counterOfferText}>
+                                Counter-offer: ₹{contract.counter_offer_rate}/hr
+                              </Text>
+                            </View>
+                          )}
+                        </View>
+                        <Ionicons name="chevron-forward" size={20} color="#64748b" />
                       </View>
-                    </View>
-                    <Ionicons name="chevron-forward" size={20} color="#64748b" />
+                    </TouchableOpacity>
+                    
+                    {/* Counter-offer response buttons */}
+                    {hasCounterOffer && (
+                      <View style={styles.counterOfferActions}>
+                        <TouchableOpacity 
+                          style={styles.declineCounterButton}
+                          onPress={async () => {
+                            try {
+                              await contractAPI.respondToCounter(contract.id, 'reject');
+                              Alert.alert('Declined', 'Counter-offer declined. Contract cancelled.');
+                              fetchData();
+                            } catch (error: any) {
+                              Alert.alert('Error', error.response?.data?.detail || 'Failed to decline');
+                            }
+                          }}
+                        >
+                          <Text style={styles.declineCounterText}>Decline</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity 
+                          style={styles.acceptCounterButton}
+                          onPress={async () => {
+                            try {
+                              await contractAPI.respondToCounter(contract.id, 'accept');
+                              Alert.alert('Accepted!', 'Counter-offer accepted. Contract is now active!');
+                              fetchData();
+                            } catch (error: any) {
+                              Alert.alert('Error', error.response?.data?.detail || 'Failed to accept');
+                            }
+                          }}
+                        >
+                          <Ionicons name="checkmark" size={16} color="#fff" />
+                          <Text style={styles.acceptCounterText}>Accept ₹{contract.counter_offer_rate}/hr</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
                   </View>
-                </TouchableOpacity>
-              ))}
+                );
+              })}
             </>
           )}
         </ScrollView>
