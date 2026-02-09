@@ -33,9 +33,12 @@ export default function ContractRequestScreen() {
   const [advancePaid, setAdvancePaid] = useState(false);
   const [initialFuelFilled, setInitialFuelFilled] = useState(false);
   const [initialFuelLiters, setInitialFuelLiters] = useState('');
+  const [proposedRate, setProposedRate] = useState('');
+  const [wantsToNegotiate, setWantsToNegotiate] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const rate = parseFloat(hourlyRate || '0');
+  const rate = wantsToNegotiate && proposedRate ? parseFloat(proposedRate) : parseFloat(hourlyRate || '0');
+  const originalRate = parseFloat(hourlyRate || '0');
   const days = parseInt(totalDays) || 0;
   const estimatedHoursPerDay = 8;
   const totalAmount = days * estimatedHoursPerDay * rate + (parseFloat(transportCharges) || 0);
