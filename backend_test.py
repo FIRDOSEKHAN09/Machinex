@@ -12,7 +12,7 @@ import os
 import uuid
 
 # Get backend URL from environment
-BACKEND_URL = "https://machinehub-5.preview.emergentagent.com/api"
+BACKEND_URL = "https://rental-mgmt-hub-1.preview.emergentagent.com/api"
 
 class MachineRentalTester:
     def __init__(self):
