@@ -169,6 +169,12 @@ class ContractResponse(BaseModel):
     transport_paid: float = 0
     initial_fuel_filled: bool = False
     initial_fuel_liters: float = 0
+    # Negotiation fields
+    proposed_hourly_rate: Optional[float] = None
+    original_hourly_rate: Optional[float] = None
+    negotiation_status: str = "none"
+    final_agreed_rate: Optional[float] = None
+    counter_offer_rate: Optional[float] = None
     created_at: datetime
     machine_name: Optional[str] = None
     machine_type: Optional[str] = None
