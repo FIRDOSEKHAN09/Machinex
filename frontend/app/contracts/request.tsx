@@ -197,6 +197,46 @@ export default function ContractRequestScreen() {
               </View>
             </View>
 
+            {/* Price Negotiation Section */}
+            <View style={styles.negotiationSection}>
+              <Text style={styles.sectionTitle}>💰 Price Negotiation</Text>
+              
+              <View style={styles.switchGroup}>
+                <View style={styles.switchLabel}>
+                  <Ionicons name="chatbubble-ellipses-outline" size={20} color="#f97316" />
+                  <Text style={styles.label}>Negotiate hourly rate?</Text>
+                </View>
+                <Switch
+                  value={wantsToNegotiate}
+                  onValueChange={setWantsToNegotiate}
+                  trackColor={{ false: '#334155', true: '#f97316' }}
+                  thumbColor={wantsToNegotiate ? '#fff' : '#94a3b8'}
+                />
+              </View>
+
+              {wantsToNegotiate && (
+                <View style={[styles.formGroup, styles.indented]}>
+                  <Text style={styles.label}>Your Proposed Rate (\u20b9/hour)</Text>
+                  <View style={styles.negotiationInputContainer}>
+                    <Text style={styles.originalRate}>Original: \u20b9{originalRate}/h</Text>
+                    <TextInput
+                      style={styles.input}
+                      placeholder={`Propose your rate (e.g., ${Math.floor(originalRate * 0.9)})`}
+                      placeholderTextColor="#64748b"
+                      value={proposedRate}
+                      onChangeText={setProposedRate}
+                      keyboardType="numeric"
+                    />
+                  </View>
+                  <Text style={styles.hint}>
+                    {proposedRate && parseFloat(proposedRate) < originalRate 
+                      ? `💚 Saving \u20b9${((originalRate - parseFloat(proposedRate)) * days * estimatedHoursPerDay).toLocaleString()}`
+                      : 'Owner will review your proposed rate'}
+                  </Text>
+                </View>
+              )}
+            </View>
+
             {/* Advance Payment */}
             <View style={styles.advanceSection}>
               <Text style={styles.sectionTitle}>Advance Payment</Text>
