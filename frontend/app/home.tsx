@@ -403,6 +403,86 @@ export default function HomeScreen() {
 
           <View style={styles.bottomSpacer} />
         </ScrollView>
+
+        {/* Counter Offer Modal */}
+        <Modal
+          visible={showNegotiationModal}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setShowNegotiationModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>💰 Make Counter Offer</Text>
+                <TouchableOpacity onPress={() => setShowNegotiationModal(false)}>
+                  <Ionicons name="close" size={24} color="#94a3b8" />
+                </TouchableOpacity>
+              </View>
+              
+              {selectedContract && (
+                <>
+                  <View style={styles.modalInfo}>
+                    <Text style={styles.modalInfoLabel}>Machine</Text>
+                    <Text style={styles.modalInfoValue}>{selectedContract.machine_name}</Text>
+                  </View>
+                  <View style={styles.modalInfo}>
+                    <Text style={styles.modalInfoLabel}>Farmer's Proposal</Text>
+                    <Text style={styles.modalInfoValue}>₹{selectedContract.proposed_hourly_rate}/hour</Text>
+                  </View>
+                  <View style={styles.modalInfo}>
+                    <Text style={styles.modalInfoLabel}>Original Rate</Text>
+                    <Text style={styles.modalInfoValue}>₹{selectedContract.original_hourly_rate}/hour</Text>
+                  </View>
+                </>
+              )}
+              
+              <View style={styles.modalInputGroup}>
+                <Text style={styles.modalInputLabel}>Your Counter Rate (₹/hour)</Text>
+                <TextInput
+                  style={styles.modalInput}
+                  placeholder="Enter your rate"
+                  placeholderTextColor="#64748b"
+                  value={counterOfferRate}
+                  onChangeText={setCounterOfferRate}
+                  keyboardType="numeric"
+                />
+              </View>
+              
+              <View style={styles.modalInputGroup}>
+                <Text style={styles.modalInputLabel}>Message (Optional)</Text>
+                <TextInput
+                  style={[styles.modalInput, styles.modalTextArea]}
+                  placeholder="e.g., This is my best offer..."
+                  placeholderTextColor="#64748b"
+                  value={counterMessage}
+                  onChangeText={setCounterMessage}
+                  multiline
+                  numberOfLines={3}
+                />
+              </View>
+              
+              <View style={styles.modalActions}>
+                <TouchableOpacity 
+                  style={styles.modalCancelButton}
+                  onPress={() => setShowNegotiationModal(false)}
+                >
+                  <Text style={styles.modalCancelText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={[styles.modalSubmitButton, isProcessing && styles.buttonDisabled]}
+                  onPress={submitCounterOffer}
+                  disabled={isProcessing}
+                >
+                  <Ionicons name="paper-plane" size={18} color="#fff" />
+                  <Text style={styles.modalSubmitText}>
+                    {isProcessing ? 'Sending...' : 'Send Counter Offer'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
       </SafeAreaView>
     );
   } else if (user?.role === 'user') {
