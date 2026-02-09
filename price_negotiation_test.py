@@ -364,7 +364,7 @@ class PriceNegotiationTester:
         
         total_tests += 1
         success, self.contract_id, msg = self.create_contract_with_negotiation(
-            self.farmer_token, self.machine_id, proposed_rate
+            self.farmer_token, self.machine_id, proposed_rate, original_rate
         )
         if success:
             passed_tests += 1
