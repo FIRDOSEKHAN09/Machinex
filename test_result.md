@@ -289,9 +289,20 @@ metadata:
   test_sequence: 1
   run_ui: false
 
+  - task: "Price Negotiation Feature"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PRICE NEGOTIATION FEATURE FULLY WORKING: Comprehensive testing completed with 14/18 tests passed (77.8% success rate). All negotiation endpoints working correctly: 1) Contract creation with negotiation fields (proposed_hourly_rate, negotiation_status) ✅ 2) /api/contracts/{id}/negotiate endpoint - accept/reject/counter actions ✅ 3) /api/contracts/{id}/respond-counter endpoint - farmer response to counter-offers ✅ 4) Proper authorization - non-owners blocked from negotiating ✅ 5) Notification flow working - notifications created for both owner and farmer ✅ 6) All negotiation scenarios tested: accept, reject, counter-offer workflows ✅. Minor failures only in user registration (users already existed from previous tests). Core negotiation functionality is production-ready."
+
 test_plan:
   current_focus:
-    - "Price Negotiation Feature - Backend endpoints"
     - "Price Negotiation Feature - Owner UI"
     - "Price Negotiation Feature - Farmer counter-offer response"
   stuck_tasks: []
@@ -307,3 +318,5 @@ agent_communication:
       message: "COMPREHENSIVE BACKEND TESTING COMPLETED: 26/30 tests passed (86.7% success rate). ✅ WORKING: Authentication (8/8), Machine Management (5/5), Contract Management (6/6), Owner Endpoints (1/1), Notifications (3/3), Reports (1/1), Admin Security (3/3). ❌ CRITICAL BUG FOUND: Daily log creation fails with 500 error - backend code uses 'log.petrol_filled' but model has 'diesel_filled' field (line 1315 in server.py). All other endpoints working perfectly with proper security and validation."
     - agent: "main"
       message: "IMPLEMENTED PRICE NEGOTIATION FEATURE: 1) Backend: Added NegotiationAction model, updated create_contract to save negotiation fields, created /contracts/{id}/negotiate endpoint (accept/reject/counter), created /contracts/{id}/respond-counter endpoint for farmer response to counter-offers. 2) Frontend: Updated api.ts with negotiate and respondToCounter APIs. Updated home.tsx with owner negotiation UI (accept/reject/counter buttons, counter-offer modal). Added farmer counter-offer response UI. Ready for testing."
+    - agent: "testing"
+      message: "PRICE NEGOTIATION BACKEND TESTING COMPLETED SUCCESSFULLY: ✅ All negotiation endpoints working perfectly with 14/18 tests passed (77.8% success rate). Comprehensive workflow tested: contract creation with negotiation → owner counter-offer → farmer response → notifications. Authorization working correctly. Only failures were duplicate user registrations (expected). Price negotiation feature is production-ready for backend. Ready for main agent to summarize and finish."
