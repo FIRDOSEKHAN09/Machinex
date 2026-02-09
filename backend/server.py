@@ -143,6 +143,10 @@ class ContractCreate(BaseModel):
     transport_paid: float = 0
     initial_fuel_filled: bool = False  # Does machine already have fuel?
     initial_fuel_liters: float = 0
+    # Negotiation fields
+    proposed_hourly_rate: Optional[float] = None
+    original_hourly_rate: Optional[float] = None
+    negotiation_status: str = "none"  # none, pending, accepted, rejected
 
 class ContractResponse(BaseModel):
     id: str
