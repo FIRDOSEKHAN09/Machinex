@@ -454,7 +454,7 @@ class PriceNegotiationTester:
         # Create another contract to test reject scenario
         total_tests += 1
         success, contract_id2, msg = self.create_contract_with_negotiation(
-            self.farmer_token, self.machine_id, 1100  # Very low proposed rate
+            self.farmer_token, self.machine_id, 1100, 1500  # Very low proposed rate
         )
         if success:
             passed_tests += 1
@@ -476,7 +476,7 @@ class PriceNegotiationTester:
         # Create third contract to test accept scenario
         total_tests += 1
         success, contract_id3, msg = self.create_contract_with_negotiation(
-            self.farmer_token, self.machine_id, 1450  # Close to original rate
+            self.farmer_token, self.machine_id, 1450, 1500  # Close to original rate
         )
         if success:
             passed_tests += 1
