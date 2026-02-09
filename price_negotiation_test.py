@@ -130,7 +130,7 @@ class PriceNegotiationTester:
         except Exception as e:
             return False, None, f"Machine creation error: {str(e)}"
 
-    def create_contract_with_negotiation(self, farmer_token, machine_id, proposed_rate):
+    def create_contract_with_negotiation(self, farmer_token, machine_id, proposed_rate, original_rate):
         """Create a contract request with proposed hourly rate for negotiation"""
         try:
             headers = {
@@ -138,14 +138,22 @@ class PriceNegotiationTester:
                 "Content-Type": "application/json"
             }
             
+            total_amount = proposed_rate * 40  # 40 hours
+            advance_amount = total_amount * 0.3  # 30% advance
+            
             contract_data = {
                 "machine_id": machine_id,
-                "start_date": "2025-01-20",
-                "end_date": "2025-01-25",
-                "estimated_hours": 40,
-                "work_description": "Land excavation for foundation work",
-                "work_location": "Site Alpha, Mumbai",
+                "renter_name": "Test Farmer",
+                "renter_contact": FARMER_PHONE,
+                "total_days": 5,
+                "advance_amount": advance_amount,
+                "total_amount": total_amount,
+                "transport_charges": 5000,
+                "transport_paid": 0,
+                "initial_fuel_filled": False,
+                "initial_fuel_liters": 0,
                 "proposed_hourly_rate": proposed_rate,
+                "original_hourly_rate": original_rate,
                 "negotiation_status": "pending"
             }
             
