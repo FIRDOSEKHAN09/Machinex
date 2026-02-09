@@ -260,39 +260,94 @@ export default function HomeScreen() {
           {pendingContracts.length > 0 && (
             <>
               <Text style={styles.sectionTitle}>Pending Approvals</Text>
-              {pendingContracts.map((contract) => (
-                <View key={contract.id} style={styles.pendingContractCard}>
-                  <TouchableOpacity 
-                    style={styles.pendingContractInfo}
-                    onPress={() => router.push(`/contracts/${contract.id}`)}
-                  >
-                    <View style={styles.pendingContractHeader}>
-                      <Ionicons name="alert-circle" size={24} color="#f97316" />
-                      <View style={styles.pendingContractDetails}>
-                        <Text style={styles.machineName}>{contract.machine_name || 'Machine'}</Text>
-                        <Text style={styles.renterName}>Requested by: {contract.renter_name}</Text>
-                        <Text style={styles.contractAmount}>Amount: ₹{contract.total_amount?.toLocaleString()}</Text>
+              {pendingContracts.map((contract) => {
+                const hasNegotiation = contract.negotiation_status === 'pending' || contract.negotiation_status === 'countered';
+                const proposedRate = contract.proposed_hourly_rate;
+                const originalRate = contract.original_hourly_rate;
+                const counterRate = contract.counter_offer_rate;
+                
+                return (
+                  <View key={contract.id} style={[styles.pendingContractCard, hasNegotiation && styles.negotiationCard]}>
+                    <TouchableOpacity 
+                      style={styles.pendingContractInfo}
+                      onPress={() => router.push(`/contracts/${contract.id}`)}
+                    >
+                      <View style={styles.pendingContractHeader}>
+                        <Ionicons 
+                          name={hasNegotiation ? "chatbubble-ellipses" : "alert-circle"} 
+                          size={24} 
+                          color={hasNegotiation ? "#a855f7" : "#f97316"} 
+                        />
+                        <View style={styles.pendingContractDetails}>
+                          <Text style={styles.machineName}>{contract.machine_name || 'Machine'}</Text>
+                          <Text style={styles.renterName}>Requested by: {contract.renter_name}</Text>
+                          <Text style={styles.contractAmount}>Amount: ₹{contract.total_amount?.toLocaleString()}</Text>
+                          
+                          {/* Show negotiation details */}
+                          {hasNegotiation && (
+                            <View style={styles.negotiationBadge}>
+                              <Ionicons name="pricetag" size={14} color="#a855f7" />
+                              <Text style={styles.negotiationText}>
+                                {contract.negotiation_status === 'pending' 
+                                  ? `Proposed: ₹${proposedRate}/hr (was ₹${originalRate}/hr)`
+                                  : `Your counter: ₹${counterRate}/hr`
+                                }
+                              </Text>
+                            </View>
+                          )}
+                        </View>
                       </View>
-                    </View>
-                  </TouchableOpacity>
-                  <View style={styles.actionButtons}>
-                    <TouchableOpacity 
-                      style={styles.rejectButton} 
-                      onPress={() => handleReject(contract.id)}
-                    >
-                      <Ionicons name="close" size={18} color="#fff" />
-                      <Text style={styles.rejectText}>Reject</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity 
-                      style={styles.approveButton} 
-                      onPress={() => handleApprove(contract.id)}
-                    >
-                      <Ionicons name="checkmark" size={18} color="#fff" />
-                      <Text style={styles.approveText}>Approve</Text>
-                    </TouchableOpacity>
+                    
+                    {/* Action buttons - different for negotiation vs regular */}
+                    {hasNegotiation ? (
+                      <View style={styles.negotiationActions}>
+                        <TouchableOpacity 
+                          style={styles.rejectButton} 
+                          onPress={() => handleRejectNegotiation(contract)}
+                          disabled={isProcessing}
+                        >
+                          <Ionicons name="close" size={16} color="#fff" />
+                          <Text style={styles.rejectText}>Reject</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity 
+                          style={styles.counterButton} 
+                          onPress={() => openCounterOfferModal(contract)}
+                          disabled={isProcessing}
+                        >
+                          <Ionicons name="swap-horizontal" size={16} color="#fff" />
+                          <Text style={styles.counterText}>Counter</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity 
+                          style={styles.acceptNegotiationButton} 
+                          onPress={() => handleAcceptNegotiation(contract)}
+                          disabled={isProcessing}
+                        >
+                          <Ionicons name="checkmark" size={16} color="#fff" />
+                          <Text style={styles.acceptText}>Accept ₹{proposedRate}/hr</Text>
+                        </TouchableOpacity>
+                      </View>
+                    ) : (
+                      <View style={styles.actionButtons}>
+                        <TouchableOpacity 
+                          style={styles.rejectButton} 
+                          onPress={() => handleReject(contract.id)}
+                        >
+                          <Ionicons name="close" size={18} color="#fff" />
+                          <Text style={styles.rejectText}>Reject</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity 
+                          style={styles.approveButton} 
+                          onPress={() => handleApprove(contract.id)}
+                        >
+                          <Ionicons name="checkmark" size={18} color="#fff" />
+                          <Text style={styles.approveText}>Approve</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
                   </View>
-                </View>
-              ))}
+                );
+              })}
             </>
           )}
 
