@@ -272,6 +272,12 @@ class SupervisorAssignment(BaseModel):
     contract_id: str
     supervisor_id: str
 
+# Negotiation Action Model
+class NegotiationAction(BaseModel):
+    action: str  # "accept", "reject", "counter"
+    counter_rate: Optional[float] = None  # Required if action is "counter"
+    message: Optional[str] = None
+
 # Monthly Report Response
 class MonthlyReportResponse(BaseModel):
     month: str  # "2025-01"
