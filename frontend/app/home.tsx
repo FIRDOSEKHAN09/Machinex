@@ -731,4 +731,33 @@ const styles = StyleSheet.create({
   contractHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   contractInfo: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12 },
   machineName: { fontSize: 16, fontWeight: '600', color: '#f8fafc', flex: 1 },
+  
+  // Negotiation styles
+  negotiationCard: { backgroundColor: 'rgba(168, 85, 247, 0.1)', borderColor: '#a855f7' },
+  negotiationBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 8, backgroundColor: 'rgba(168, 85, 247, 0.2)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, alignSelf: 'flex-start' },
+  negotiationText: { fontSize: 12, color: '#a855f7', fontWeight: '500' },
+  negotiationActions: { flexDirection: 'row', gap: 6, flexWrap: 'wrap' },
+  counterButton: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 12, paddingVertical: 8, backgroundColor: '#a855f7', borderRadius: 8 },
+  counterText: { color: '#fff', fontSize: 13, fontWeight: '600' },
+  acceptNegotiationButton: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 12, paddingVertical: 8, backgroundColor: '#22c55e', borderRadius: 8, flex: 1, justifyContent: 'center' },
+  acceptText: { color: '#fff', fontSize: 13, fontWeight: '600' },
+  buttonDisabled: { opacity: 0.5 },
+  
+  // Modal styles
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.8)', justifyContent: 'flex-end' },
+  modalContent: { backgroundColor: '#1e293b', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, maxHeight: '80%' },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+  modalTitle: { fontSize: 20, fontWeight: 'bold', color: '#f8fafc' },
+  modalInfo: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#334155' },
+  modalInfoLabel: { fontSize: 14, color: '#94a3b8' },
+  modalInfoValue: { fontSize: 14, fontWeight: '600', color: '#f8fafc' },
+  modalInputGroup: { marginBottom: 16 },
+  modalInputLabel: { fontSize: 14, color: '#94a3b8', marginBottom: 8 },
+  modalInput: { backgroundColor: '#0f172a', borderRadius: 12, padding: 16, fontSize: 16, color: '#f8fafc', borderWidth: 1, borderColor: '#334155' },
+  modalTextArea: { minHeight: 80, textAlignVertical: 'top' },
+  modalActions: { flexDirection: 'row', gap: 12, marginTop: 8 },
+  modalCancelButton: { flex: 1, paddingVertical: 14, borderRadius: 12, backgroundColor: '#334155', alignItems: 'center' },
+  modalCancelText: { color: '#94a3b8', fontSize: 16, fontWeight: '600' },
+  modalSubmitButton: { flex: 2, flexDirection: 'row', paddingVertical: 14, borderRadius: 12, backgroundColor: '#a855f7', alignItems: 'center', justifyContent: 'center', gap: 8 },
+  modalSubmitText: { color: '#fff', fontSize: 16, fontWeight: '600' },
 });
