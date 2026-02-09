@@ -82,6 +82,69 @@ export default function HomeScreen() {
     }
   };
 
+  // Negotiation handlers
+  const handleAcceptNegotiation = async (contract: any) => {
+    try {
+      setIsProcessing(true);
+      await contractAPI.negotiate(contract.id, { action: 'accept' });
+      Alert.alert('Success', 'Negotiation accepted! Contract is now active.');
+      fetchData();
+    } catch (error: any) {
+      console.error('Accept negotiation error:', error);
+      Alert.alert('Error', error.response?.data?.detail || 'Failed to accept negotiation');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleRejectNegotiation = async (contract: any) => {
+    try {
+      setIsProcessing(true);
+      await contractAPI.negotiate(contract.id, { action: 'reject', message: 'Price not acceptable' });
+      Alert.alert('Rejected', 'Negotiation has been rejected.');
+      fetchData();
+    } catch (error: any) {
+      console.error('Reject negotiation error:', error);
+      Alert.alert('Error', error.response?.data?.detail || 'Failed to reject negotiation');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const openCounterOfferModal = (contract: any) => {
+    setSelectedContract(contract);
+    setCounterOfferRate(contract.original_hourly_rate?.toString() || '');
+    setCounterMessage('');
+    setShowNegotiationModal(true);
+  };
+
+  const submitCounterOffer = async () => {
+    if (!counterOfferRate || isNaN(parseFloat(counterOfferRate))) {
+      Alert.alert('Error', 'Please enter a valid counter offer rate');
+      return;
+    }
+
+    try {
+      setIsProcessing(true);
+      await contractAPI.negotiate(selectedContract.id, {
+        action: 'counter',
+        counter_rate: parseFloat(counterOfferRate),
+        message: counterMessage || undefined,
+      });
+      Alert.alert('Success', 'Counter-offer sent to farmer!');
+      setShowNegotiationModal(false);
+      setSelectedContract(null);
+      setCounterOfferRate('');
+      setCounterMessage('');
+      fetchData();
+    } catch (error: any) {
+      console.error('Counter offer error:', error);
+      Alert.alert('Error', error.response?.data?.detail || 'Failed to send counter-offer');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending': return '#f59e0b';
