@@ -450,6 +450,17 @@ const styles = StyleSheet.create({
   advanceSection: {
     marginBottom: 24,
   },
+  negotiationSection: {
+    marginBottom: 24,
+  },
+  negotiationInputContainer: {
+    gap: 8,
+  },
+  originalRate: {
+    fontSize: 12,
+    color: '#64748b',
+    fontStyle: 'italic',
+  },
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
