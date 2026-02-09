@@ -69,6 +69,9 @@ export default function ContractRequestScreen() {
         transport_paid: advancePaid ? advance : 0,
         initial_fuel_filled: initialFuelFilled,
         initial_fuel_liters: parseFloat(initialFuelLiters) || 0,
+        proposed_hourly_rate: wantsToNegotiate ? parseFloat(proposedRate) : null,
+        original_hourly_rate: originalRate,
+        negotiation_status: wantsToNegotiate ? 'pending' : 'none',
       });
 
       Alert.alert(
