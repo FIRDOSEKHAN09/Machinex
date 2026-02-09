@@ -49,6 +49,11 @@ export const contractAPI = {
   reject: (id: string, reason?: string) => api.post(`/contracts/${id}/reject`, { reason }),
   assignSupervisor: (contractId: string, supervisorId: string) =>
     api.post(`/contracts/${contractId}/assign-supervisor`, { contract_id: contractId, supervisor_id: supervisorId }),
+  // Negotiation APIs
+  negotiate: (contractId: string, data: { action: string; counter_rate?: number; message?: string }) =>
+    api.post(`/contracts/${contractId}/negotiate`, data),
+  respondToCounter: (contractId: string, action: string) =>
+    api.post(`/contracts/${contractId}/respond-counter`, null, { params: { action } }),
 };
 
 // Daily Log API
