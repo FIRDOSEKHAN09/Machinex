@@ -810,4 +810,14 @@ const styles = StyleSheet.create({
   modalCancelText: { color: '#94a3b8', fontSize: 16, fontWeight: '600' },
   modalSubmitButton: { flex: 2, flexDirection: 'row', paddingVertical: 14, borderRadius: 12, backgroundColor: '#a855f7', alignItems: 'center', justifyContent: 'center', gap: 8 },
   modalSubmitText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  
+  // Farmer counter-offer response styles
+  counterOfferCard: { borderWidth: 1, borderColor: '#f97316', backgroundColor: 'rgba(249, 115, 22, 0.1)' },
+  counterOfferBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 8, backgroundColor: 'rgba(249, 115, 22, 0.2)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, alignSelf: 'flex-start' },
+  counterOfferText: { fontSize: 12, color: '#f97316', fontWeight: '600' },
+  counterOfferActions: { flexDirection: 'row', gap: 8, marginTop: -4, marginBottom: 12, paddingHorizontal: 4 },
+  declineCounterButton: { flex: 1, paddingVertical: 10, borderRadius: 8, backgroundColor: '#334155', alignItems: 'center' },
+  declineCounterText: { color: '#94a3b8', fontSize: 14, fontWeight: '600' },
+  acceptCounterButton: { flex: 2, flexDirection: 'row', paddingVertical: 10, borderRadius: 8, backgroundColor: '#22c55e', alignItems: 'center', justifyContent: 'center', gap: 6 },
+  acceptCounterText: { color: '#fff', fontSize: 14, fontWeight: '600' },
 });
