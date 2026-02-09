@@ -1270,6 +1270,216 @@ async def reject_contract(contract_id: str, reason: Optional[str] = None, curren
     
     return {"message": "Contract rejected", "contract_id": contract_id}
 
+@api_router.post("/contracts/{contract_id}/negotiate")
+async def handle_negotiation(contract_id: str, negotiation: NegotiationAction, current_user: dict = Depends(get_current_user)):
+    """Owner handles price negotiation: accept, reject, or counter-offer"""
+    contract = await db.contracts.find_one({"id": contract_id})
+    if not contract:
+        raise HTTPException(status_code=404, detail="Contract not found")
+    
+    # Only owner can handle negotiation
+    if contract["owner_id"] != current_user["id"]:
+        raise HTTPException(status_code=403, detail="Only machine owner can handle negotiations")
+    
+    # Check if contract has a pending negotiation
+    if contract.get("negotiation_status") not in ["pending", "countered"]:
+        raise HTTPException(status_code=400, detail="No pending negotiation for this contract")
+    
+    machine = await db.machines.find_one({"id": contract["machine_id"]})
+    machine_name = machine["model_name"] if machine else "Machine"
+    
+    if negotiation.action == "accept":
+        # Accept the proposed rate (or counter offer if farmer re-negotiated)
+        final_rate = contract.get("proposed_hourly_rate") or contract.get("original_hourly_rate", 0)
+        
+        # Recalculate total amount with new rate
+        estimated_hours = contract["total_days"] * 8  # 8 hours per day estimate
+        new_total = (estimated_hours * final_rate) + contract.get("transport_charges", 0)
+        
+        await db.contracts.update_one(
+            {"id": contract_id},
+            {"$set": {
+                "negotiation_status": "accepted",
+                "final_agreed_rate": final_rate,
+                "total_amount": new_total,
+                "remaining_amount": new_total - contract.get("advance_amount", 0),
+                "approval_status": "approved",
+                "status": "active",
+                "start_date": datetime.utcnow()
+            }}
+        )
+        
+        # Update machine status to rented
+        await db.machines.update_one(
+            {"id": contract["machine_id"]},
+            {"$set": {"status": "rented"}}
+        )
+        
+        # Notify farmer
+        notification = {
+            "id": str(uuid.uuid4()),
+            "user_id": contract["renter_id"],
+            "message": f"✅ Great news! Your proposed rate of ₹{final_rate}/hr for {machine_name} has been accepted! Contract is now active.",
+            "notification_type": "negotiation_accepted",
+            "contract_id": contract_id,
+            "read": False,
+            "created_at": datetime.utcnow()
+        }
+        await db.notifications.insert_one(notification)
+        
+        return {"message": "Negotiation accepted", "final_rate": final_rate, "contract_id": contract_id}
+    
+    elif negotiation.action == "reject":
+        # Reject the negotiation entirely
+        await db.contracts.update_one(
+            {"id": contract_id},
+            {"$set": {
+                "negotiation_status": "rejected",
+                "approval_status": "rejected",
+                "status": "rejected"
+            }}
+        )
+        
+        rejection_msg = f"❌ Your price negotiation for {machine_name} was rejected."
+        if negotiation.message:
+            rejection_msg += f" Owner's message: {negotiation.message}"
+        
+        notification = {
+            "id": str(uuid.uuid4()),
+            "user_id": contract["renter_id"],
+            "message": rejection_msg,
+            "notification_type": "negotiation_rejected",
+            "contract_id": contract_id,
+            "read": False,
+            "created_at": datetime.utcnow()
+        }
+        await db.notifications.insert_one(notification)
+        
+        return {"message": "Negotiation rejected", "contract_id": contract_id}
+    
+    elif negotiation.action == "counter":
+        # Owner makes a counter-offer
+        if not negotiation.counter_rate:
+            raise HTTPException(status_code=400, detail="Counter rate is required for counter-offer")
+        
+        # Calculate new total with counter rate
+        estimated_hours = contract["total_days"] * 8
+        new_total = (estimated_hours * negotiation.counter_rate) + contract.get("transport_charges", 0)
+        
+        await db.contracts.update_one(
+            {"id": contract_id},
+            {"$set": {
+                "negotiation_status": "countered",
+                "counter_offer_rate": negotiation.counter_rate,
+                "total_amount": new_total,
+                "remaining_amount": new_total - contract.get("advance_amount", 0)
+            }}
+        )
+        
+        counter_msg = f"💬 Counter-offer received for {machine_name}! Owner proposes ₹{negotiation.counter_rate}/hr."
+        if negotiation.message:
+            counter_msg += f" Message: {negotiation.message}"
+        
+        notification = {
+            "id": str(uuid.uuid4()),
+            "user_id": contract["renter_id"],
+            "message": counter_msg,
+            "notification_type": "counter_offer",
+            "contract_id": contract_id,
+            "read": False,
+            "created_at": datetime.utcnow()
+        }
+        await db.notifications.insert_one(notification)
+        
+        return {"message": "Counter-offer sent", "counter_rate": negotiation.counter_rate, "contract_id": contract_id}
+    
+    else:
+        raise HTTPException(status_code=400, detail="Invalid action. Use 'accept', 'reject', or 'counter'")
+
+@api_router.post("/contracts/{contract_id}/respond-counter")
+async def respond_to_counter_offer(contract_id: str, action: str, current_user: dict = Depends(get_current_user)):
+    """Farmer responds to owner's counter-offer: accept or reject"""
+    contract = await db.contracts.find_one({"id": contract_id})
+    if not contract:
+        raise HTTPException(status_code=404, detail="Contract not found")
+    
+    # Only the renter can respond to counter-offer
+    if contract["renter_id"] != current_user["id"]:
+        raise HTTPException(status_code=403, detail="Only the renter can respond to counter-offers")
+    
+    if contract.get("negotiation_status") != "countered":
+        raise HTTPException(status_code=400, detail="No counter-offer to respond to")
+    
+    machine = await db.machines.find_one({"id": contract["machine_id"]})
+    machine_name = machine["model_name"] if machine else "Machine"
+    counter_rate = contract.get("counter_offer_rate", 0)
+    
+    if action == "accept":
+        # Accept the counter-offer
+        estimated_hours = contract["total_days"] * 8
+        final_total = (estimated_hours * counter_rate) + contract.get("transport_charges", 0)
+        
+        await db.contracts.update_one(
+            {"id": contract_id},
+            {"$set": {
+                "negotiation_status": "accepted",
+                "final_agreed_rate": counter_rate,
+                "proposed_hourly_rate": counter_rate,  # Update proposed to final agreed
+                "total_amount": final_total,
+                "remaining_amount": final_total - contract.get("advance_amount", 0),
+                "approval_status": "approved",
+                "status": "active",
+                "start_date": datetime.utcnow()
+            }}
+        )
+        
+        # Update machine status
+        await db.machines.update_one(
+            {"id": contract["machine_id"]},
+            {"$set": {"status": "rented"}}
+        )
+        
+        # Notify owner
+        notification = {
+            "id": str(uuid.uuid4()),
+            "user_id": contract["owner_id"],
+            "message": f"✅ {contract['renter_name']} accepted your counter-offer of ₹{counter_rate}/hr for {machine_name}. Contract is now active!",
+            "notification_type": "counter_offer_accepted",
+            "contract_id": contract_id,
+            "read": False,
+            "created_at": datetime.utcnow()
+        }
+        await db.notifications.insert_one(notification)
+        
+        return {"message": "Counter-offer accepted", "final_rate": counter_rate, "contract_id": contract_id}
+    
+    elif action == "reject":
+        # Reject the counter-offer - contract is cancelled
+        await db.contracts.update_one(
+            {"id": contract_id},
+            {"$set": {
+                "negotiation_status": "rejected",
+                "approval_status": "rejected",
+                "status": "rejected"
+            }}
+        )
+        
+        notification = {
+            "id": str(uuid.uuid4()),
+            "user_id": contract["owner_id"],
+            "message": f"❌ {contract['renter_name']} rejected your counter-offer for {machine_name}. Contract cancelled.",
+            "notification_type": "counter_offer_rejected",
+            "contract_id": contract_id,
+            "read": False,
+            "created_at": datetime.utcnow()
+        }
+        await db.notifications.insert_one(notification)
+        
+        return {"message": "Counter-offer rejected, contract cancelled", "contract_id": contract_id}
+    
+    else:
+        raise HTTPException(status_code=400, detail="Invalid action. Use 'accept' or 'reject'")
+
 @api_router.post("/contracts/{contract_id}/assign-supervisor")
 async def assign_supervisor(contract_id: str, assignment: SupervisorAssignment, current_user: dict = Depends(get_current_user)):
     """Owner assigns a supervisor to a contract"""
