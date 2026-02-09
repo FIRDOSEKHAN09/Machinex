@@ -1059,6 +1059,11 @@ async def create_contract(contract: ContractCreate, current_user: dict = Depends
     renter_id = current_user["id"]
     
     contract_id = str(uuid.uuid4())
+    
+    # Determine negotiation status and prepare negotiation fields
+    has_negotiation = contract.proposed_hourly_rate is not None and contract.proposed_hourly_rate != contract.original_hourly_rate
+    negotiation_status = "pending" if has_negotiation else "none"
+    
     contract_doc = {
         "id": contract_id,
         "machine_id": contract.machine_id,
@@ -1080,6 +1085,12 @@ async def create_contract(contract: ContractCreate, current_user: dict = Depends
         "approval_status": "pending",  # Requires owner approval
         "supervisor_id": None,
         "supervisor_name": None,
+        # Negotiation fields
+        "proposed_hourly_rate": contract.proposed_hourly_rate,
+        "original_hourly_rate": contract.original_hourly_rate or machine.get("hourly_rate", 0),
+        "negotiation_status": negotiation_status,
+        "final_agreed_rate": None,
+        "counter_offer_rate": None,
         "created_at": datetime.utcnow()
     }
     
@@ -1088,10 +1099,15 @@ async def create_contract(contract: ContractCreate, current_user: dict = Depends
     # Machine status remains "available" until approved
     
     # Create notification for owner to approve
+    if has_negotiation:
+        notification_message = f"💰 {contract.renter_name} wants to negotiate the rate for {machine['model_name']}. Proposed: ₹{contract.proposed_hourly_rate}/hr (Original: ₹{contract.original_hourly_rate}/hr)"
+    else:
+        notification_message = f"🔔 {contract.renter_name} is waiting for approval to rent {machine['model_name']}"
+    
     notification = {
         "id": str(uuid.uuid4()),
         "user_id": owner_id,
-        "message": f"🔔 {contract.renter_name} is waiting for approval to rent {machine['model_name']}",
+        "message": notification_message,
         "notification_type": "contract_approval_request",
         "contract_id": contract_id,
         "read": False,
