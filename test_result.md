@@ -290,9 +290,12 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus: []
+  current_focus:
+    - "Price Negotiation Feature - Backend endpoints"
+    - "Price Negotiation Feature - Owner UI"
+    - "Price Negotiation Feature - Farmer counter-offer response"
   stuck_tasks: []
-  test_all: true
+  test_all: false
   test_priority: "high_first"
 
 agent_communication:
@@ -302,3 +305,5 @@ agent_communication:
       message: "Fixed critical data deletion bug. Root cause was missing user dependencies in useFocusEffect hooks. Updated home.tsx, machines/index.tsx, contracts/index.tsx, and admin/index.tsx to properly refetch data when user changes (login/logout). MongoDB persistence verified working - no data loss on server side. Ready for frontend testing to verify the fix works correctly."
     - agent: "testing"
       message: "COMPREHENSIVE BACKEND TESTING COMPLETED: 26/30 tests passed (86.7% success rate). ✅ WORKING: Authentication (8/8), Machine Management (5/5), Contract Management (6/6), Owner Endpoints (1/1), Notifications (3/3), Reports (1/1), Admin Security (3/3). ❌ CRITICAL BUG FOUND: Daily log creation fails with 500 error - backend code uses 'log.petrol_filled' but model has 'diesel_filled' field (line 1315 in server.py). All other endpoints working perfectly with proper security and validation."
+    - agent: "main"
+      message: "IMPLEMENTED PRICE NEGOTIATION FEATURE: 1) Backend: Added NegotiationAction model, updated create_contract to save negotiation fields, created /contracts/{id}/negotiate endpoint (accept/reject/counter), created /contracts/{id}/respond-counter endpoint for farmer response to counter-offers. 2) Frontend: Updated api.ts with negotiate and respondToCounter APIs. Updated home.tsx with owner negotiation UI (accept/reject/counter buttons, counter-offer modal). Added farmer counter-offer response UI. Ready for testing."
