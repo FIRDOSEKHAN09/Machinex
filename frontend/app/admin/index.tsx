@@ -421,7 +421,431 @@ export default function AdminDashboardScreen() {
       </ScrollView>
     </SafeAreaView>
   );
+}  import React, { useState, useEffect, useCallback } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+  RefreshControl,
+  ActivityIndicator,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter, useFocusEffect } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { useAuth } from "@/src/context/AuthContext";
+import { adminAPI } from "@/src/services/api";
+
+export default function AdminDashboardScreen() {
+  const router = useRouter();
+  const { user, logout } = useAuth();
+  const [overview, setOverview] = useState<any>(null);
+  const [runningMachines, setRunningMachines] = useState<any[]>([]);
+  const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [todayStats, setTodayStats] = useState<any>({
+    logins: 0,
+    newContracts: 0,
+    newUsers: 0,
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchData = async () => {
+    try {
+      const [overviewRes, runningRes, activityRes] = await Promise.all([
+        adminAPI.getOverview(),
+        adminAPI.getRunningMachines(),
+        adminAPI.getRecentActivity(),
+      ]);
+
+      setOverview(overviewRes.data);
+      setRunningMachines(runningRes.data || []);
+      setRecentActivity(activityRes.data || []);
+
+      const today = new Date().toDateString();
+      const todayActivity = (activityRes.data || []).filter(
+        (a: any) => new Date(a.timestamp).toDateString() === today,
+      );
+
+      setTodayStats({
+        logins: todayActivity.filter((a: any) => a.type === "login").length,
+        newContracts: todayActivity.filter(
+          (a: any) => a.type === "contract_created",
+        ).length,
+        newUsers: todayActivity.filter((a: any) => a.type === "user_registered")
+          .length,
+      });
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        router.replace("/home");
+      }
+    } finally {
+      setIsLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      if (user) fetchData();
+      const interval = setInterval(() => {
+        if (user) fetchData();
+      }, 30000);
+      return () => clearInterval(interval);
+    }, [user?.id]),
+  );
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchData();
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    router.replace("/auth/login");
+  };
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#f97316" />
+          <Text style={styles.loadingText}></Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+   if (user?.role !== 'admin') {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.errorContainer}>
+          <Ionicons name="lock-closed" size={64} color="#ef4444" />
+          <Text style={styles.errorTitle}>Access Denied</Text>
+          <Text style={styles.errorText}>Admin access required</Text>
+
+          {/* ✅ ONLY CHANGE HERE */}
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.replace('/auth/login')}
+          >
+            <Text style={styles.backButtonText}>Go Back</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  function getActivityIcon(type: any) {
+    throw new Error("Function not implemented.");
+  }
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <ScrollView
+        style={styles.scrollView}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#f97316"
+          />
+        }
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.greeting}>Admin Dashboard</Text>
+            <Text style={styles.userName}>{user?.name}</Text>
+            <View style={styles.liveBadge}>
+              <View style={styles.liveIndicator} />
+              <Text style={styles.liveText}>LIVE</Text>
+            </View>
+          </View>
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <Ionicons name="log-out-outline" size={24} color="#f8fafc" />
+          </TouchableOpacity>
+        </View>
+
+        {/* Today's Activity */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Today's Activity</Text>
+          <View style={styles.todayGrid}>
+            <View style={styles.todayCard}>
+              <Ionicons name="log-in" size={24} color="#3b82f6" />
+              <Text style={styles.todayValue}>{todayStats.logins}</Text>
+              <Text style={styles.todayLabel}>Logins</Text>
+            </View>
+            <View style={styles.todayCard}>
+              <Ionicons name="document-text" size={24} color="#22c55e" />
+              <Text style={styles.todayValue}>{todayStats.newContracts}</Text>
+              <Text style={styles.todayLabel}>New Contracts</Text>
+            </View>
+            <View style={styles.todayCard}>
+              <Ionicons name="person-add" size={24} color="#f97316" />
+              <Text style={styles.todayValue}>{todayStats.newUsers}</Text>
+              <Text style={styles.todayLabel}>New Users</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Overview Stats */}
+        {overview && (
+          <>
+            {/* Users Stats */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Users Overview</Text>
+              <View style={styles.statsGrid}>
+                <View style={[styles.statCard, styles.statCardPrimary]}>
+                  <Ionicons name="people" size={28} color="#f97316" />
+                  <Text style={styles.statValue}>{overview.users.total}</Text>
+                  <Text style={styles.statLabel}>Total Users</Text>
+                </View>
+                <View style={styles.statCard}>
+                  <Ionicons name="business" size={24} color="#3b82f6" />
+                  <Text style={styles.statValue}>{overview.users.owners}</Text>
+                  <Text style={styles.statLabel}>Owners</Text>
+                </View>
+                <View style={styles.statCard}>
+                  <Ionicons name="person" size={24} color="#22c55e" />
+                  <Text style={styles.statValue}>{overview.users.renters}</Text>
+                  <Text style={styles.statLabel}>Renters</Text>
+                </View>
+                <View style={styles.statCard}>
+                  <Ionicons name="settings" size={24} color="#a855f7" />
+                  <Text style={styles.statValue}>
+                    {overview.users.managers}
+                  </Text>
+                  <Text style={styles.statLabel}>Managers</Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Machines Stats */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Machines Status</Text>
+              <View style={styles.statsGrid}>
+                <View style={styles.statCard}>
+                  <Ionicons name="construct" size={24} color="#f97316" />
+                  <Text style={styles.statValue}>
+                    {overview.machines.total}
+                  </Text>
+                  <Text style={styles.statLabel}>Total</Text>
+                </View>
+                <View style={styles.statCard}>
+                  <Ionicons name="checkmark-circle" size={24} color="#22c55e" />
+                  <Text style={styles.statValue}>
+                    {overview.machines.available}
+                  </Text>
+                  <Text style={styles.statLabel}>Available</Text>
+                </View>
+                <View style={styles.statCard}>
+                  <Ionicons name="swap-horizontal" size={24} color="#3b82f6" />
+                  <Text style={styles.statValue}>
+                    {overview.machines.rented}
+                  </Text>
+                  <Text style={styles.statLabel}>Rented</Text>
+                </View>
+                <View style={[styles.statCard, styles.statCardRunning]}>
+                  <Ionicons name="pulse" size={24} color="#ef4444" />
+                  <Text style={[styles.statValue, styles.runningValue]}>
+                    {overview.machines.running}
+                  </Text>
+                  <Text style={styles.statLabel}>Running NOW</Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Contracts & Revenue */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Contracts & Revenue</Text>
+              <View style={styles.statsRow}>
+                <View style={[styles.statCardWide, styles.revenueCard]}>
+                  <Ionicons name="cash" size={32} color="#22c55e" />
+                  <View>
+                    <Text style={styles.revenueLabel}>Total Revenue</Text>
+                    <Text style={styles.revenueValue}>
+                      ₹{overview.revenue.total.toLocaleString()}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+              <View style={styles.statsGrid}>
+                <View style={styles.statCard}>
+                  <Ionicons name="document-text" size={24} color="#3b82f6" />
+                  <Text style={styles.statValue}>
+                    {overview.contracts.total}
+                  </Text>
+                  <Text style={styles.statLabel}>Total</Text>
+                </View>
+                <View style={styles.statCard}>
+                  <Ionicons name="time" size={24} color="#f97316" />
+                  <Text style={styles.statValue}>
+                    {overview.contracts.active}
+                  </Text>
+                  <Text style={styles.statLabel}>Active</Text>
+                </View>
+                <View style={styles.statCard}>
+                  <Ionicons name="checkmark-done" size={24} color="#22c55e" />
+                  <Text style={styles.statValue}>
+                    {overview.contracts.completed}
+                  </Text>
+                  <Text style={styles.statLabel}>Completed</Text>
+                </View>
+              </View>
+            </View>
+          </>
+        )}
+
+        {/* Running Machines - LIVE */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <View style={styles.sectionTitleRow}>
+              <Text style={styles.sectionTitle}>Machines Running NOW</Text>
+              <View style={styles.pulseIndicator}>
+                <View style={styles.pulseCircle} />
+              </View>
+            </View>
+            <TouchableOpacity
+              onPress={() => router.push("/admin/running-machines")}
+            >
+              <Text style={styles.seeAll}>View All</Text>
+            </TouchableOpacity>
+          </View>
+
+          {runningMachines.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Ionicons name="pause-circle-outline" size={48} color="#475569" />
+              <Text style={styles.emptyText}>No machines running</Text>
+            </View>
+          ) : (
+            runningMachines.slice(0, 3).map((machine) => (
+              <View key={machine.log_id} style={styles.runningCard}>
+                <View style={styles.runningHeader}>
+                  <View style={styles.runningIcon}>
+                    <Ionicons name="construct" size={20} color="#22c55e" />
+                    <View style={styles.runningDot} />
+                  </View>
+                  <View style={styles.runningInfo}>
+                    <Text style={styles.runningMachine}>
+                      {machine.machine_name}
+                    </Text>
+                    <Text style={styles.runningRenter}>
+                      Rented by: {machine.renter_name}
+                    </Text>
+                  </View>
+                  <View style={styles.runningTime}>
+                    <Text style={styles.runningHours}>
+                      {machine.running_hours.toFixed(1)}h
+                    </Text>
+                    <Text style={styles.runningLabel}>Running</Text>
+                  </View>
+                </View>
+              </View>
+            ))
+          )}
+        </View>
+
+        {/* Quick Actions */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Quick Actions</Text>
+          <View style={styles.actionsGrid}>
+            <TouchableOpacity
+              style={styles.actionCard}
+              onPress={() => router.push("/admin/users")}
+            >
+              <View
+                style={[
+                  styles.actionIcon,
+                  { backgroundColor: "rgba(59, 130, 246, 0.1)" },
+                ]}
+              >
+                <Ionicons name="people" size={28} color="#3b82f6" />
+              </View>
+              <Text style={styles.actionText}>All Users</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.actionCard}
+              onPress={() => router.push("/admin/all-contracts")}
+            >
+              <View
+                style={[
+                  styles.actionIcon,
+                  { backgroundColor: "rgba(34, 197, 94, 0.1)" },
+                ]}
+              >
+                <Ionicons name="document-text" size={28} color="#22c55e" />
+              </View>
+              <Text style={styles.actionText}>All Contracts</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.actionCard}
+              onPress={() => router.push("/admin/all-machines")}
+            >
+              <View
+                style={[
+                  styles.actionIcon,
+                  { backgroundColor: "rgba(249, 115, 22, 0.1)" },
+                ]}
+              >
+                <Ionicons name="construct" size={28} color="#f97316" />
+              </View>
+              <Text style={styles.actionText}>All Machines</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.actionCard}
+              onPress={() => router.push("/admin/daily-logs")}
+            >
+              <View
+                style={[
+                  styles.actionIcon,
+                  { backgroundColor: "rgba(168, 85, 247, 0.1)" },
+                ]}
+              >
+                <Ionicons name="time" size={28} color="#a855f7" />
+              </View>
+              <Text style={styles.actionText}>Daily Logs</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Recent Activity */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Recent Activity</Text>
+          {recentActivity.slice(0, 10).map((activity, index) => {
+            const icon = getActivityIcon(activity.type);
+            return (
+              <View key={index} style={styles.activityCard}>
+                <View
+                  style={[
+                    styles.activityIcon,
+                    { backgroundColor: `${icon.color}20` },
+                  ]}
+                >
+                  <Ionicons
+                    name={icon.name as any}
+                    size={20}
+                    color={icon.color}
+                  />
+                </View>
+                <View style={styles.activityContent}>
+                  <Text style={styles.activityMessage}>{activity.message}</Text>
+                  <Text style={styles.activityTime}>
+                    {formatDate(activity.timestamp)}
+                  </Text>
+                </View>
+              </View>
+            );
+          })}
+        </View>
+
+        <View style={styles.bottomSpacer} />
+      </ScrollView>
+    </SafeAreaView>
+  );
 }
+ 
 
 const styles = StyleSheet.create({
   container: {
