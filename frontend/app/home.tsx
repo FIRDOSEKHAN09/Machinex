@@ -870,4 +870,14 @@ const styles = StyleSheet.create({
   declineCounterText: { color: '#94a3b8', fontSize: 14, fontWeight: '600' },
   acceptCounterButton: { flex: 2, flexDirection: 'row', paddingVertical: 10, borderRadius: 8, backgroundColor: '#22c55e', alignItems: 'center', justifyContent: 'center', gap: 6 },
   acceptCounterText: { color: '#fff', fontSize: 14, fontWeight: '600' },
+  
+  // Admin styles
+  adminWelcome: { alignItems: 'center', paddingVertical: 40, marginBottom: 20 },
+  adminWelcomeTitle: { fontSize: 24, fontWeight: 'bold', color: '#f8fafc', marginTop: 16 },
+  adminWelcomeSubtitle: { fontSize: 14, color: '#64748b', marginTop: 8 },
+  adminCardButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#1e293b', borderRadius: 16, padding: 20, marginBottom: 16, borderWidth: 1, borderColor: '#334155' },
+  adminCardIcon: { width: 56, height: 56, borderRadius: 28, backgroundColor: 'rgba(249, 115, 22, 0.1)', alignItems: 'center', justifyContent: 'center', marginRight: 16 },
+  adminCardContent: { flex: 1 },
+  adminCardTitle: { fontSize: 18, fontWeight: '600', color: '#f8fafc' },
+  adminCardSubtitle: { fontSize: 14, color: '#64748b', marginTop: 4 },
 });
