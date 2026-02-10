@@ -303,8 +303,8 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Price Negotiation Feature - Owner UI"
-    - "Price Negotiation Feature - Farmer counter-offer response"
+    - "Admin Authentication System - Secure login"
+    - "Admin Role Seeding - Auto-seed on startup"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
