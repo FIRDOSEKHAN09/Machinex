@@ -1797,10 +1797,13 @@ async def get_owner_monthly_summary(
         "total_grease_used": round(total_grease_used, 2),
         "total_engine_oil_used": round(total_engine_oil_used, 2),
         "total_hydraulic_oil_used": round(total_hydraulic_oil_used, 2),
+        "total_fuel_cost": round(diesel_cost, 2),  # Frontend expects this field name
+        "total_consumables_cost": round(consumables_cost, 2),  # Frontend expects this field name
         "diesel_cost": round(diesel_cost, 2),
         "consumables_cost": round(consumables_cost, 2),
         "net_earnings": round(net_earnings, 2),
         "total_contracts": total_contracts,
+        "machine_breakdown": machine_summaries,  # Frontend expects this field name
         "machines": machine_summaries
     }
 
