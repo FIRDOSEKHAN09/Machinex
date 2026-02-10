@@ -115,7 +115,7 @@ export default function AdminDashboardScreen() {
   }
 
   function getActivityIcon(type: any) {
-    throw new Error("Function not implemented.");
+    switch (type) { case "login": return <Ionicons name="log-in-outline" size={20} color="#22c55e" />; case "contract": return <Ionicons name="document-text-outline" size={20} color="#3b82f6" />; case "machine": return <Ionicons name="construct-outline" size={20} color="#f97316" />; case "payment": return <Ionicons name="cash-outline" size={20} color="#a855f7" />; case "registration": return <Ionicons name="person-add-outline" size={20} color="#06b6d4" />; default: return <Ionicons name="ellipse-outline" size={20} color="#64748b" />; }
   }
 
   return (
@@ -538,7 +538,7 @@ export default function AdminDashboardScreen() {
   }
 
   function getActivityIcon(type: any) {
-    throw new Error("Function not implemented.");
+    switch (type) { case "login": return <Ionicons name="log-in-outline" size={20} color="#22c55e" />; case "contract": return <Ionicons name="document-text-outline" size={20} color="#3b82f6" />; case "machine": return <Ionicons name="construct-outline" size={20} color="#f97316" />; case "payment": return <Ionicons name="cash-outline" size={20} color="#a855f7" />; case "registration": return <Ionicons name="person-add-outline" size={20} color="#06b6d4" />; default: return <Ionicons name="ellipse-outline" size={20} color="#64748b" />; }
   }
 
   return (
