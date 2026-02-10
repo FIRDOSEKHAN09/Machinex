@@ -1675,6 +1675,136 @@ async def get_monthly_report(
     }
 
 
+@api_router.get("/owner/monthly-summary")
+async def get_owner_monthly_summary(
+    year: int,
+    month: int,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Get monthly summary for all machines owned by the current user
+    Aggregates: total revenue, working hours, diesel consumed, oil used, net earnings
+    """
+    # Only owners can access this
+    if current_user["role"] not in [UserRole.OWNER, UserRole.ADMIN]:
+        raise HTTPException(status_code=403, detail="Only owners can access monthly summary")
+    
+    # Get all machines owned by user
+    machines = await db.machines.find({"owner_id": current_user["id"]}).to_list(1000)
+    
+    if not machines:
+        return {
+            "year": year,
+            "month": month,
+            "total_revenue": 0,
+            "total_working_hours": 0,
+            "total_diesel_consumed": 0,
+            "total_grease_used": 0,
+            "total_engine_oil_used": 0,
+            "total_hydraulic_oil_used": 0,
+            "diesel_cost": 0,
+            "consumables_cost": 0,
+            "net_earnings": 0,
+            "total_contracts": 0,
+            "machines": []
+        }
+    
+    # Calculate date range
+    start_date = datetime(year, month, 1)
+    if month == 12:
+        end_date = datetime(year + 1, 1, 1)
+    else:
+        end_date = datetime(year, month + 1, 1)
+    
+    # Aggregate data across all machines
+    total_revenue = 0
+    total_working_hours = 0
+    total_diesel_consumed = 0
+    total_grease_used = 0
+    total_engine_oil_used = 0
+    total_hydraulic_oil_used = 0
+    diesel_cost = 0
+    consumables_cost = 0
+    total_contracts = 0
+    machine_summaries = []
+    
+    for machine in machines:
+        machine_revenue = 0
+        machine_hours = 0
+        machine_diesel = 0
+        
+        # Get contracts for this machine in the month
+        contracts = await db.contracts.find({
+            "machine_id": machine["id"],
+            "$or": [
+                {"start_date": {"$gte": start_date, "$lt": end_date}},
+                {"status": "active", "start_date": {"$lt": end_date}}
+            ]
+        }).to_list(1000)
+        
+        for contract in contracts:
+            total_contracts += 1
+            machine_revenue += contract.get("total_amount", 0)
+            
+            # Get daily logs for this contract within the month
+            daily_logs = await db.daily_logs.find({
+                "contract_id": contract["id"],
+                "date": {"$gte": start_date, "$lt": end_date}
+            }).to_list(1000)
+            
+            for log in daily_logs:
+                hours = log.get("working_hours", 0)
+                machine_hours += hours
+                total_working_hours += hours
+                
+                diesel = log.get("diesel_filled", 0)
+                machine_diesel += diesel
+                total_diesel_consumed += diesel
+                
+                total_grease_used += log.get("grease_oil", 0)
+                total_engine_oil_used += log.get("engine_oil", 0)
+                total_hydraulic_oil_used += log.get("hydraulic_oil", 0)
+                
+                diesel_cost += diesel * log.get("diesel_price_snapshot", 95)
+            
+            # Get consumables
+            consumables = await db.consumables.find({
+                "contract_id": contract["id"],
+                "date": {"$gte": start_date, "$lt": end_date}
+            }).to_list(1000)
+            
+            for cons in consumables:
+                consumables_cost += cons.get("total_cost", 0)
+        
+        total_revenue += machine_revenue
+        
+        machine_summaries.append({
+            "machine_id": machine["id"],
+            "machine_name": machine["model_name"],
+            "revenue": round(machine_revenue, 2),
+            "working_hours": round(machine_hours, 2),
+            "diesel_consumed": round(machine_diesel, 2)
+        })
+    
+    net_earnings = total_revenue - diesel_cost - consumables_cost
+    
+    return {
+        "year": year,
+        "month": month,
+        "total_revenue": round(total_revenue, 2),
+        "total_working_hours": round(total_working_hours, 2),
+        "total_diesel_consumed": round(total_diesel_consumed, 2),
+        "total_grease_used": round(total_grease_used, 2),
+        "total_engine_oil_used": round(total_engine_oil_used, 2),
+        "total_hydraulic_oil_used": round(total_hydraulic_oil_used, 2),
+        "diesel_cost": round(diesel_cost, 2),
+        "consumables_cost": round(consumables_cost, 2),
+        "net_earnings": round(net_earnings, 2),
+        "total_contracts": total_contracts,
+        "machines": machine_summaries
+    }
+
+
 # ==================== ADMIN ENDPOINTS (App Owner Only) ====================
 
 async def check_admin(current_user: dict):
