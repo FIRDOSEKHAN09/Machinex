@@ -115,7 +115,36 @@ export default function AdminDashboardScreen() {
   }
 
   function getActivityIcon(type: any) {
-    switch (type) { case "login": return <Ionicons name="log-in-outline" size={20} color="#22c55e" />; case "contract": return <Ionicons name="document-text-outline" size={20} color="#3b82f6" />; case "machine": return <Ionicons name="construct-outline" size={20} color="#f97316" />; case "payment": return <Ionicons name="cash-outline" size={20} color="#a855f7" />; case "registration": return <Ionicons name="person-add-outline" size={20} color="#06b6d4" />; default: return <Ionicons name="ellipse-outline" size={20} color="#64748b" />; }
+    switch (type) {
+      case "login":
+        return { name: "log-in-outline", color: "#22c55e" };
+      case "contract":
+        return { name: "document-text-outline", color: "#3b82f6" };
+      case "machine":
+        return { name: "construct-outline", color: "#f97316" };
+      case "payment":
+        return { name: "cash-outline", color: "#a855f7" };
+      case "registration":
+        return { name: "person-add-outline", color: "#06b6d4" };
+      default:
+        return { name: "ellipse-outline", color: "#64748b" };
+    }
+  }
+
+  function formatDate(dateString: string) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+    
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString();
   }
 
   return (
