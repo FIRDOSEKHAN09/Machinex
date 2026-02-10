@@ -1039,7 +1039,7 @@ async def approve_contract(contract_id: str, current_user: dict = Depends(get_cu
     notification = {
         "id": str(uuid.uuid4()),
         "user_id": contract["renter_id"],
-        "message": f"✅ Your contract request has been approved! You can now start using the machine.",
+        "message": "✅ Your contract request has been approved! You can now start using the machine.",
         "notification_type": "contract_approved",
         "contract_id": contract_id,
         "read": False,
