@@ -1073,7 +1073,7 @@ async def reject_contract(contract_id: str, reason: Optional[str] = None, curren
     )
     
     # Notify renter
-    rejection_msg = f"❌ Your contract request has been rejected."
+    rejection_msg = "❌ Your contract request has been rejected."
     if reason:
         rejection_msg += f" Reason: {reason}"
     
