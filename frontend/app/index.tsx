@@ -3,14 +3,11 @@ import { View, ActivityIndicator, StyleSheet, Animated, Text, Easing } from 'rea
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/src/context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
-import AdminPasswordModal from '@/src/components/AdminPasswordModal';
 
 export default function Index() {
-  const { isAuthenticated, isLoading, user, isAdmin } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const router = useRouter();
   const [showSplash, setShowSplash] = useState(true);
-  const [showAdminModal, setShowAdminModal] = useState(false);
-  const [hasCheckedAdmin, setHasCheckedAdmin] = useState(false);
   
   // Animation values
   const excavatorPosition = new Animated.Value(-100);
@@ -83,30 +80,13 @@ export default function Index() {
   useEffect(() => {
     if (!showSplash && !isLoading) {
       if (isAuthenticated) {
-        // Check if we should show admin modal (only once per session)
-        if (!hasCheckedAdmin && !isAdmin) {
-          setShowAdminModal(true);
-          setHasCheckedAdmin(true);
-        } else {
-          // Navigate based on role
-          router.replace('/home');
-        }
+        // Navigate to home - role-based routing handled in home.tsx
+        router.replace('/home');
       } else {
         router.replace('/auth/login');
       }
     }
-  }, [showSplash, isLoading, isAuthenticated, user, hasCheckedAdmin, isAdmin]);
-
-  const handleAdminModalClose = () => {
-    setShowAdminModal(false);
-    // Navigate to home after modal closes (whether admin or not)
-    router.replace('/home');
-  };
-
-  const handleAdminSuccess = () => {
-    // Admin access granted, just navigate to home
-    // Home screen will show admin features based on role
-  };
+  }, [showSplash, isLoading, isAuthenticated, user]);
 
   const spin = wheelRotation.interpolate({
     inputRange: [0, 1],
@@ -180,13 +160,6 @@ export default function Index() {
   return (
     <View style={styles.container}>
       <ActivityIndicator size="large" color="#f97316" />
-      
-      {/* Hidden Admin Password Modal */}
-      <AdminPasswordModal
-        visible={showAdminModal}
-        onClose={handleAdminModalClose}
-        onSuccess={handleAdminSuccess}
-      />
     </View>
   );
 }
