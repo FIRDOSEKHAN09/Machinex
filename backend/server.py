@@ -2043,16 +2043,19 @@ async def seed_admin_user():
             await db.users.insert_one(admin_user)
             logger.info(f"✅ Admin user seeded successfully: {ADMIN_PHONE}")
         else:
-            # Update admin password if changed in env
+            # Ensure admin role and correct password
+            update_fields = {"role": UserRole.ADMIN, "verified": True}
             current_hash = existing_admin.get("password_hash", "")
             if not verify_password(ADMIN_PASSWORD, current_hash):
-                await db.users.update_one(
-                    {"phone_or_email": ADMIN_PHONE},
-                    {"$set": {"password_hash": hash_password(ADMIN_PASSWORD)}}
-                )
-                logger.info(f"✅ Admin password updated for: {ADMIN_PHONE}")
+                update_fields["password_hash"] = hash_password(ADMIN_PASSWORD)
+                logger.info(f"✅ Admin password and role updated for: {ADMIN_PHONE}")
             else:
-                logger.info(f"✅ Admin user already exists: {ADMIN_PHONE}")
+                logger.info(f"✅ Admin role ensured for: {ADMIN_PHONE}")
+            
+            await db.users.update_one(
+                {"phone_or_email": ADMIN_PHONE},
+                {"$set": update_fields}
+            )
     except Exception as e:
         logger.error(f"❌ Failed to seed admin user: {e}")
 
