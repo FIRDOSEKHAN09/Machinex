@@ -187,6 +187,60 @@ export default function HomeScreen() {
   }
 
   // ROLE-BASED RENDERING
+  
+  // ADMIN ROLE - Redirect to Admin Dashboard
+  if (user?.role === 'admin') {
+    // Admin sees the dedicated admin dashboard
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.greeting}>Admin Dashboard</Text>
+            <Text style={styles.userName}>{user.name}</Text>
+          </View>
+          <View style={styles.headerActions}>
+            <TouchableOpacity style={styles.notificationButton} onPress={() => router.push('/notifications')}>
+              <Ionicons name="notifications-outline" size={24} color="#f8fafc" />
+              {unreadCount > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{unreadCount}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.profileButton} onPress={() => router.push('/profile')}>
+              <Ionicons name="person-outline" size={24} color="#f8fafc" />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <ScrollView style={styles.scrollView} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#f97316" />}>
+          {/* Admin Quick Actions */}
+          <View style={styles.adminWelcome}>
+            <Ionicons name="shield-checkmark" size={48} color="#f97316" />
+            <Text style={styles.adminWelcomeTitle}>Welcome, Admin</Text>
+            <Text style={styles.adminWelcomeSubtitle}>You have full access to manage the platform</Text>
+          </View>
+
+          <TouchableOpacity 
+            style={styles.adminCardButton}
+            onPress={() => router.push('/admin')}
+          >
+            <View style={styles.adminCardIcon}>
+              <Ionicons name="analytics" size={28} color="#f97316" />
+            </View>
+            <View style={styles.adminCardContent}>
+              <Text style={styles.adminCardTitle}>View Full Dashboard</Text>
+              <Text style={styles.adminCardSubtitle}>Users, machines, contracts, revenue & more</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={24} color="#64748b" />
+          </TouchableOpacity>
+
+          <View style={styles.bottomSpacer} />
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
+
   if (user?.role === 'owner') {
     // MACHINE OWNER VIEW - Enhanced Dashboard
     const pendingContracts = sortedContracts.filter(c => c.status === 'pending');
