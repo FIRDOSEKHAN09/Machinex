@@ -2206,6 +2206,38 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ==================== ADMIN SEEDING ====================
+@app.on_event("startup")
+async def seed_admin_user():
+    """Seed the admin user on application startup if not exists"""
+    try:
+        existing_admin = await db.users.find_one({"phone_or_email": ADMIN_PHONE})
+        if not existing_admin:
+            admin_user = {
+                "id": str(uuid.uuid4()),
+                "name": ADMIN_NAME,
+                "phone_or_email": ADMIN_PHONE,
+                "password_hash": hash_password(ADMIN_PASSWORD),
+                "role": UserRole.ADMIN,
+                "verified": True,  # Admin is pre-verified
+                "created_at": datetime.utcnow()
+            }
+            await db.users.insert_one(admin_user)
+            logger.info(f"✅ Admin user seeded successfully: {ADMIN_PHONE}")
+        else:
+            # Update admin password if changed in env
+            current_hash = existing_admin.get("password_hash", "")
+            if not verify_password(ADMIN_PASSWORD, current_hash):
+                await db.users.update_one(
+                    {"phone_or_email": ADMIN_PHONE},
+                    {"$set": {"password_hash": hash_password(ADMIN_PASSWORD)}}
+                )
+                logger.info(f"✅ Admin password updated for: {ADMIN_PHONE}")
+            else:
+                logger.info(f"✅ Admin user already exists: {ADMIN_PHONE}")
+    except Exception as e:
+        logger.error(f"❌ Failed to seed admin user: {e}")
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
