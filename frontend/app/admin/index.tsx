@@ -421,6 +421,7 @@ export default function AdminDashboardScreen() {
       </ScrollView>
     </SafeAreaView>
   );
+}
 
 const styles = StyleSheet.create({
   container: {
