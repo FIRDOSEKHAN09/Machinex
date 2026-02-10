@@ -18,8 +18,6 @@ export const authAPI = {
   login: (data: { phone_or_email: string; password: string }) =>
     api.post('/auth/login', data),
   getMe: () => api.get('/auth/me'),
-  verifyAdminAccess: (data: { admin_password: string }) =>
-    api.post('/auth/verify-admin-access', data),
 };
 
 // Machine API
