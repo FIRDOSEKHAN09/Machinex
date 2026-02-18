@@ -383,4 +383,56 @@ const styles = StyleSheet.create({
   bottomSpacer: {
     height: 32,
   },
+  // Subscription styles
+  premiumCard: {
+    borderWidth: 2,
+    borderColor: '#f97316',
+    backgroundColor: 'rgba(249, 115, 22, 0.05)',
+  },
+  freeCard: {
+    borderWidth: 1,
+    borderColor: '#334155',
+  },
+  subscriptionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  subscriptionInfo: {
+    flex: 1,
+  },
+  subscriptionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#f8fafc',
+  },
+  subscriptionStatus: {
+    fontSize: 13,
+    color: '#94a3b8',
+    marginTop: 2,
+  },
+  upgradeButton: {
+    backgroundColor: '#f97316',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  upgradeButtonText: {
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  subscriptionDetails: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#334155',
+  },
+  subscriptionDetailText: {
+    fontSize: 13,
+    color: '#22c55e',
+  },
 });
