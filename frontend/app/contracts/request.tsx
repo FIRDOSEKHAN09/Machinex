@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -16,6 +16,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/src/context/AuthContext';
 import { contractAPI } from '@/src/services/api';
+import { usePremiumGate } from '@/src/hooks/usePremiumGate';
 
 export default function ContractRequestScreen() {
   const router = useRouter();
@@ -26,6 +27,7 @@ export default function ContractRequestScreen() {
     ownerId: string;
   }>();
   const { user } = useAuth();
+  const { isPremium, checkPremiumAccess, goToPaywall } = usePremiumGate();
 
   const [totalDays, setTotalDays] = useState('');
   const [transportCharges, setTransportCharges] = useState('');
@@ -36,6 +38,13 @@ export default function ContractRequestScreen() {
   const [proposedRate, setProposedRate] = useState('');
   const [wantsToNegotiate, setWantsToNegotiate] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Premium gating - check on mount
+  useEffect(() => {
+    if (!isPremium) {
+      goToPaywall();
+    }
+  }, [isPremium, goToPaywall]);
 
   const rate = wantsToNegotiate && proposedRate ? parseFloat(proposedRate) : parseFloat(hourlyRate || '0');
   const originalRate = parseFloat(hourlyRate || '0');
