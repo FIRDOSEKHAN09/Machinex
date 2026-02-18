@@ -58,7 +58,7 @@ export default function LoginScreen() {
             <View style={styles.iconContainer}>
               <Ionicons name="construct" size={48} color="#f97316" />
             </View>
-            <Text style={styles.title}>Machine Rental</Text>
+            <Text style={styles.title}>MachineX</Text>
             <Text style={styles.subtitle}>Login to your account</Text>
           </View>
 
