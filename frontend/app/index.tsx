@@ -113,7 +113,7 @@ export default function Index() {
           <View style={styles.logoIcon}>
             <Ionicons name="construct" size={64} color="#f97316" />
           </View>
-          <Text style={styles.logoText}>Machine Rental</Text>
+          <Text style={styles.logoText}>MachineX</Text>
           <Text style={styles.logoSubtext}>Rent • Track • Manage</Text>
         </Animated.View>
 
