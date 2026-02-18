@@ -55,6 +55,9 @@ export default function ContractRequestScreen() {
   const remaining = totalAmount - advance;
 
   const handleSubmit = async () => {
+    // Check premium access before contract creation
+    if (!checkPremiumAccess()) return;
+    
     if (!totalDays || days <= 0) {
       Alert.alert('Error', 'Please enter valid number of days');
       return;
