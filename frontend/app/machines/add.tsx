@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -15,6 +15,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { machineAPI } from '@/src/services/api';
 import ImagePickerComponent from '@/src/components/ImagePickerComponent';
+import { usePremiumGate } from '@/src/hooks/usePremiumGate';
 
 const MACHINE_TYPES = [
   'Excavator',
@@ -30,6 +31,7 @@ const FUEL_TYPES = ['Diesel', 'Petrol', 'Electric', 'Hybrid'];
 
 export default function AddMachineScreen() {
   const router = useRouter();
+  const { isPremium, checkPremiumAccess, goToPaywall } = usePremiumGate();
   const [modelName, setModelName] = useState('');
   const [machineType, setMachineType] = useState('');
   const [engineCapacity, setEngineCapacity] = useState('');
@@ -45,7 +47,17 @@ export default function AddMachineScreen() {
   const [showTypeDropdown, setShowTypeDropdown] = useState(false);
   const [showFuelDropdown, setShowFuelDropdown] = useState(false);
 
+  // Premium gating - check on mount
+  useEffect(() => {
+    if (!isPremium) {
+      goToPaywall();
+    }
+  }, [isPremium, goToPaywall]);
+
   const handleSubmit = async () => {
+    // Check premium before allowing submission
+    if (!checkPremiumAccess()) return;
+    
     if (!modelName.trim() || !machineType || !engineCapacity.trim() || !fuelType || !hourlyRate || !city.trim()) {
       Alert.alert('Error', 'Please fill in all required fields (including city)');
       return;
