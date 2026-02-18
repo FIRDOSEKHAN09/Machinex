@@ -61,7 +61,7 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
       >
         <Ionicons name="construct" size={80} color="#f97316" />
       </Animated.View>
-      <Text style={styles.title}>Machine Rental</Text>
+      <Text style={styles.title}>MachineX</Text>
       <Text style={styles.subtitle}>Manage your fleet</Text>
       
       {/* Animated progress indicator */}
