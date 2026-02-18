@@ -105,6 +105,39 @@ export default function ProfileScreen() {
           </View>
         </View>
 
+        {/* Subscription Status Card */}
+        <TouchableOpacity
+          style={[styles.card, isPremium ? styles.premiumCard : styles.freeCard]}
+          onPress={() => !isPremium && router.push('/paywall')}
+        >
+          <View style={styles.subscriptionHeader}>
+            <Ionicons
+              name={isPremium ? 'diamond' : 'diamond-outline'}
+              size={28}
+              color={isPremium ? '#f97316' : '#64748b'}
+            />
+            <View style={styles.subscriptionInfo}>
+              <Text style={styles.subscriptionTitle}>
+                {isPremium ? 'MachineX Pro' : 'Free Plan'}
+              </Text>
+              <Text style={styles.subscriptionStatus}>
+                {isPremium ? 'Active Subscription' : 'Upgrade for full access'}
+              </Text>
+            </View>
+            {!isPremium && (
+              <View style={styles.upgradeButton}>
+                <Text style={styles.upgradeButtonText}>Upgrade</Text>
+              </View>
+            )}
+          </View>
+          {isPremium && customerInfo?.activeSubscriptions?.length > 0 && (
+            <View style={styles.subscriptionDetails}>
+              <Ionicons name="checkmark-circle" size={16} color="#22c55e" />
+              <Text style={styles.subscriptionDetailText}>All premium features unlocked</Text>
+            </View>
+          )}
+        </TouchableOpacity>
+
         {/* Details Card */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Account Information</Text>
