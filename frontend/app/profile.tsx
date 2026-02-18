@@ -13,10 +13,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/src/context/AuthContext';
+import { useSubscription } from '@/src/context/SubscriptionContext';
 
 export default function ProfileScreen() {
   const router = useRouter();
   const { user, logout } = useAuth();
+  const { isPremium, customerInfo } = useSubscription();
 
   const handleLogout = async () => {
     Alert.alert(
