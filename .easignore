@@ -14,9 +14,4 @@ SETUP_INSTRUCTIONS.md
 test_result.md
 node_modules
 .expo
-.emergent
-.venv
-tests
-backend
 *.md
-*.patch
