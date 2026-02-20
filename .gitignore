@@ -1,15 +1,15 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
-
-# dependencies
-node_modules/
-
-# Expo
+# Expo & build artifacts
 .expo/
 dist/
 web-build/
 expo-env.d.ts
+android/
+ios/
 
-# Native
+# Dependencies
+node_modules/
+
+# Native credentials & build files
 .kotlin/
 *.orig.*
 *.jks
@@ -18,63 +18,45 @@ expo-env.d.ts
 *.key
 *.mobileprovision
 
-# Metro
+# Metro & debug
 .metro-health-check*
-
-# debug
 npm-debug.*
 yarn-debug.*
 yarn-error.*
+.pnpm-debug.log*
 
-# macOS
+# OS junk
 .DS_Store
-*.pem
+Thumbs.db
 
-# local env files
+# Environment & local files
+.env
+.env.*
 .env*.local
+*token.json*
+*credentials.json*
 
-# typescript
+# TypeScript & IDE
 *.tsbuildinfo
-
-app-example
-
-# IDE and editors
 .idea/
 .vscode/
 
-# Testing
+# Testing & coverage
 /coverage
 
-# Python
+# Python & backend
 __pycache__/
 *.pyc
 venv/
 .venv/
-
-# Development tools
-chainlit.md
-.chainlit
-.ipynb_checkpoints/
+backend/
+tests/
+.emergent/
 
 # Deployment
 .vercel
-
-# Environment files
-*.env
-*.env.*
-*token.json*
-*credentials.json*
 
 # Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
-
-# System files
-.DS_Store
-
-# Backend / non-mobile
-backend/
-tests/
-.emergent/
