@@ -18,7 +18,7 @@ import { useSubscription } from '@/src/context/SubscriptionContext';
 export default function ProfileScreen() {
   const router = useRouter();
   const { user, logout } = useAuth();
-  const { isPremium, customerInfo } = useSubscription();
+  const { isPremium, isTrialActive, trialDaysRemaining } = useSubscription();
 
   const handleLogout = async () => {
     Alert.alert(
