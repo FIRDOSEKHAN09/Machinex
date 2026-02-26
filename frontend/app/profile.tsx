@@ -130,10 +130,12 @@ export default function ProfileScreen() {
               </View>
             )}
           </View>
-          {isPremium && customerInfo?.activeSubscriptions?.length > 0 && (
+          {isTrialActive && (
             <View style={styles.subscriptionDetails}>
-              <Ionicons name="checkmark-circle" size={16} color="#22c55e" />
-              <Text style={styles.subscriptionDetailText}>All premium features unlocked</Text>
+              <Ionicons name="time-outline" size={16} color="#22c55e" />
+              <Text style={styles.subscriptionDetailText}>
+                {trialDaysRemaining} days free remaining
+              </Text>
             </View>
           )}
         </TouchableOpacity>
