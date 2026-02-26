@@ -1,9 +1,3 @@
-import Purchases, {
-  CustomerInfo,
-  PurchasesOfferings,
-  PurchasesPackage,
-  LOG_LEVEL,
-} from 'react-native-purchases';
 import { Platform } from 'react-native';
 
 // RevenueCat Configuration
@@ -16,8 +10,31 @@ export const PRODUCT_IDS = {
   YEARLY: 'machinex_yearly',
 };
 
+// Dynamic import to prevent crash if module not available
+let Purchases: any = null;
+let LOG_LEVEL: any = null;
+
+const loadRevenueCat = async () => {
+  if (Platform.OS === 'web') {
+    console.log('[SubscriptionService] Web platform - RevenueCat not supported');
+    return false;
+  }
+  
+  try {
+    const module = await import('react-native-purchases');
+    Purchases = module.default;
+    LOG_LEVEL = module.LOG_LEVEL;
+    console.log('[SubscriptionService] RevenueCat module loaded successfully');
+    return true;
+  } catch (error) {
+    console.error('[SubscriptionService] Failed to load RevenueCat module:', error);
+    return false;
+  }
+};
+
 class SubscriptionService {
   private initialized: boolean = false;
+  private moduleLoaded: boolean = false;
 
   /**
    * Initialize RevenueCat SDK
@@ -29,9 +46,27 @@ class SubscriptionService {
       return;
     }
 
+    // Skip on web
+    if (Platform.OS === 'web') {
+      console.log('[SubscriptionService] Web platform - skipping initialization');
+      this.initialized = true;
+      return;
+    }
+
     try {
+      // Try to load the module
+      this.moduleLoaded = await loadRevenueCat();
+      
+      if (!this.moduleLoaded || !Purchases) {
+        console.log('[SubscriptionService] RevenueCat not available - skipping');
+        this.initialized = true;
+        return;
+      }
+
       // Set log level for debugging (change to WARN in production)
-      Purchases.setLogLevel(LOG_LEVEL.DEBUG);
+      if (LOG_LEVEL) {
+        Purchases.setLogLevel(LOG_LEVEL.DEBUG);
+      }
 
       // Configure RevenueCat
       if (Platform.OS === 'android') {
@@ -40,10 +75,7 @@ class SubscriptionService {
       } else if (Platform.OS === 'ios') {
         // iOS not implemented yet - would need separate API key
         console.log('[SubscriptionService] iOS not configured yet');
-        return;
-      } else {
-        // Web - RevenueCat not supported on web
-        console.log('[SubscriptionService] Web platform - subscriptions not available');
+        this.initialized = true;
         return;
       }
 
@@ -51,14 +83,28 @@ class SubscriptionService {
       console.log('[SubscriptionService] Initialized successfully');
     } catch (error) {
       console.error('[SubscriptionService] Initialization failed:', error);
-      throw error;
+      // Don't throw - just mark as initialized to prevent retry loops
+      this.initialized = true;
+      this.moduleLoaded = false;
     }
+  }
+
+  /**
+   * Check if RevenueCat is available and initialized
+   */
+  isAvailable(): boolean {
+    return this.initialized && this.moduleLoaded && Purchases !== null;
   }
 
   /**
    * Identify user with their unique ID (Firebase UID or app user ID)
    */
-  async loginUser(userId: string): Promise<CustomerInfo> {
+  async loginUser(userId: string): Promise<any> {
+    if (!this.isAvailable()) {
+      console.log('[SubscriptionService] Not available - skipping login');
+      return null;
+    }
+
     try {
       console.log('[SubscriptionService] Logging in user:', userId);
       const { customerInfo } = await Purchases.logIn(userId);
@@ -66,14 +112,18 @@ class SubscriptionService {
       return customerInfo;
     } catch (error) {
       console.error('[SubscriptionService] Login failed:', error);
-      throw error;
+      return null;
     }
   }
 
   /**
    * Log out user (clear RevenueCat identity)
    */
-  async logoutUser(): Promise<CustomerInfo> {
+  async logoutUser(): Promise<any> {
+    if (!this.isAvailable()) {
+      return null;
+    }
+
     try {
       console.log('[SubscriptionService] Logging out user');
       const customerInfo = await Purchases.logOut();
@@ -81,14 +131,18 @@ class SubscriptionService {
       return customerInfo;
     } catch (error) {
       console.error('[SubscriptionService] Logout failed:', error);
-      throw error;
+      return null;
     }
   }
 
   /**
    * Get current customer info including subscription status
    */
-  async getCustomerInfo(): Promise<CustomerInfo> {
+  async getCustomerInfo(): Promise<any> {
+    if (!this.isAvailable()) {
+      return null;
+    }
+
     try {
       const customerInfo = await Purchases.getCustomerInfo();
       console.log('[SubscriptionService] Got customer info:', {
@@ -98,7 +152,7 @@ class SubscriptionService {
       return customerInfo;
     } catch (error) {
       console.error('[SubscriptionService] Failed to get customer info:', error);
-      throw error;
+      return null;
     }
   }
 
@@ -106,15 +160,16 @@ class SubscriptionService {
    * Check if user has pro_access entitlement (premium)
    */
   async isPremiumUser(): Promise<boolean> {
-    try {
-      if (!this.initialized) {
-        console.log('[SubscriptionService] Not initialized, returning false');
-        return false;
-      }
+    if (!this.isAvailable()) {
+      console.log('[SubscriptionService] Not available - returning false');
+      return false;
+    }
 
+    try {
       const customerInfo = await this.getCustomerInfo();
-      const isPremium = customerInfo.entitlements.active[ENTITLEMENT_ID] !== undefined;
+      if (!customerInfo) return false;
       
+      const isPremium = customerInfo.entitlements?.active?.[ENTITLEMENT_ID] !== undefined;
       console.log('[SubscriptionService] Premium status:', isPremium);
       return isPremium;
     } catch (error) {
@@ -126,10 +181,14 @@ class SubscriptionService {
   /**
    * Get available subscription offerings
    */
-  async getOfferings(): Promise<PurchasesOfferings | null> {
+  async getOfferings(): Promise<any> {
+    if (!this.isAvailable()) {
+      return null;
+    }
+
     try {
       const offerings = await Purchases.getOfferings();
-      console.log('[SubscriptionService] Got offerings:', offerings.current?.identifier);
+      console.log('[SubscriptionService] Got offerings:', offerings?.current?.identifier);
       return offerings;
     } catch (error) {
       console.error('[SubscriptionService] Failed to get offerings:', error);
@@ -140,12 +199,16 @@ class SubscriptionService {
   /**
    * Purchase a subscription package
    */
-  async purchasePackage(pkg: PurchasesPackage): Promise<{ customerInfo: CustomerInfo; success: boolean }> {
+  async purchasePackage(pkg: any): Promise<{ customerInfo: any; success: boolean }> {
+    if (!this.isAvailable()) {
+      return { customerInfo: null, success: false };
+    }
+
     try {
       console.log('[SubscriptionService] Purchasing package:', pkg.identifier);
       const { customerInfo } = await Purchases.purchasePackage(pkg);
       
-      const isPremium = customerInfo.entitlements.active[ENTITLEMENT_ID] !== undefined;
+      const isPremium = customerInfo.entitlements?.active?.[ENTITLEMENT_ID] !== undefined;
       console.log('[SubscriptionService] Purchase complete, premium:', isPremium);
       
       return { customerInfo, success: isPremium };
@@ -153,7 +216,8 @@ class SubscriptionService {
       // Check if user cancelled
       if (error.userCancelled) {
         console.log('[SubscriptionService] User cancelled purchase');
-        return { customerInfo: await this.getCustomerInfo(), success: false };
+        const info = await this.getCustomerInfo();
+        return { customerInfo: info, success: false };
       }
       console.error('[SubscriptionService] Purchase failed:', error);
       throw error;
@@ -163,11 +227,15 @@ class SubscriptionService {
   /**
    * Restore previous purchases
    */
-  async restorePurchases(): Promise<{ customerInfo: CustomerInfo; isPremium: boolean }> {
+  async restorePurchases(): Promise<{ customerInfo: any; isPremium: boolean }> {
+    if (!this.isAvailable()) {
+      return { customerInfo: null, isPremium: false };
+    }
+
     try {
       console.log('[SubscriptionService] Restoring purchases');
       const customerInfo = await Purchases.restorePurchases();
-      const isPremium = customerInfo.entitlements.active[ENTITLEMENT_ID] !== undefined;
+      const isPremium = customerInfo.entitlements?.active?.[ENTITLEMENT_ID] !== undefined;
       
       console.log('[SubscriptionService] Restore complete, premium:', isPremium);
       return { customerInfo, isPremium };
