@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "MachineX",
-    "slug": "machine-x-new",
+    "slug": "machine-x-rent",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -50,7 +50,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "be054d9b-ea6d-4251-ad84-d20d3a0611e0"
+        "projectId": "21e2cd24-955c-4ebf-987f-6be8f4794dfd"
       }
     },
     "owner": "firdose_09"
