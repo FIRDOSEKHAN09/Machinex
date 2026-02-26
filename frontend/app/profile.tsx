@@ -349,26 +349,3 @@ const styles = StyleSheet.create({
     height: 32,
   },
 });
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  upgradeButtonText: {
-    color: '#fff',
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  subscriptionDetails: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#334155',
-  },
-  subscriptionDetailText: {
-    fontSize: 13,
-    color: '#22c55e',
-  },
-});
