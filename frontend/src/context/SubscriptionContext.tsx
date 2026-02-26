@@ -1,196 +1,84 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { Platform } from 'react-native';
-import { subscriptionService } from '../services/subscriptionService';
-import { useAuth } from './AuthContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const TRIAL_START_KEY = '@machinex_trial_start';
+const TWO_MONTHS_MS = 60 * 24 * 60 * 60 * 1000; // 60 days in milliseconds
 
 interface SubscriptionContextType {
   isPremium: boolean;
   isLoading: boolean;
-  offerings: any;
-  customerInfo: any;
+  isTrialActive: boolean;
+  trialDaysRemaining: number;
   error: string | null;
-  isAvailable: boolean;
-  purchasePackage: (pkg: any) => Promise<boolean>;
-  restorePurchases: () => Promise<boolean>;
-  refreshSubscriptionStatus: () => Promise<void>;
 }
 
 const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined);
 
 export function SubscriptionProvider({ children }: { children: ReactNode }) {
-  const { user, isAuthenticated } = useAuth();
-  // Default to premium (no blocking) - subscription is optional
+  // Default to premium (free access) - user can use app freely
   const [isPremium, setIsPremium] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
-  const [offerings, setOfferings] = useState<any>(null);
-  const [customerInfo, setCustomerInfo] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isTrialActive, setIsTrialActive] = useState(true);
+  const [trialDaysRemaining, setTrialDaysRemaining] = useState(60);
   const [error, setError] = useState<string | null>(null);
-  const [isAvailable, setIsAvailable] = useState(false);
 
-  // Initialize RevenueCat - but don't block user access
-  const initializeSubscriptions = useCallback(async () => {
-    // Skip on web - grant access
-    if (Platform.OS === 'web') {
-      console.log('[SubscriptionContext] Web platform - access granted');
-      setIsPremium(true);
-      setIsAvailable(false);
-      return;
-    }
-
+  // Check and initialize trial period
+  const checkTrialStatus = useCallback(async () => {
     try {
-      setIsLoading(true);
-      setError(null);
-
-      // Try to initialize RevenueCat
-      try {
-        await subscriptionService.initialize();
-      } catch (initError) {
-        console.log('[SubscriptionContext] RevenueCat init skipped:', initError);
-        setIsPremium(true); // Don't block user
-        setIsAvailable(false);
-        setIsLoading(false);
-        return;
+      // Get trial start date from storage
+      let trialStart = await AsyncStorage.getItem(TRIAL_START_KEY);
+      
+      if (!trialStart) {
+        // First time user - start trial now
+        trialStart = new Date().toISOString();
+        await AsyncStorage.setItem(TRIAL_START_KEY, trialStart);
+        console.log('[Subscription] Trial started:', trialStart);
       }
 
-      const available = subscriptionService.isAvailable();
-      setIsAvailable(available);
+      const startDate = new Date(trialStart);
+      const now = new Date();
+      const elapsed = now.getTime() - startDate.getTime();
+      const remaining = TWO_MONTHS_MS - elapsed;
+      const daysRemaining = Math.max(0, Math.ceil(remaining / (24 * 60 * 60 * 1000)));
 
-      if (!available) {
-        console.log('[SubscriptionContext] RevenueCat not available - access granted');
-        setIsPremium(true);
-        setIsLoading(false);
-        return;
-      }
-
-      // If user is authenticated, identify them
-      if (isAuthenticated && user?.id) {
-        try {
-          await subscriptionService.loginUser(user.id);
-        } catch (loginError) {
-          console.log('[SubscriptionContext] RevenueCat login skipped');
-        }
-      }
-
-      // Check subscription status - but don't block if it fails
-      try {
-        const premium = await subscriptionService.isPremiumUser();
-        setIsPremium(premium || true); // Default to true if check fails
-      } catch {
-        setIsPremium(true);
-      }
-
-      // Get offerings (non-blocking)
-      try {
-        const offers = await subscriptionService.getOfferings();
-        setOfferings(offers);
-      } catch {
-        // Ignore
-      }
-
-      // Get customer info (non-blocking)
-      try {
-        const info = await subscriptionService.getCustomerInfo();
-        setCustomerInfo(info);
-      } catch {
-        // Ignore
-      }
-
+      setTrialDaysRemaining(daysRemaining);
+      setIsTrialActive(daysRemaining > 0);
+      
+      // User has premium access during trial (2 months free)
+      // After trial, they still have access (subscription is optional for now)
+      setIsPremium(true);
+      
+      console.log('[Subscription] Trial days remaining:', daysRemaining);
     } catch (err: any) {
-      console.log('[SubscriptionContext] Error (non-blocking):', err.message);
-      setIsPremium(true); // Don't block user on errors
-      setIsAvailable(false);
+      console.error('[Subscription] Error checking trial:', err);
+      setError(err.message);
+      // On error, grant access
+      setIsPremium(true);
+      setIsTrialActive(true);
     } finally {
       setIsLoading(false);
     }
-  }, [isAuthenticated, user?.id]);
+  }, []);
 
-  // Initialize on mount with delay to not block app startup
+  // Initialize on mount
   useEffect(() => {
+    // Small delay to let app render first
     const timer = setTimeout(() => {
-      initializeSubscriptions();
-    }, 500); // Delay to let app render first
+      checkTrialStatus();
+    }, 100);
 
     return () => clearTimeout(timer);
-  }, [initializeSubscriptions]);
-
-  // Purchase a subscription package
-  const purchasePackage = useCallback(async (pkg: any): Promise<boolean> => {
-    if (!isAvailable) {
-      console.log('[SubscriptionContext] Purchases not available');
-      return false;
-    }
-
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const { customerInfo: info, success } = await subscriptionService.purchasePackage(pkg);
-      
-      setCustomerInfo(info);
-      if (success) setIsPremium(true);
-      
-      return success;
-    } catch (err: any) {
-      console.error('[SubscriptionContext] Purchase error:', err);
-      setError(err.message || 'Purchase failed');
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [isAvailable]);
-
-  // Restore previous purchases
-  const restorePurchases = useCallback(async (): Promise<boolean> => {
-    if (!isAvailable) {
-      return false;
-    }
-
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const { customerInfo: info, isPremium: premium } = await subscriptionService.restorePurchases();
-      
-      setCustomerInfo(info);
-      if (premium) setIsPremium(true);
-      
-      return premium;
-    } catch (err: any) {
-      console.error('[SubscriptionContext] Restore error:', err);
-      setError(err.message || 'Restore failed');
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [isAvailable]);
-
-  // Refresh subscription status
-  const refreshSubscriptionStatus = useCallback(async (): Promise<void> => {
-    if (Platform.OS === 'web' || !isAvailable) return;
-    
-    try {
-      const premium = await subscriptionService.isPremiumUser();
-      if (premium) setIsPremium(true);
-      
-      const info = await subscriptionService.getCustomerInfo();
-      setCustomerInfo(info);
-    } catch {
-      // Ignore errors
-    }
-  }, [isAvailable]);
+  }, [checkTrialStatus]);
 
   return (
     <SubscriptionContext.Provider
       value={{
         isPremium,
         isLoading,
-        offerings,
-        customerInfo,
+        isTrialActive,
+        trialDaysRemaining,
         error,
-        isAvailable,
-        purchasePackage,
-        restorePurchases,
-        refreshSubscriptionStatus,
       }}
     >
       {children}
