@@ -19,116 +19,99 @@ const SubscriptionContext = createContext<SubscriptionContextType | undefined>(u
 
 export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const { user, isAuthenticated } = useAuth();
-  const [isPremium, setIsPremium] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  // Default to premium (no blocking) - subscription is optional
+  const [isPremium, setIsPremium] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [offerings, setOfferings] = useState<any>(null);
   const [customerInfo, setCustomerInfo] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [isAvailable, setIsAvailable] = useState(false);
 
-  // Initialize RevenueCat and check subscription on app start
+  // Initialize RevenueCat - but don't block user access
   const initializeSubscriptions = useCallback(async () => {
+    // Skip on web - grant access
+    if (Platform.OS === 'web') {
+      console.log('[SubscriptionContext] Web platform - access granted');
+      setIsPremium(true);
+      setIsAvailable(false);
+      return;
+    }
+
     try {
       setIsLoading(true);
       setError(null);
 
-      // Web platform doesn't support subscriptions - grant premium access for testing
-      if (Platform.OS === 'web') {
-        console.log('[SubscriptionContext] Web platform - granting premium access');
-        setIsPremium(true);
-        setIsAvailable(false);
-        setIsLoading(false);
-        return;
-      }
-
-      // Initialize RevenueCat with error handling
+      // Try to initialize RevenueCat
       try {
         await subscriptionService.initialize();
       } catch (initError) {
-        console.error('[SubscriptionContext] RevenueCat init failed:', initError);
-        // Continue without RevenueCat - grant premium for now
-        setIsPremium(true);
+        console.log('[SubscriptionContext] RevenueCat init skipped:', initError);
+        setIsPremium(true); // Don't block user
         setIsAvailable(false);
         setIsLoading(false);
         return;
       }
 
-      // Check if RevenueCat is actually available
       const available = subscriptionService.isAvailable();
       setIsAvailable(available);
 
       if (!available) {
-        console.log('[SubscriptionContext] RevenueCat not available - granting premium access');
+        console.log('[SubscriptionContext] RevenueCat not available - access granted');
         setIsPremium(true);
         setIsLoading(false);
         return;
       }
 
-      // If user is authenticated, identify them with RevenueCat
+      // If user is authenticated, identify them
       if (isAuthenticated && user?.id) {
         try {
           await subscriptionService.loginUser(user.id);
         } catch (loginError) {
-          console.error('[SubscriptionContext] RevenueCat login failed:', loginError);
+          console.log('[SubscriptionContext] RevenueCat login skipped');
         }
       }
 
-      // Get subscription status
+      // Check subscription status - but don't block if it fails
       try {
         const premium = await subscriptionService.isPremiumUser();
-        setIsPremium(premium);
-      } catch (premiumError) {
-        console.error('[SubscriptionContext] Premium check failed:', premiumError);
-        setIsPremium(false);
-      }
-
-      // Get customer info (non-blocking)
-      try {
-        const info = await subscriptionService.getCustomerInfo();
-        setCustomerInfo(info);
-      } catch (infoError) {
-        console.error('[SubscriptionContext] Customer info failed:', infoError);
+        setIsPremium(premium || true); // Default to true if check fails
+      } catch {
+        setIsPremium(true);
       }
 
       // Get offerings (non-blocking)
       try {
         const offers = await subscriptionService.getOfferings();
         setOfferings(offers);
-      } catch (offerError) {
-        console.error('[SubscriptionContext] Offerings failed:', offerError);
+      } catch {
+        // Ignore
       }
 
-      console.log('[SubscriptionContext] Initialized successfully');
+      // Get customer info (non-blocking)
+      try {
+        const info = await subscriptionService.getCustomerInfo();
+        setCustomerInfo(info);
+      } catch {
+        // Ignore
+      }
+
     } catch (err: any) {
-      console.error('[SubscriptionContext] Initialization error:', err);
-      setError(err.message || 'Failed to initialize subscriptions');
-      // On error, grant premium access to not block the user
-      setIsPremium(true);
+      console.log('[SubscriptionContext] Error (non-blocking):', err.message);
+      setIsPremium(true); // Don't block user on errors
       setIsAvailable(false);
     } finally {
       setIsLoading(false);
     }
   }, [isAuthenticated, user?.id]);
 
-  // Handle user login/logout changes
+  // Initialize on mount with delay to not block app startup
   useEffect(() => {
-    // Small delay to let other contexts initialize first
     const timer = setTimeout(() => {
       initializeSubscriptions();
-    }, 100);
+    }, 500); // Delay to let app render first
 
     return () => clearTimeout(timer);
   }, [initializeSubscriptions]);
-
-  // Handle logout
-  useEffect(() => {
-    if (!isAuthenticated) {
-      // User logged out - reset state but don't crash
-      if (Platform.OS !== 'web' && subscriptionService.isAvailable()) {
-        subscriptionService.logoutUser().catch(console.error);
-      }
-    }
-  }, [isAuthenticated]);
 
   // Purchase a subscription package
   const purchasePackage = useCallback(async (pkg: any): Promise<boolean> => {
@@ -144,7 +127,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       const { customerInfo: info, success } = await subscriptionService.purchasePackage(pkg);
       
       setCustomerInfo(info);
-      setIsPremium(success);
+      if (success) setIsPremium(true);
       
       return success;
     } catch (err: any) {
@@ -159,7 +142,6 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   // Restore previous purchases
   const restorePurchases = useCallback(async (): Promise<boolean> => {
     if (!isAvailable) {
-      console.log('[SubscriptionContext] Purchases not available');
       return false;
     }
 
@@ -170,7 +152,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       const { customerInfo: info, isPremium: premium } = await subscriptionService.restorePurchases();
       
       setCustomerInfo(info);
-      setIsPremium(premium);
+      if (premium) setIsPremium(true);
       
       return premium;
     } catch (err: any) {
@@ -182,18 +164,18 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     }
   }, [isAvailable]);
 
-  // Refresh subscription status (call on app resume)
+  // Refresh subscription status
   const refreshSubscriptionStatus = useCallback(async (): Promise<void> => {
     if (Platform.OS === 'web' || !isAvailable) return;
     
     try {
       const premium = await subscriptionService.isPremiumUser();
-      setIsPremium(premium);
+      if (premium) setIsPremium(true);
       
       const info = await subscriptionService.getCustomerInfo();
       setCustomerInfo(info);
-    } catch (err: any) {
-      console.error('[SubscriptionContext] Refresh error:', err);
+    } catch {
+      // Ignore errors
     }
   }, [isAvailable]);
 
