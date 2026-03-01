@@ -10,6 +10,7 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
+import { Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -54,13 +55,27 @@ export default function LoginScreen() {
         style={styles.keyboardView}
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          <View style={styles.header}>
-            <View style={styles.iconContainer}>
-              <Ionicons name="construct" size={48} color="#f97316" />
-            </View>
+        <View style={styles.header}>
+  <Image
+  source={require('../../assets/images/logo.png')}
+  style={styles.logoImageStandalone}
+  resizeMode="contain"
+/>
+
             <Text style={styles.title}>MachineX</Text>
-            <Text style={styles.subtitle}>Login to your account</Text>
-          </View>
+
+  <View style={styles.taglineContainer}>
+    <Text style={styles.subtitle}>Rent</Text>
+    <View style={styles.dot} />
+    <Text style={styles.subtitle}>Track</Text>
+    <View style={styles.dot} />
+    <Text style={styles.subtitle}>Manage</Text>
+  </View>
+
+  <Text style={[styles.login, { marginTop: 6 }]}>
+    Login to your account
+  </Text>
+</View>
 
           <View style={styles.form}>
             <View style={styles.inputContainer}>
@@ -133,6 +148,33 @@ const styles = StyleSheet.create({
   keyboardView: {
     flex: 1,
   },
+
+  taglineContainer: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: 8,
+  marginTop: 4,
+},
+
+dot: {
+  width: 6,
+  height: 6,
+  borderRadius: 3,
+  backgroundColor: '#f97316',
+},
+
+logoImageStandalone: {
+  width: 130,
+  height: 130,
+  marginBottom: 16,
+},
+
+logoImage: {
+  width: '80%',
+  height: '80%',
+},
+
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
@@ -158,9 +200,16 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   subtitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: 'white',
+    marginBottom:4
+  },
+  login: {
     fontSize: 16,
     color: '#94a3b8',
   },
+
   form: {
     gap: 16,
   },
@@ -173,6 +222,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#334155',
   },
+  logo: {
+  width: 120,
+  height: 120,
+  marginBottom: 12,
+},
   inputIcon: {
     marginRight: 12,
   },

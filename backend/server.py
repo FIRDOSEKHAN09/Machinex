@@ -116,7 +116,7 @@ class MachineResponse(BaseModel):
     gps_latitude: Optional[float] = None
     gps_longitude: Optional[float] = None
     operational_radius_km: Optional[float] = 50
-    images: Optional[List[str]] = []  # Array of base64 images
+    images: Optional[List[str]] = None  # Array of base64 images
     created_at: datetime
 
 class FuelPricesCreate(BaseModel):
@@ -210,19 +210,19 @@ class DailyLogResponse(BaseModel):
     id: str
     contract_id: str
     day_number: int
-    start_time: Optional[str]
-    end_time: Optional[str]
-    working_hours: float
-    diesel_filled: float
-    diesel_used: float
-    diesel_price_snapshot: float
-    engine_oil: float
-    grease_oil: float
-    hydraulic_oil: float
-    filled_by: str
-    expenses: float
-    notes: str
-    created_at: datetime
+    start_time: Optional[str] = None
+    end_time: Optional[str] = None
+    working_hours: float = 0
+    diesel_filled: float = 0
+    diesel_used: float = 0
+    diesel_price_snapshot: Optional[float] = 95.0
+    engine_oil: float = 0
+    grease_oil: float = 0
+    hydraulic_oil: float = 0
+    filled_by: str = "owner"
+    expenses: float = 0
+    notes: str = ""
+    created_at: Optional[datetime] = None
 
 class EngineTimerUpdate(BaseModel):
     contract_id: str
@@ -531,6 +531,7 @@ async def create_machine(machine: MachineCreate, current_user: dict = Depends(ge
         "gps_latitude": machine.gps_latitude,
         "gps_longitude": machine.gps_longitude,
         "operational_radius_km": machine.operational_radius_km,
+        "images": machine.images or [],   # ✅ ADD THIS
         "status": "available",
         "created_at": datetime.utcnow()
     }
@@ -1475,6 +1476,10 @@ async def engine_timer(data: EngineTimerUpdate, current_user: dict = Depends(get
     
     if not log:
         # Create a new daily log if doesn't exist
+        # Get current diesel price
+        diesel_price = await db.diesel_prices.find_one({"city": "default"})
+        diesel_price_snapshot = diesel_price["price_per_liter"] if diesel_price else 95.0
+        
         log_id = str(uuid.uuid4())
         log = {
             "id": log_id,
@@ -1485,6 +1490,7 @@ async def engine_timer(data: EngineTimerUpdate, current_user: dict = Depends(get
             "working_hours": 0,
             "diesel_filled": 0,
             "diesel_used": 0,
+            "diesel_price_snapshot": diesel_price_snapshot,
             "engine_oil": 0,
             "grease_oil": 0,
             "hydraulic_oil": 0,

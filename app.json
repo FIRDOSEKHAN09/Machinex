@@ -1,48 +1,32 @@
 {
   "expo": {
     "name": "MachineX",
-    "slug": "machine-x-rent",
+    "slug": "machine-x",
+    "scheme": "machinerental",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "machinerental",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.machinerental.app",
-      "infoPlist": {
-        "NSCameraUsageDescription": "Take photos of machines and contracts"
-      }
+      "bundleIdentifier": "com.machinerental.app"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#0f172a"
       },
-      "edgeToEdgeEnabled": true,
       "package": "com.machinerental.app",
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.INTERNET"
       ]
     },
-    "web": {
-      "bundler": "metro",
-      "output": "static",
-      "favicon": "./assets/images/favicon.png"
-    },
     "plugins": [
       "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          "image": "./assets/images/splash-image.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#000"
-        }
-      ]
+      "expo-font",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true
@@ -50,9 +34,8 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "21e2cd24-955c-4ebf-987f-6be8f4794dfd"
+        "projectId": "3e84a7e3-4c13-474d-842b-8c9bbc2761fd"
       }
-    },
-    "owner": "firdose_09"
+    }
   }
 }
