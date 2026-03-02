@@ -608,7 +608,7 @@ export default function HomeScreen() {
                       <Text style={styles.detailText}>{machine.fuel_type}</Text>
                     </View>
                   </View>
-                  <Text style={styles.machineRateText}>\u20b9{machine.hourly_rate}/hour</Text>
+                  <Text style={styles.machineRateText}>₹{machine.hourly_rate}/hour</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={20} color="#64748b" />
               </TouchableOpacity>
