@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -7,11 +7,11 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter, useFocusEffect } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { reportsAPI } from '@/src/services/api';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter, useFocusEffect } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { reportsAPI } from "@/src/services/api";
 
 export default function MonthlySummaryScreen() {
   const router = useRouter();
@@ -19,15 +19,21 @@ export default function MonthlySummaryScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const today = new Date();
+  const currentMonth = today.getMonth() + 1;
+  const currentYear = today.getFullYear();
 
   const fetchSummary = async () => {
     try {
       setIsLoading(true);
-      const res = await reportsAPI.getMonthlySummary(selectedYear, selectedMonth);
+      const res = await reportsAPI.getMonthlySummary(
+        selectedYear,
+        selectedMonth,
+      );
       setSummary(res.data);
     } catch (error) {
-      console.error('Error fetching summary:', error);
-      Alert.alert('Error', 'Failed to load monthly summary');
+      console.error("Error fetching summary:", error);
+      Alert.alert("Error", "Failed to load monthly summary");
     } finally {
       setIsLoading(false);
     }
@@ -36,7 +42,7 @@ export default function MonthlySummaryScreen() {
   useFocusEffect(
     useCallback(() => {
       fetchSummary();
-    }, [selectedMonth, selectedYear])
+    }, [selectedMonth, selectedYear]),
   );
 
   const changeMonth = (delta: number) => {
@@ -51,13 +57,31 @@ export default function MonthlySummaryScreen() {
       newYear -= 1;
     }
 
+    // Prevent going to future months
+    if (
+      newYear > currentYear ||
+      (newYear === currentYear && newMonth > currentMonth)
+    ) {
+      return;
+    }
+
     setSelectedMonth(newMonth);
     setSelectedYear(newYear);
   };
 
   const monthNames = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
   ];
 
   if (isLoading) {
@@ -74,7 +98,10 @@ export default function MonthlySummaryScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backButton}
+        >
           <Ionicons name="arrow-back" size={24} color="#f8fafc" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Monthly Report</Text>
@@ -83,15 +110,32 @@ export default function MonthlySummaryScreen() {
 
       {/* Month Selector */}
       <View style={styles.monthSelector}>
-        <TouchableOpacity onPress={() => changeMonth(-1)} style={styles.monthButton}>
+        <TouchableOpacity
+          onPress={() => changeMonth(-1)}
+          style={styles.monthButton}
+        >
           <Ionicons name="chevron-back" size={24} color="#f97316" />
         </TouchableOpacity>
         <View style={styles.monthDisplay}>
           <Text style={styles.monthText}>{monthNames[selectedMonth - 1]}</Text>
           <Text style={styles.yearText}>{selectedYear}</Text>
         </View>
-        <TouchableOpacity onPress={() => changeMonth(1)} style={styles.monthButton}>
-          <Ionicons name="chevron-forward" size={24} color="#f97316" />
+        <TouchableOpacity
+          onPress={() => changeMonth(1)}
+          style={styles.monthButton}
+          disabled={
+            selectedYear === currentYear && selectedMonth === currentMonth
+          }
+        >
+          <Ionicons
+            name="chevron-forward"
+            size={24}
+            color={
+              selectedYear === currentYear && selectedMonth === currentMonth
+                ? "#475569"
+                : "#f97316"
+            }
+          />
         </TouchableOpacity>
       </View>
 
@@ -102,14 +146,14 @@ export default function MonthlySummaryScreen() {
             <Ionicons name="cash" size={32} color="#22c55e" />
             <Text style={styles.summaryLabel}>Total Revenue</Text>
             <Text style={styles.summaryValue}>
-              ₹{summary?.total_revenue?.toLocaleString() || '0'}
+              ₹{summary?.total_revenue?.toLocaleString() || "0"}
             </Text>
           </View>
           <View style={styles.summaryCard}>
             <Ionicons name="time" size={32} color="#3b82f6" />
             <Text style={styles.summaryLabel}>Working Hours</Text>
             <Text style={styles.summaryValue}>
-              {summary?.total_working_hours?.toFixed(1) || '0'}h
+              {summary?.total_working_hours?.toFixed(1) || "0"}h
             </Text>
           </View>
         </View>
@@ -119,14 +163,14 @@ export default function MonthlySummaryScreen() {
             <Ionicons name="water" size={32} color="#ef4444" />
             <Text style={styles.summaryLabel}>Fuel Cost</Text>
             <Text style={styles.summaryValue}>
-              ₹{summary?.total_fuel_cost?.toLocaleString() || '0'}
+              ₹{summary?.total_fuel_cost?.toLocaleString() || "0"}
             </Text>
           </View>
           <View style={styles.summaryCard}>
             <Ionicons name="build" size={32} color="#a855f7" />
             <Text style={styles.summaryLabel}>Consumables</Text>
             <Text style={styles.summaryValue}>
-              ₹{summary?.total_consumables_cost?.toLocaleString() || '0'}
+              ₹{summary?.total_consumables_cost?.toLocaleString() || "0"}
             </Text>
           </View>
         </View>
@@ -138,9 +182,16 @@ export default function MonthlySummaryScreen() {
             <Text style={styles.netEarningsLabel}>Net Earnings</Text>
           </View>
           <Text style={styles.netEarningsValue}>
-            ₹{((summary?.total_revenue || 0) - (summary?.total_fuel_cost || 0) - (summary?.total_consumables_cost || 0)).toLocaleString()}
+            ₹
+            {(
+              (summary?.total_revenue || 0) -
+              (summary?.total_fuel_cost || 0) -
+              (summary?.total_consumables_cost || 0)
+            ).toLocaleString()}
           </Text>
-          <Text style={styles.netEarningsSubtext}>After deducting fuel & consumables</Text>
+          <Text style={styles.netEarningsSubtext}>
+            After deducting fuel & consumables
+          </Text>
         </View>
 
         {/* Machine-Wise Breakdown */}
@@ -152,20 +203,28 @@ export default function MonthlySummaryScreen() {
                 <View style={styles.machineHeader}>
                   <Ionicons name="construct" size={24} color="#f97316" />
                   <View style={styles.machineInfo}>
-                    <Text style={styles.machineName}>{machine.machine_name}</Text>
-                    <Text style={styles.machineType}>{machine.machine_type}</Text>
+                    <Text style={styles.machineName}>
+                      {machine.machine_name}
+                    </Text>
+                    <Text style={styles.machineType}>
+                      {machine.machine_type}
+                    </Text>
                   </View>
                 </View>
                 <View style={styles.machineStats}>
                   <View style={styles.machineStat}>
                     <Text style={styles.machineStatLabel}>Hours</Text>
-                    <Text style={styles.machineStatValue}>{machine.working_hours?.toFixed(1) || '0'}h</Text>
+                    <Text style={styles.machineStatValue}>
+                      {machine.working_hours?.toFixed(1) || "0"}h
+                    </Text>
                   </View>
                   <View style={styles.machineStatDivider} />
                   <View style={styles.machineStat}>
                     <Text style={styles.machineStatLabel}>Revenue</Text>
-                    <Text style={[styles.machineStatValue, styles.revenueColor]}>
-                      ₹{machine.revenue?.toLocaleString() || '0'}
+                    <Text
+                      style={[styles.machineStatValue, styles.revenueColor]}
+                    >
+                      ₹{machine.revenue?.toLocaleString() || "0"}
                     </Text>
                   </View>
                 </View>
@@ -191,17 +250,17 @@ export default function MonthlySummaryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0f172a',
+    backgroundColor: "#0f172a",
   },
   loadingContainer: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
@@ -209,25 +268,25 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#1e293b',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#1e293b",
+    alignItems: "center",
+    justifyContent: "center",
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#f8fafc',
+    fontWeight: "600",
+    color: "#f8fafc",
   },
   placeholder: {
     width: 40,
   },
   monthSelector: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 16,
-    backgroundColor: '#1e293b',
+    backgroundColor: "#1e293b",
     marginHorizontal: 16,
     marginBottom: 16,
     borderRadius: 16,
@@ -236,21 +295,21 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(249, 115, 22, 0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "rgba(249, 115, 22, 0.1)",
+    alignItems: "center",
+    justifyContent: "center",
   },
   monthDisplay: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   monthText: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#f8fafc',
+    fontWeight: "bold",
+    color: "#f8fafc",
   },
   yearText: {
     fontSize: 14,
-    color: '#94a3b8',
+    color: "#94a3b8",
     marginTop: 2,
   },
   scrollView: {
@@ -258,73 +317,73 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   summaryGrid: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
     marginBottom: 12,
   },
   summaryCard: {
     flex: 1,
-    backgroundColor: '#1e293b',
+    backgroundColor: "#1e293b",
     borderRadius: 16,
     padding: 16,
-    alignItems: 'center',
+    alignItems: "center",
     gap: 8,
   },
   summaryLabel: {
     fontSize: 12,
-    color: '#94a3b8',
-    textAlign: 'center',
+    color: "#94a3b8",
+    textAlign: "center",
   },
   summaryValue: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#f8fafc',
+    fontWeight: "bold",
+    color: "#f8fafc",
   },
   netEarningsCard: {
-    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+    backgroundColor: "rgba(34, 197, 94, 0.1)",
     borderRadius: 16,
     padding: 24,
     marginBottom: 24,
-    alignItems: 'center',
+    alignItems: "center",
     borderWidth: 1,
-    borderColor: 'rgba(34, 197, 94, 0.3)',
+    borderColor: "rgba(34, 197, 94, 0.3)",
   },
   netEarningsHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
     marginBottom: 12,
   },
   netEarningsLabel: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#22c55e',
+    fontWeight: "600",
+    color: "#22c55e",
   },
   netEarningsValue: {
     fontSize: 36,
-    fontWeight: 'bold',
-    color: '#22c55e',
+    fontWeight: "bold",
+    color: "#22c55e",
   },
   netEarningsSubtext: {
     fontSize: 12,
-    color: '#94a3b8',
+    color: "#94a3b8",
     marginTop: 4,
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#94a3b8',
+    fontWeight: "600",
+    color: "#94a3b8",
     marginBottom: 12,
   },
   machineCard: {
-    backgroundColor: '#1e293b',
+    backgroundColor: "#1e293b",
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
   },
   machineHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 12,
     marginBottom: 12,
   },
@@ -333,48 +392,48 @@ const styles = StyleSheet.create({
   },
   machineName: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#f8fafc',
+    fontWeight: "600",
+    color: "#f8fafc",
   },
   machineType: {
     fontSize: 12,
-    color: '#64748b',
+    color: "#64748b",
     marginTop: 2,
   },
   machineStats: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   machineStat: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
   },
   machineStatLabel: {
     fontSize: 11,
-    color: '#94a3b8',
+    color: "#94a3b8",
   },
   machineStatValue: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#f8fafc',
+    fontWeight: "bold",
+    color: "#f8fafc",
     marginTop: 4,
   },
   machineStatDivider: {
     width: 1,
     height: 40,
-    backgroundColor: '#334155',
+    backgroundColor: "#334155",
   },
   revenueColor: {
-    color: '#22c55e',
+    color: "#22c55e",
   },
   emptyState: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     padding: 48,
   },
   emptyText: {
     fontSize: 14,
-    color: '#64748b',
+    color: "#64748b",
     marginTop: 12,
   },
   bottomSpacer: {
