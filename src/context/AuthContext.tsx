@@ -6,7 +6,14 @@ interface User {
   id: string;
   name: string;
   phone_or_email: string;
+
+  // OLD ❌
   role: string;
+
+  // NEW ✅
+  roles: string[];
+  activeRole: string;
+
   created_at: string;
   is_primary_admin?: boolean;
 }
@@ -50,18 +57,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const login = async (newToken: string, newUser: User) => {
-    try {
-      await AsyncStorage.setItem('auth_token', newToken);
-      await AsyncStorage.setItem('auth_user', JSON.stringify(newUser));
-      setToken(newToken);
-      setUser(newUser);
-      api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
-    } catch (error) {
-      console.error('Error saving auth:', error);
-      throw error;
-    }
-  };
+  const login = async (newToken: string, newUser: any) => {
+  try {
+    // Convert old role → new structure
+    const formattedUser = {
+      ...newUser,
+      roles: newUser.roles || [newUser.role], // fallback
+      activeRole: newUser.activeRole || newUser.role
+    };
+
+    await AsyncStorage.setItem('auth_token', newToken);
+    await AsyncStorage.setItem('auth_user', JSON.stringify(formattedUser));
+
+    setToken(newToken);
+    setUser(formattedUser);
+
+    api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+  } catch (error) {
+    console.error('Error saving auth:', error);
+    throw error;
+  }
+};
 
   const logout = async () => {
     try {
@@ -84,7 +100,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.activeRole === 'admin';
 
   return (
     <AuthContext.Provider

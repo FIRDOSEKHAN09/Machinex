@@ -380,13 +380,20 @@ async def verify_otp(data: OTPVerify):
     # Create user
     user_id = str(uuid.uuid4())
     user_doc = {
-        "id": user_id,
-        "name": pending["name"],
-        "phone_or_email": pending["phone_or_email"],
-        "password_hash": pending["password_hash"],
-        "role": pending["role"],
-        "created_at": datetime.utcnow()
-    }
+    "id": user_id,
+    "name": pending["name"],
+    "phone_or_email": pending["phone_or_email"],
+    "password_hash": pending["password_hash"],
+
+    # ✅ OLD (keep for safety)
+    "role": pending["role"],
+
+    # ✅ NEW (multi-role support)
+    "roles": [pending["role"]],
+    "activeRole": pending["role"],
+
+    "created_at": datetime.utcnow()
+}
     
     await db.users.insert_one(user_doc)
     await db.pending_registrations.delete_one({"phone_or_email": data.phone_or_email})
@@ -417,38 +424,113 @@ async def verify_otp(data: OTPVerify):
         )
     )
 
-@api_router.post("/auth/login", response_model=TokenResponse)
+@api_router.post("/auth/login")
 async def login(data: UserLogin):
     user = await db.users.find_one({"phone_or_email": data.phone_or_email})
-    
+
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    
+
     if not verify_password(data.password, user["password_hash"]):
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    
+
     token = create_access_token(user["id"], user["role"])
-    
-    return TokenResponse(
-        access_token=token,
-        user=UserResponse(
-            id=user["id"],
-            name=user["name"],
-            phone_or_email=user["phone_or_email"],
-            role=user["role"],
-            created_at=user["created_at"]
+
+    # 🔥 AUTO MIGRATE OLD USERS
+    if "roles" not in user:
+        await db.users.update_one(
+            {"id": user["id"]},
+            {
+                "$set": {
+                    "roles": [user["role"]],
+                    "activeRole": user["role"]
+                }
+            }
         )
+
+        # update local variable also
+        user["roles"] = [user["role"]]
+        user["activeRole"] = user["role"]
+
+    roles = user.get("roles", [user.get("role")])
+    active_role = user.get("activeRole", user.get("role"))
+
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "user": {
+            "id": user["id"],
+            "name": user["name"],
+            "phone_or_email": user["phone_or_email"],
+
+            # keep old
+            "role": user["role"],
+
+            # new
+            "roles": roles,
+            "activeRole": active_role,
+
+            "created_at": user["created_at"]
+        }
+    }
+
+@api_router.post("/auth/add-role")
+async def add_role(data: dict, current_user: dict = Depends(get_current_user)):
+    role = data.get("role")
+
+    if not role:
+        raise HTTPException(status_code=400, detail="Role is required")
+
+    await db.users.update_one(
+        {"id": current_user["id"]},
+        {"$addToSet": {"roles": role}}
     )
+
+    updated_user = await db.users.find_one({"id": current_user["id"]})
+
+    return {
+        "message": "Role added",
+        "roles": updated_user.get("roles", [updated_user.get("role")])
+    }
+
+@api_router.post("/auth/switch-role")
+async def switch_role(data: dict, current_user: dict = Depends(get_current_user)):
+    role = data.get("role")
+
+    if not role:
+        raise HTTPException(status_code=400, detail="Role is required")
+
+    roles = current_user.get("roles", [current_user.get("role")])
+
+    if role not in roles:
+        raise HTTPException(status_code=403, detail="Role not assigned")
+
+    await db.users.update_one(
+        {"id": current_user["id"]},
+        {"$set": {"activeRole": role}}
+    )
+
+    return {
+        "message": "Role switched",
+        "activeRole": role
+    }
 
 @api_router.get("/auth/me", response_model=UserResponse)
 async def get_me(current_user: dict = Depends(get_current_user)):
-    return UserResponse(
-        id=current_user["id"],
-        name=current_user["name"],
-        phone_or_email=current_user["phone_or_email"],
-        role=current_user["role"],
-        created_at=current_user["created_at"]
-    )
+   return {
+    "id": current_user["id"],
+    "name": current_user["name"],
+    "phone_or_email": current_user["phone_or_email"],
+
+    # OLD (keep)
+    "role": current_user["role"],
+
+    # NEW (IMPORTANT)
+    "roles": current_user.get("roles", [current_user["role"]]),
+    "activeRole": current_user.get("activeRole", current_user["role"]),
+
+    "created_at": current_user["created_at"]
+}
 
 @api_router.post("/auth/forgot-password")
 async def forgot_password(data: UserLogin):

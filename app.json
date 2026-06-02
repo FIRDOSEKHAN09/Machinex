@@ -3,7 +3,7 @@
     "name": "MachineX",
     "slug": "machine-x",
     "scheme": "machinerental",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "userInterfaceStyle": "automatic",
@@ -13,9 +13,10 @@
       "bundleIdentifier": "com.machinerental.app"
     },
     "splash": {
-  "image": "./assets/images/splash-image.png",
-  "resizeMode": "contain"
-},
+      "image": "./assets/images/splash-image.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F59E0B"
+    },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",

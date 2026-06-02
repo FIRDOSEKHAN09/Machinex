@@ -9,6 +9,7 @@ import { contractAPI, notificationAPI, machineAPI } from '@/src/services/api';
 export default function HomeScreen() {
   const router = useRouter();
   const { user } = useAuth();
+  const role = user?.activeRole || user?.role;
   const [contracts, setContracts] = useState<any[]>([]);
   const [machines, setMachines] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -24,7 +25,7 @@ export default function HomeScreen() {
 
   const fetchData = async () => {
     try {
-      if (user?.role === 'user') {
+      if (role === 'user') {
         // Farmer: Fetch available machines AND contracts
         const [machinesRes, contractsRes, notifRes] = await Promise.all([
           machineAPI.browseAll(),
@@ -56,7 +57,7 @@ export default function HomeScreen() {
       if (user) {
         fetchData();
       }
-    }, [user?.id, user?.role])
+    }, [user?.id, role])
   );
 
   const onRefresh = () => {
@@ -189,14 +190,14 @@ export default function HomeScreen() {
   // ROLE-BASED RENDERING
   
   // ADMIN ROLE - Redirect to Admin Dashboard
-  if (user?.role === 'admin') {
+  if (role === 'admin') {
     // Admin sees the dedicated admin dashboard
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <View>
             <Text style={styles.greeting}>Admin Dashboard</Text>
-            <Text style={styles.userName}>{user.name}</Text>
+            <Text style={styles.userName}>{user?.name}</Text>
           </View>
           <View style={styles.headerActions}>
             <TouchableOpacity style={styles.notificationButton} onPress={() => router.push('/notifications')}>
@@ -241,7 +242,7 @@ export default function HomeScreen() {
     );
   }
 
-  if (user?.role === 'owner') {
+  if (role === 'owner') {
     // MACHINE OWNER VIEW - Enhanced Dashboard
     const pendingContracts = sortedContracts.filter(c => c.status === 'pending');
     const activeContracts = sortedContracts.filter(c => c.status === 'active');
@@ -255,9 +256,22 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <View>
             <Text style={styles.greeting}>Dashboard</Text>
-            <Text style={styles.userName}>{user.name}</Text>
+            <Text style={styles.userName}>{user?.name}</Text>
           </View>
           <View style={styles.headerActions}>
+
+             {/* ✅ HELP BUTTON */}
+  <TouchableOpacity
+    style={styles.helpButton}
+    onPress={() =>
+      router.push({
+        pathname: '/help',
+        params: { role: role },
+      })
+    }
+  >
+    <Ionicons name="help-circle-outline" size={24} color="#f8fafc" />
+  </TouchableOpacity>
             <TouchableOpacity style={styles.notificationButton} onPress={() => router.push('/notifications')}>
               <Ionicons name="notifications-outline" size={24} color="#f8fafc" />
               {unreadCount > 0 && (
@@ -539,16 +553,30 @@ export default function HomeScreen() {
         </Modal>
       </SafeAreaView>
     );
-  } else if (user?.role === 'user') {
+  } else if (role === 'user') {
     // FARMER VIEW - Show Machine Discovery
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <View>
             <Text style={styles.greeting}>Find Machines</Text>
-            <Text style={styles.userName}>{user.name}</Text>
+            <Text style={styles.userName}>{user?.name}</Text>
           </View>
           <View style={styles.headerActions}>
+
+            {/* ✅ HELP BUTTON */}
+  <TouchableOpacity
+    style={styles.helpButton}
+    onPress={() =>
+      router.push({
+        pathname: '/help',
+        params: { role: role },
+      })
+    }
+  >
+    <Ionicons name="help-circle-outline" size={24} color="#f8fafc" />
+  </TouchableOpacity>
+            
             <TouchableOpacity style={styles.notificationButton} onPress={() => router.push('/notifications')}>
               <Ionicons name="notifications-outline" size={24} color="#f8fafc" />
               {unreadCount > 0 && (
@@ -699,16 +727,16 @@ export default function HomeScreen() {
         </ScrollView>
       </SafeAreaView>
     );
-  } else if (user?.role === 'manager') {
+  } else if (role === 'manager') {
     // SUPERVISOR VIEW - Show Assigned Contracts
-    const assignedContracts = contracts.filter((c) => c.supervisor_id === user.id);
+    const assignedContracts = contracts.filter((c) => c.supervisor_id === user?.id);
 
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <View>
             <Text style={styles.greeting}>My Assignments</Text>
-            <Text style={styles.userName}>{user.name}</Text>
+            <Text style={styles.userName}>{user?.name}</Text>
           </View>
           <View style={styles.headerActions}>
             <TouchableOpacity style={styles.notificationButton} onPress={() => router.push('/notifications')}>
@@ -755,8 +783,7 @@ export default function HomeScreen() {
   }
 
  // Default fallback 
- return
-  ( 
+ return ( 
   <SafeAreaView style={styles.container}> 
   <Text>Loading...</Text> 
   </SafeAreaView> 
@@ -842,6 +869,16 @@ const styles = StyleSheet.create({
   acceptNegotiationButton: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 12, paddingVertical: 8, backgroundColor: '#22c55e', borderRadius: 8, flex: 1, justifyContent: 'center' },
   acceptText: { color: '#fff', fontSize: 13, fontWeight: '600' },
   buttonDisabled: { opacity: 0.5 },
+
+  // help button styles
+  helpButton: {
+  width: 40,
+  height: 40,
+  borderRadius: 20,
+  backgroundColor: '#1e293b',
+  alignItems: 'center',
+  justifyContent: 'center',
+},
   
   // Modal styles
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.8)', justifyContent: 'flex-end' },

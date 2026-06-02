@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -8,77 +8,130 @@ import {
   Image,
   Alert,
   Platform,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '@/src/context/AuthContext';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { useAuth } from "@/src/context/AuthContext";
+import { api } from "@/src/services/api";
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
 
   const handleLogout = async () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            await logout();
-            router.replace('/auth/login');
-          },
+    Alert.alert("Logout", "Are you sure you want to logout?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Logout",
+        style: "destructive",
+        onPress: async () => {
+          await logout();
+          router.replace("/auth/login");
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-IN', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
+    return date.toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
     });
   };
 
   const getRoleLabel = (role: string) => {
     switch (role) {
-      case 'admin': return 'App Admin';
-      case 'owner': return 'Machine Owner';
-      case 'user': return 'Renter';
-      case 'manager': return 'Manager';
-      default: return role;
+      case "admin":
+        return "App Admin";
+      case "owner":
+        return "Machine Owner";
+      case "user":
+        return "Renter";
+      case "manager":
+        return "Manager";
+      default:
+        return role;
     }
   };
 
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'admin': return '#ef4444';
-      case 'owner': return '#3b82f6';
-      case 'user': return '#22c55e';
-      case 'manager': return '#a855f7';
-      default: return '#64748b';
+      case "admin":
+        return "#ef4444";
+      case "owner":
+        return "#3b82f6";
+      case "user":
+        return "#22c55e";
+      case "manager":
+        return "#a855f7";
+      default:
+        return "#64748b";
     }
   };
 
   const getInitials = (name: string) => {
     return name
-      .split(' ')
-      .map(word => word[0])
-      .join('')
+      .split(" ")
+      .map((word) => word[0])
+      .join("")
       .toUpperCase()
       .substring(0, 2);
   };
 
+  const handleSwitchRole = async (role: string) => {
+    if (!user) return;
+
+    try {
+      // 🔥 backend call
+      await api.post("/auth/switch-role", { role });
+
+      const updatedUser = {
+        ...user,
+        activeRole: role,
+      };
+
+      await updateUser(updatedUser);
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Error", "Failed to switch role");
+    }
+  };
+
+  const handleAddRole = async (role: string) => {
+    if (!user) return;
+
+    const roles = user.roles || [user.role];
+
+    if (roles.includes(role)) return;
+
+    try {
+      // 🔥 backend call
+      await api.post("/auth/add-role", { role });
+
+      const updatedUser = {
+        ...user,
+        roles: [...roles, role],
+      };
+
+      await updateUser(updatedUser);
+
+      Alert.alert("Success", `${getRoleLabel(role)} added`);
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Error", "Failed to add role");
+    }
+  };
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backButton}
+        >
           <Ionicons name="arrow-back" size={24} color="#f8fafc" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Profile</Text>
@@ -90,15 +143,35 @@ export default function ProfileScreen() {
       <ScrollView style={styles.scrollView}>
         {/* Profile Picture & Name */}
         <View style={styles.profileSection}>
-          <View style={[styles.avatar, { backgroundColor: `${getRoleColor(user?.role || '')}20` }]}>
-            <Text style={[styles.avatarText, { color: getRoleColor(user?.role || '') }]}>
-              {getInitials(user?.name || '')}
+          <View
+            style={[
+              styles.avatar,
+              { backgroundColor: `${getRoleColor(user?.activeRole || "")}20` },
+            ]}
+          >
+            <Text
+              style={[
+                styles.avatarText,
+                { color: getRoleColor(user?.activeRole || "") },
+              ]}
+            >
+              {getInitials(user?.name || "")}
             </Text>
           </View>
           <Text style={styles.userName}>{user?.name}</Text>
-          <View style={[styles.roleBadge, { backgroundColor: `${getRoleColor(user?.role || '')}20` }]}>
-            <Text style={[styles.roleText, { color: getRoleColor(user?.role || '') }]}>
-              {getRoleLabel(user?.role || '')}
+          <View
+            style={[
+              styles.roleBadge,
+              { backgroundColor: `${getRoleColor(user?.activeRole || "")}20` },
+            ]}
+          >
+            <Text
+              style={[
+                styles.roleText,
+                { color: getRoleColor(user?.activeRole || "") },
+              ]}
+            >
+              {getRoleLabel(user?.activeRole || "")}
             </Text>
           </View>
         </View>
@@ -129,11 +202,17 @@ export default function ProfileScreen() {
 
           <View style={styles.detailRow}>
             <View style={styles.detailIcon}>
-              <Ionicons name="shield-checkmark-outline" size={20} color="#94a3b8" />
+              <Ionicons
+                name="shield-checkmark-outline"
+                size={20}
+                color="#94a3b8"
+              />
             </View>
             <View style={styles.detailContent}>
               <Text style={styles.detailLabel}>Role</Text>
-              <Text style={styles.detailValue}>{getRoleLabel(user?.role || '')}</Text>
+              <Text style={styles.detailValue}>
+                {getRoleLabel(user?.activeRole || "")}
+              </Text>
             </View>
           </View>
 
@@ -144,7 +223,7 @@ export default function ProfileScreen() {
             <View style={styles.detailContent}>
               <Text style={styles.detailLabel}>Member Since</Text>
               <Text style={styles.detailValue}>
-                {user?.created_at ? formatDate(user.created_at) : 'N/A'}
+                {user?.created_at ? formatDate(user.created_at) : "N/A"}
               </Text>
             </View>
           </View>
@@ -155,7 +234,10 @@ export default function ProfileScreen() {
             </View>
             <View style={styles.detailContent}>
               <Text style={styles.detailLabel}>User ID</Text>
-              <Text style={[styles.detailValue, styles.userIdText]} numberOfLines={1}>
+              <Text
+                style={[styles.detailValue, styles.userIdText]}
+                numberOfLines={1}
+              >
                 {user?.id}
               </Text>
             </View>
@@ -166,9 +248,17 @@ export default function ProfileScreen() {
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Actions</Text>
 
-          <TouchableOpacity style={styles.actionRow} onPress={() => router.push('/home')}>
+          <TouchableOpacity
+            style={styles.actionRow}
+            onPress={() => router.push("/home")}
+          >
             <View style={styles.actionLeft}>
-              <View style={[styles.actionIcon, { backgroundColor: 'rgba(59, 130, 246, 0.1)' }]}>
+              <View
+                style={[
+                  styles.actionIcon,
+                  { backgroundColor: "rgba(59, 130, 246, 0.1)" },
+                ]}
+              >
                 <Ionicons name="home-outline" size={20} color="#3b82f6" />
               </View>
               <Text style={styles.actionText}>Go to Home</Text>
@@ -176,11 +266,23 @@ export default function ProfileScreen() {
             <Ionicons name="chevron-forward" size={20} color="#64748b" />
           </TouchableOpacity>
 
-          {user?.role === 'admin' && (
-            <TouchableOpacity style={styles.actionRow} onPress={() => router.push('/admin')}>
+          {user?.activeRole === "admin" && (
+            <TouchableOpacity
+              style={styles.actionRow}
+              onPress={() => router.push("/admin")}
+            >
               <View style={styles.actionLeft}>
-                <View style={[styles.actionIcon, { backgroundColor: 'rgba(239, 68, 68, 0.1)' }]}>
-                  <Ionicons name="shield-checkmark-outline" size={20} color="#ef4444" />
+                <View
+                  style={[
+                    styles.actionIcon,
+                    { backgroundColor: "rgba(239, 68, 68, 0.1)" },
+                  ]}
+                >
+                  <Ionicons
+                    name="shield-checkmark-outline"
+                    size={20}
+                    color="#ef4444"
+                  />
                 </View>
                 <Text style={styles.actionText}>Admin Dashboard</Text>
               </View>
@@ -190,13 +292,65 @@ export default function ProfileScreen() {
 
           <TouchableOpacity style={styles.actionRow} onPress={handleLogout}>
             <View style={styles.actionLeft}>
-              <View style={[styles.actionIcon, { backgroundColor: 'rgba(239, 68, 68, 0.1)' }]}>
+              <View
+                style={[
+                  styles.actionIcon,
+                  { backgroundColor: "rgba(239, 68, 68, 0.1)" },
+                ]}
+              >
                 <Ionicons name="log-out-outline" size={20} color="#ef4444" />
               </View>
-              <Text style={[styles.actionText, { color: '#ef4444' }]}>Logout</Text>
+              <Text style={[styles.actionText, { color: "#ef4444" }]}>
+                Logout
+              </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#ef4444" />
           </TouchableOpacity>
+        </View>
+        {/* Switch Role */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Switch Role</Text>
+
+          {(user?.roles || [user?.role])
+            .filter((role): role is string => !!role)
+            .map((role) => (
+              <TouchableOpacity
+                key={role}
+                style={styles.actionRow}
+                onPress={() => handleSwitchRole(role)}
+              >
+                <Text style={styles.actionText}>{getRoleLabel(role)}</Text>
+
+                {user?.activeRole === role && (
+                  <Ionicons name="checkmark" size={20} color="#22c55e" />
+                )}
+              </TouchableOpacity>
+            ))}
+        </View>
+
+        {/* Add Role */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Add Role</Text>
+
+          {["owner", "user", "manager"].map((role) => {
+            const roles = (user?.roles || [user?.role]).filter(
+              (r): r is string => !!r,
+            );
+            if (roles.includes(role)) return null;
+
+            return (
+              <TouchableOpacity
+                key={role}
+                style={styles.actionRow}
+                onPress={() => handleAddRole(role)}
+              >
+                <Text style={styles.actionText}>
+                  Become {getRoleLabel(role)}
+                </Text>
+                <Ionicons name="add" size={20} color="#22c55e" />
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
         <View style={styles.bottomSpacer} />
@@ -208,12 +362,12 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0f172a',
+    backgroundColor: "#0f172a",
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
@@ -221,28 +375,28 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#1e293b',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#1e293b",
+    alignItems: "center",
+    justifyContent: "center",
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#f8fafc',
+    fontWeight: "600",
+    color: "#f8fafc",
   },
   logoutButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#1e293b',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#1e293b",
+    alignItems: "center",
+    justifyContent: "center",
   },
   scrollView: {
     flex: 1,
   },
   profileSection: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 32,
     paddingHorizontal: 20,
   },
@@ -250,18 +404,18 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 16,
   },
   avatarText: {
     fontSize: 48,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   userName: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#f8fafc',
+    fontWeight: "bold",
+    color: "#f8fafc",
     marginBottom: 8,
   },
   roleBadge: {
@@ -271,10 +425,10 @@ const styles = StyleSheet.create({
   },
   roleText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   card: {
-    backgroundColor: '#1e293b',
+    backgroundColor: "#1e293b",
     marginHorizontal: 16,
     marginBottom: 16,
     borderRadius: 16,
@@ -282,24 +436,24 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#f8fafc',
+    fontWeight: "600",
+    color: "#f8fafc",
     marginBottom: 16,
   },
   detailRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#334155',
+    borderBottomColor: "#334155",
   },
   detailIcon: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(148, 163, 184, 0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "rgba(148, 163, 184, 0.1)",
+    alignItems: "center",
+    justifyContent: "center",
     marginRight: 12,
   },
   detailContent: {
@@ -307,43 +461,43 @@ const styles = StyleSheet.create({
   },
   detailLabel: {
     fontSize: 12,
-    color: '#94a3b8',
+    color: "#94a3b8",
     marginBottom: 2,
   },
   detailValue: {
     fontSize: 14,
-    color: '#f8fafc',
-    fontWeight: '500',
+    color: "#f8fafc",
+    fontWeight: "500",
   },
   userIdText: {
-    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+    fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
     fontSize: 12,
   },
   actionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#334155',
+    borderBottomColor: "#334155",
   },
   actionLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     flex: 1,
   },
   actionIcon: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginRight: 12,
   },
   actionText: {
     fontSize: 15,
-    fontWeight: '500',
-    color: '#f8fafc',
+    fontWeight: "500",
+    color: "#f8fafc",
   },
   bottomSpacer: {
     height: 32,
