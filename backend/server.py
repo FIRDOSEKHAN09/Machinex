@@ -1032,11 +1032,24 @@ async def get_contracts(current_user: dict = Depends(get_current_user)):
         contracts = await db.contracts.find({"renter_id": current_user["id"]}).to_list(1000)
     
     result = []
+
     for c in contracts:
-        machine = await db.machines.find_one({"id": c["machine_id"]})
-        c["machine_name"] = machine["model_name"] if machine else "Unknown"
-        result.append(ContractResponse(**c))
-    
+     machine = await db.machines.find_one(
+        {"id": c["machine_id"]}
+    )
+
+    owner = await db.users.find_one(
+        {"id": c["owner_id"]}
+    )
+
+    c["machine_name"] = machine["model_name"] if machine else "Unknown"
+    c["machine_type"] = machine["machine_type"] if machine else None
+
+    c["owner_name"] = owner["name"] if owner else "Unknown"
+    c["owner_contact"] = owner["phone_or_email"] if owner else ""
+
+    result.append(ContractResponse(**c))
+
     return result
 
 @api_router.get("/contracts/{contract_id}", response_model=ContractResponse)
@@ -1055,9 +1068,9 @@ async def get_contract(contract_id: str, current_user: dict = Depends(get_curren
     )
 
     contract["machine_name"] = machine["model_name"] if machine else "Unknown"
+    contract["machine_type"] = machine["machine_type"] if machine else None
 
     contract["owner_name"] = owner["name"] if owner else "Unknown"
-
     contract["owner_contact"] = owner["phone_or_email"] if owner else ""
 
     return ContractResponse(**contract)

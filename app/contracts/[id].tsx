@@ -222,10 +222,46 @@ export default function ContractDetailScreen() {
               <Ionicons name="construct" size={28} color="#f97316" />
             </View>
             <View style={styles.summaryInfo}>
-              <Text style={styles.machineName}>{contract.machine_name}</Text>
-              <Text style={styles.renterName}>{contract.renter_name}</Text>
-              <Text style={styles.renterContact}>{contract.renter_contact}</Text>
-            </View>
+  <Text style={styles.machineName}>{contract.machine_name}</Text>
+
+  <Text style={styles.renterName}>
+    {contract.renter_name}
+  </Text>
+
+  <Text style={styles.renterContact}>
+    📞 {contract.renter_contact}
+  </Text>
+
+  <View style={{ marginTop: 10 }}>
+    <Text
+      style={{
+        color: "#94a3b8",
+        fontSize: 12,
+      }}
+    >
+      Machine Owner
+    </Text>
+
+    <Text
+      style={{
+        color: "#fff",
+        fontSize: 16,
+        fontWeight: "600",
+      }}
+    >
+      {contract.owner_name}
+    </Text>
+
+    <Text
+      style={{
+        color: "#22c55e",
+        marginTop: 4,
+      }}
+    >
+      📞 {contract.owner_contact}
+    </Text>
+  </View>
+</View>
             <View style={[
               styles.statusBadge,
               contract.status === 'active' ? styles.statusActive : styles.statusCompleted,
