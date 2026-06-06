@@ -642,8 +642,22 @@ async def get_all_machines(current_user: dict = Depends(get_current_user)):
 @api_router.get("/machines/{machine_id}", response_model=MachineResponse)
 async def get_machine(machine_id: str, current_user: dict = Depends(get_current_user)):
     machine = await db.machines.find_one({"id": machine_id})
+
     if not machine:
         raise HTTPException(status_code=404, detail="Machine not found")
+
+    owner = await db.users.find_one({"id": machine["owner_id"]})
+
+    if owner:
+        machine["owner_name"] = owner["name"]
+        machine["owner_contact"] = owner["phone_or_email"]
+
+        total_machines = await db.machines.count_documents(
+            {"owner_id": machine["owner_id"]}
+        )
+
+        machine["owner_total_machines"] = total_machines
+
     return MachineResponse(**machine)
 
 @api_router.put("/machines/{machine_id}", response_model=MachineResponse)
