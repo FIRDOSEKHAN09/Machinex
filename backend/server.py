@@ -180,6 +180,8 @@ class ContractResponse(BaseModel):
     created_at: datetime
     machine_name: Optional[str] = None
     machine_type: Optional[str] = None
+    owner_name: Optional[str] = None
+    owner_contact: Optional[str] = None
 
 class DailyLogCreate(BaseModel):
     contract_id: str
@@ -1040,11 +1042,24 @@ async def get_contracts(current_user: dict = Depends(get_current_user)):
 @api_router.get("/contracts/{contract_id}", response_model=ContractResponse)
 async def get_contract(contract_id: str, current_user: dict = Depends(get_current_user)):
     contract = await db.contracts.find_one({"id": contract_id})
+
     if not contract:
         raise HTTPException(status_code=404, detail="Contract not found")
-    
-    machine = await db.machines.find_one({"id": contract["machine_id"]})
+
+    machine = await db.machines.find_one(
+        {"id": contract["machine_id"]}
+    )
+
+    owner = await db.users.find_one(
+        {"id": contract["owner_id"]}
+    )
+
     contract["machine_name"] = machine["model_name"] if machine else "Unknown"
+
+    contract["owner_name"] = owner["name"] if owner else "Unknown"
+
+    contract["owner_contact"] = owner["phone_or_email"] if owner else ""
+
     return ContractResponse(**contract)
 
 @api_router.put("/contracts/{contract_id}/complete")
